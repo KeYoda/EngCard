@@ -33,18 +33,6 @@ BoxDecoration createCircularBox(String imagePath) {
   );
 }
 
-String imagePath1 = 'assets/a1.webp';
-String imagePath2 = 'assets/a2.webp';
-String imagePath3 = 'assets/a3.webp';
-String imagePath4 = 'assets/a4.webp';
-String imagePath5 = 'assets/a5.webp';
-
-BoxDecoration circulBox1 = createCircularBox(imagePath1);
-BoxDecoration circulBox2 = createCircularBox(imagePath2);
-BoxDecoration circulBox3 = createCircularBox(imagePath3);
-BoxDecoration circulBox4 = createCircularBox(imagePath4);
-BoxDecoration circulBox5 = createCircularBox(imagePath5);
-
 Color orange = const Color.fromARGB(255, 253, 85, 35);
 Color hardgreen = const Color.fromARGB(255, 35, 68, 59);
 Color medgreen = const Color.fromARGB(255, 53, 104, 89);
@@ -76,7 +64,7 @@ class _SixScreenState extends State<SixScreen> {
       appBar: AppBar(
         iconTheme: IconThemeData(color: whites),
         title: Text(
-          'OneWord',
+          'WordCard',
           style: GoogleFonts.abel(color: whites, fontSize: 30.sp),
         ),
         backgroundColor: hardgreen,
@@ -87,347 +75,235 @@ class _SixScreenState extends State<SixScreen> {
         color: whites,
         child: ListView(
           children: [
-            SizedBox(height: 17.sp),
-            Row(
-              children: [
-                Flexible(
-                  child: SizedBox(
-                    width: screenWidth * 0.052.sp,
-                  ),
-                ),
-                Column(
-                  children: [
-                    Text(
-                      'Toplam Skor',
-                      style: TextStyle(color: medgreen, fontSize: 12.sp),
-                    ),
-                    Container(
-                      height: screenHeight * 0.07,
-                      width: screenWidth * 0.2,
-                      decoration: BoxDecoration(
-                        color: orange,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${scoreProvider.totalScore}',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  width: screenWidth * 0.12.sp,
-                ),
-                Column(
-                  children: [
-                    Text(
-                      'Günlük Skor',
-                      style: TextStyle(color: medgreen, fontSize: 12.sp),
-                    ),
-                    Container(
-                      height: screenHeight * 0.07,
-                      width: screenWidth * 0.2,
-                      decoration: BoxDecoration(
-                        color: orange,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${scoreProvider.dailyScore}',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: SizedBox(
-                    width: screenWidth * 0.10.sp,
-                  ),
-                ),
-                Column(
-                  children: [
-                    Text(
-                      'Bilinen Kelimeler',
-                      style: TextStyle(color: medgreen, fontSize: 12.sp),
-                    ),
-                    Container(
-                      height: screenHeight * 0.07,
-                      width: screenWidth * 0.2,
-                      decoration: BoxDecoration(
-                        color: orange,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${scoreProvider.knownScore}',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-            ///////////////////////////////////////////////////////////
+            SizedBox(height: 20.sp),
+            _buildScoreRow(scoreProvider, screenWidth, screenHeight),
             SizedBox(
               height: screenHeight * 0.050,
             ),
-            //
-            Row(
-              children: [
-                SizedBox(width: screenWidth * 0.024),
-                SizedBox(
-                  width: screenWidth * 0.47,
-                  height: screenHeight * 0.2,
-                  child: InkWell(
-                    onTap: () {
-                      if (wordListProvider.wordsListOne.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: hardgreen,
-                            content: Text(
-                              '                      Bu bölümü tamamladınız',
-                              style: TextStyle(color: whites),
-                            ),
-                            duration: const Duration(seconds: 2),
-                            // action: SnackBarAction(
-                            //     label: 'Sıfırlamak için tıklayın', onPressed: () {}),
-                          ),
-                        );
-                      } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const OneCard(),
-                          ),
-                        );
-                      }
-                    },
-                    child: Center(
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: screenWidth * 0.4,
-                            height: screenHeight * 0.179,
-                            decoration: circulBox1,
-                            child: CircularProgressIndicator(
-                              strokeAlign: 2,
-                              strokeWidth: 7,
-                              value: progressProvider.progressValue,
-                              backgroundColor: easgreen,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                yellow,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 60,
-                            bottom: 65,
-                            child: Text('A1', style: _textStyle),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: screenWidth * 0.01),
-                SizedBox(
-                  width: screenWidth * 0.47,
-                  height: screenHeight * 0.2,
-                  child: InkWell(
-                    onTap: () {
-                      if (wordListProvider1.wordsListTwo.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Bu bölümü tamamladınız.'),
-                          ),
-                        );
-                      } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const TwoCard(),
-                          ),
-                        );
-                      }
-                    },
-                    child: Center(
-                      child: Stack(
-                        children: [
-                          Container(
-                            height: screenHeight * 0.179,
-                            width: screenWidth * 0.4,
-                            decoration: circulBox2,
-                            child: CircularProgressIndicator(
-                              strokeAlign: 2,
-                              strokeWidth: 7,
-                              value: progressProvider.progressValue1,
-                              backgroundColor: easgreen,
-                              valueColor: AlwaysStoppedAnimation<Color>(yellow),
-                            ),
-                          ),
-                          Positioned(
-                            right: 60,
-                            bottom: 65,
-                            child: Text('A2', style: _textStyle),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            _buildLevelRow(
+              context,
+              wordListProvider,
+              wordListProvider1,
+              progressProvider,
+              screenWidth,
+              screenHeight,
             ),
-            //////////////////////////////////////////////////////////////////////
             SizedBox(height: screenHeight * 0.03),
-            Row(
-              children: [
-                SizedBox(width: screenWidth * 0.024),
-                SizedBox(
-                  width: screenWidth * 0.47,
-                  height: screenHeight * 0.2,
-                  child: InkWell(
-                    onTap: () {
-                      if (wordListProvider2.wordsListThre.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Bu bölümü tamamladınız.'),
-                          ),
-                        );
-                      } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const ThreCard(),
-                          ),
-                        );
-                      }
-                    },
-                    child: Center(
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: screenWidth * 0.4,
-                            height: screenHeight * 0.179,
-                            decoration: circulBox3,
-                            child: CircularProgressIndicator(
-                              strokeAlign: 2,
-                              strokeWidth: 7,
-                              value: progressProvider.progressValue2,
-                              backgroundColor: easgreen,
-                              valueColor: AlwaysStoppedAnimation<Color>(yellow),
-                            ),
-                          ),
-                          Positioned(
-                            right: 60,
-                            bottom: 65,
-                            child: Text('B1', style: _textStyle),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: screenWidth * 0.01),
-                SizedBox(
-                  width: screenWidth * 0.47,
-                  height: screenHeight * 0.179,
-                  child: InkWell(
-                    onTap: () {
-                      if (wordListProvider3.wordsListFour.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Bu bölümü tamamladınız.'),
-                          ),
-                        );
-                      } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const FourCard(),
-                          ),
-                        );
-                      }
-                    },
-                    child: Center(
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: screenWidth * 0.4,
-                            height: screenHeight * 0.179,
-                            decoration: circulBox4,
-                            child: CircularProgressIndicator(
-                              strokeAlign: 2,
-                              strokeWidth: 7,
-                              value: progressProvider.progressValue3,
-                              backgroundColor: easgreen,
-                              valueColor: AlwaysStoppedAnimation<Color>(yellow),
-                            ),
-                          ),
-                          Positioned(
-                            right: 60,
-                            bottom: 65,
-                            child: Text('B2', style: _textStyle),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ), /////////////////////////////////////////////////////
-            SizedBox(height: screenHeight * 0.03),
-            Row(
-              children: [
-                SizedBox(width: screenWidth * 0.25),
-                SizedBox(
-                  width: screenWidth * 0.47,
-                  height: screenHeight * 0.2,
-                  child: InkWell(
-                    onTap: () {
-                      if (wordListProvider4.wordsListFive.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Bu bölümü tamamladınız.'),
-                          ),
-                        );
-                      } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const FiveCard(),
-                          ),
-                        );
-                      }
-                    },
-                    child: Center(
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: screenWidth * 0.4,
-                            height: screenHeight * 0.179,
-                            decoration: circulBox5,
-                            child: CircularProgressIndicator(
-                              strokeAlign: 2,
-                              strokeWidth: 7,
-                              value: progressProvider.progressValue4,
-                              backgroundColor: easgreen,
-                              valueColor: AlwaysStoppedAnimation<Color>(yellow),
-                            ),
-                          ),
-                          Positioned(
-                            right: 60,
-                            bottom: 65,
-                            child: Text('C1', style: _textStyle),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            _buildLevelRow1(
+              context,
+              wordListProvider2,
+              wordListProvider3,
+              progressProvider,
+              screenWidth,
+              screenHeight,
             ),
+            SizedBox(height: screenHeight * 0.03),
+            _buildFinalLevel(context, wordListProvider4, progressProvider,
+                screenWidth, screenHeight),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildScoreRow(
+      ScoreProvider scoreProvider, double screenWidth, double screenHeight) {
+    return Row(
+      children: [
+        SizedBox(width: screenWidth * 0.076),
+        _buildScoreColumn(
+            'Toplam Skor', scoreProvider.totalScore, screenHeight, screenWidth),
+        SizedBox(width: screenWidth * 0.12),
+        _buildScoreColumn(
+            'Günlük Skor', scoreProvider.dailyScore, screenHeight, screenWidth),
+        SizedBox(width: screenWidth * 0.10),
+        _buildScoreColumn('Bilinen Kelimeler', scoreProvider.knownScore,
+            screenHeight, screenWidth),
+      ],
+    );
+  }
+
+  Widget _buildScoreColumn(
+      String label, int score, double screenHeight, double screenWidth) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(color: medgreen, fontSize: 11.sp),
+        ),
+        Container(
+          height: screenHeight * 0.06,
+          width: screenWidth * 0.2,
+          decoration: BoxDecoration(
+            color: orange,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              '$score',
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLevelRow(
+    BuildContext context,
+    WordProvider wordListProvider,
+    WordProvider2 wordListProvider1,
+    ProgressProvider progressProvider,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    return Row(
+      children: [
+        SizedBox(width: screenWidth * 0.024),
+        _buildLevelCard(
+          context,
+          'A1',
+          createCircularBox('assets/a1.webp'),
+          wordListProvider.wordsListOne.isEmpty,
+          const OneCard(),
+          progressProvider.progressValue,
+          screenWidth,
+          screenHeight,
+        ),
+        SizedBox(width: screenWidth * 0.01),
+        _buildLevelCard(
+          context,
+          'A2',
+          createCircularBox('assets/a2.webp'),
+          wordListProvider1.wordsListTwo.isEmpty,
+          const TwoCard(),
+          progressProvider.progressValue1,
+          screenWidth,
+          screenHeight,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLevelRow1(
+    BuildContext context,
+    WordProvider3 wordListProvider2,
+    WordProvider4 wordListProvider3,
+    ProgressProvider progressProvider,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    return Row(
+      children: [
+        SizedBox(width: screenWidth * 0.024),
+        _buildLevelCard(
+          context,
+          'B1',
+          createCircularBox('assets/a3.webp'),
+          wordListProvider2.wordsListThre.isEmpty,
+          const ThreCard(),
+          progressProvider.progressValue2,
+          screenWidth,
+          screenHeight,
+        ),
+        SizedBox(width: screenWidth * 0.01),
+        _buildLevelCard(
+          context,
+          'B2',
+          createCircularBox('assets/a4.webp'),
+          wordListProvider3.wordsListFour.isEmpty,
+          const FourCard(),
+          progressProvider.progressValue3,
+          screenWidth,
+          screenHeight,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLevelCard(
+    BuildContext context,
+    String level,
+    BoxDecoration decoration,
+    bool isCompleted,
+    Widget nextPage,
+    double progressValue,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    return SizedBox(
+      width: screenWidth * 0.47,
+      height: screenHeight * 0.2,
+      child: InkWell(
+        onTap: () {
+          if (isCompleted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: hardgreen,
+                content: Text(
+                  'Bu bölümü tamamladınız',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: whites),
+                ),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          } else {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) => nextPage));
+          }
+        },
+        child: Center(
+          child: Stack(
+            children: [
+              Container(
+                width: screenWidth * 0.4,
+                height: screenHeight * 0.179,
+                decoration: decoration,
+                child: CircularProgressIndicator(
+                  strokeAlign: 2,
+                  strokeWidth: 7,
+                  value: progressValue,
+                  backgroundColor: easgreen,
+                  valueColor: AlwaysStoppedAnimation<Color>(yellow),
+                ),
+              ),
+              Positioned(
+                right: 60,
+                bottom: 65,
+                child: Text(level, style: _textStyle),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFinalLevel(
+    BuildContext context,
+    WordProvider5 wordListProvider,
+    ProgressProvider progressProvider,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    return Row(
+      children: [
+        SizedBox(width: screenWidth * 0.25),
+        _buildLevelCard(
+          context,
+          'C1',
+          createCircularBox('assets/a5.webp'),
+          wordListProvider.wordsListFive.isEmpty,
+          const FiveCard(),
+          progressProvider.progressValue4,
+          screenWidth,
+          screenHeight,
+        ),
+      ],
     );
   }
 }

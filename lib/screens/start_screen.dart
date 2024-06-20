@@ -5,12 +5,18 @@ import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:eng_card/provider/wordshare_threprov.dart';
 import 'package:eng_card/provider/wordshare_twoprov.dart';
 import 'package:eng_card/screens/six_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
+
   @override
   State<StartScreen> createState() {
     return _StartScreenState();
@@ -19,6 +25,7 @@ class StartScreen extends StatefulWidget {
 
 class _StartScreenState extends State<StartScreen> {
   bool _isFirstRun = true;
+
   @override
   void initState() {
     super.initState();
@@ -27,10 +34,9 @@ class _StartScreenState extends State<StartScreen> {
 
   void _checkFirstRun() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? isFirstRun = prefs.getBool('isFirstRun');
+    bool? hasStarted = prefs.getBool('hasStarted');
 
-    if (isFirstRun == null || isFirstRun) {
-      prefs.setBool('isFirstRun', false);
+    if (hasStarted == null || !hasStarted) {
       setState(() {
         _isFirstRun = true;
       });
@@ -55,6 +61,7 @@ class _StartScreenState extends State<StartScreen> {
 
 class CheckScreen extends StatelessWidget {
   const CheckScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     var wordLists = Provider.of<WordProvider>(context);
@@ -64,53 +71,88 @@ class CheckScreen extends StatelessWidget {
     var wordLists4 = Provider.of<WordProvider5>(context);
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Hoşgeldin',
+          style: GoogleFonts.pacifico(
+            color: Colors.white,
+            fontSize: 30,
+            // fontWeight: FontWeight.bold,
+            letterSpacing: 4,
+          ),
+        ),
+        centerTitle: true,
+        elevation: 8,
+        shadowColor: Colors.white,
+        toolbarHeight: 130,
+        backgroundColor: yellow,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.elliptical(150, 30),
+            bottomRight: Radius.elliptical(150, 30),
+          ),
+        ),
+      ),
       backgroundColor: whites,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            const SizedBox(height: 5),
-            Text(
-              'Hoş Geldiniz',
-              style: TextStyle(
-                  fontSize: 30, fontWeight: FontWeight.bold, color: orange),
+            Expanded(
+              child: SizedBox(
+                height: 300.h,
+                child: Image.asset('assets/logoback.png'),
+              ),
             ),
-            Container(
-              height: 300,
-              child: Image.asset('assets/TestLog1.png'),
-            ),
-            // Açıklama metni
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Text(
-                'Eğitim, hayat boyu süren bir serüven ve keşif yolculuğudur. Bu yolculuğa beni de dahil etmek için aşağıdaki butona basabilirsin.',
+                'Eğitim, hayat boyu süren bir serüven ve keşif yolculuğudur. Bu yolculuğa beni de dahil etmek için aşağıdaki butona basarak başlayalım.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, color: medgreen),
+                style: GoogleFonts.dmSans(
+                    fontSize: 12.sp,
+                    color: yellow,
+                    fontWeight: FontWeight.bold),
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                wordLists4.resetList5();
-                wordLists3.resetList4();
-                wordLists2.resetList3();
-                wordLists1.resetList2();
-                wordLists.resetList();
+            SizedBox(height: 35.h),
+            Padding(
+              padding: EdgeInsets.all(20.0.w),
+              child: SizedBox(
+                height: 65,
+                width: 220,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    wordLists4.resetList5();
+                    wordLists3.resetList4();
+                    wordLists2.resetList3();
+                    wordLists1.resetList2();
+                    wordLists.resetList();
 
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const SixScreen(),
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    await prefs.setBool('hasStarted', true);
+
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const SixScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 30.w),
+                    backgroundColor: hardgreen,
+                    foregroundColor: whites,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0.r),
+                    ),
+                    elevation: 5,
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                foregroundColor: Colors.white, // Buton rengi
-                backgroundColor: hardgreen, // Yazı rengi
-              ),
-              child: const Text(
-                'Başla',
-                style: TextStyle(fontSize: 24),
+                  child: Text(
+                    'Hadi başlayalım',
+                    style: TextStyle(fontSize: 15.sp),
+                  ),
+                ),
               ),
             ),
           ],

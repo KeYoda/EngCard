@@ -24,8 +24,8 @@ class WordProvider extends ChangeNotifier {
   }
 
   WordProvider() {
-    loadData();
     _loadLastIndex();
+    loadData();
     wordsListOne.shuffle();
     initialList1.shuffle();
     initialList1.addAll(wordsListOne);
@@ -33,6 +33,8 @@ class WordProvider extends ChangeNotifier {
 
   void loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    wordsListOne.clear();
 
     List<String>? questList = prefs.getStringList('questList');
     List<String>? answerList = prefs.getStringList('answerList');
@@ -84,13 +86,20 @@ class WordProvider extends ChangeNotifier {
   void deleteWord(int index, BuildContext context) {
     if (wordsListOne.isNotEmpty) {
       wordsListOne.removeAt(index);
-      if (index == wordsListOne.length) {
-        // Silinen öğe son öğeyse
-        lastIndex--;
-      }
       if (wordsListOne.isEmpty) {
-        Navigator.pop(context);
-      } else {}
+        Navigator.pop(context); // Liste tamamen boşsa ekranı kapat
+      } else {
+        if (index == wordsListOne.length) {
+          lastIndex--;
+        } else {
+          // Eğer eleman sayısı 1 ise ve onu siliyorsak `lastIndex` 0 olmalı
+          if (wordsListOne.length == 1) {
+            lastIndex = 0;
+          } else {
+            lastIndex = (index == 0) ? 0 : lastIndex - 1;
+          }
+        }
+      }
       saveData();
       notifyListeners();
     }
@@ -101,7 +110,6 @@ class WordProvider extends ChangeNotifier {
 
     // Başlangıç verilerini başlangıç listesi ile güncelle
     wordsListOne.addAll(initialList1);
-    initialList1.addAll(wordsListOne);
 
     saveData();
     notifyListeners(); // Değişiklikleri bildir
@@ -235,6 +243,12 @@ class WordProvider extends ChangeNotifier {
         list: 'A1',
         answer: 'kötü bir şekilde',
         quest: 'badly'),
+    Words(
+        front: 'I know you had exams last week.',
+        back: 'Geçen hafta sınavların olduğunu biliyorum.',
+        list: 'A1',
+        answer: 'sınav',
+        quest: 'exam'),
     Words(
         front: 'The washing machine is in the basement.',
         back: 'Çamaşır makinesi bodrum katında.',
@@ -570,7 +584,7 @@ class WordProvider extends ChangeNotifier {
         quest: 'curly'),
     Words(
         front:
-            "Wild animals can be dangerous, so it's important to keep a safe distance.",
+            "Wild animals can be dangerous , so it's important to keep a safe distance.",
         back:
             'Vahşi hayvanlar tehlikeli olabilir, bu yüzden güvenli bir mesafeyi korumak önemlidir.',
         list: 'A1',
@@ -659,6 +673,12 @@ class WordProvider extends ChangeNotifier {
         answer: 'düşmek',
         quest: 'drop'),
     Words(
+        front: "Let's go ask them. ",
+        back: 'Gidip onlara soralım.',
+        list: 'A1',
+        answer: 'sormak',
+        quest: 'ask'),
+    Words(
         front: 'After washing, hang your clothes outside to dry.',
         back: 'Yıkadıktan sonra kıyafetlerini dışarı asarak kurut.',
         list: 'A1',
@@ -713,6 +733,12 @@ class WordProvider extends ChangeNotifier {
         list: 'A1',
         answer: 'dürüst, adil',
         quest: 'fair'),
+    Words(
+        front: 'I found some really cheap clothes on sale.',
+        back: 'İndirimde gerçekten ucuz kıyafetler buldum.',
+        list: 'A1',
+        answer: 'ucuz',
+        quest: 'cheap'),
     Words(
         front: 'Be careful not to fall on the ice!',
         back: 'Buzun üzerine düşmemeye dikkat edin!',
@@ -818,6 +844,18 @@ class WordProvider extends ChangeNotifier {
         answer: 'lunapark',
         quest: 'funfair'),
     Words(
+        front: "The architect designed the new museum in the shape of a cone.",
+        back: 'Mimar yeni müzeyi bir koni şeklinde tasarladı.',
+        list: 'A1',
+        answer: 'tasarlamak',
+        quest: 'design'),
+    Words(
+        front: "Can you imagine life without electricity?",
+        back: 'Elektriksiz bir hayat düşünebiliyor musunuz?',
+        list: 'A1',
+        answer: 'hayal etmek',
+        quest: 'imagine'),
+    Words(
         front: "It's time to get dressed for the party.",
         back: 'Parti için giyinme zamanı geldi.',
         list: 'A1',
@@ -829,6 +867,12 @@ class WordProvider extends ChangeNotifier {
         list: 'A1',
         answer: 'çıkmak',
         quest: 'get off'),
+    Words(
+        front: "There's an extra chair in the hall.",
+        back: 'Koridorda fazladan bir sandalye var.',
+        list: 'A1',
+        answer: 'fazla',
+        quest: 'extra'),
     Words(
         front: "Let's get on the train before it leaves.",
         back: "Kalkmadan önce tren'e binelim.",
@@ -896,6 +940,12 @@ class WordProvider extends ChangeNotifier {
         answer: 'büyümek',
         quest: 'grow'),
     Words(
+        front: 'He has just become a father.',
+        back: 'Daha yeni baba oldu.',
+        list: 'A1',
+        answer: 'olmak,haline gelmek',
+        quest: 'become'),
+    Words(
         front:
             "He's all grown up now and learning to stand on his own two feet.",
         back: 'Artık büyüdü ve kendi ayakları üzerinde durmayı öğreniyor.',
@@ -914,6 +964,12 @@ class WordProvider extends ChangeNotifier {
         list: 'A1',
         answer: 'baş ağrısı',
         quest: 'headache'),
+    Words(
+        front: 'The phone bill was higher than he expected.',
+        back: 'Telefon faturası beklediğinden yüksek geldi.',
+        list: 'A1',
+        answer: 'fatura',
+        quest: 'bill'),
     Words(
         front: 'It is important to wear a helmet when riding a motorcycle.',
         back: 'Bisiklet kullanırken kask takmak önemlidir.',
@@ -1000,6 +1056,12 @@ class WordProvider extends ChangeNotifier {
         answer: 'aç',
         quest: 'hungry'),
     Words(
+        front: 'Being in the countryside makes me feel so good.',
+        back: 'Kırsalda olmak bana kendimi çok iyi hissettiriyor.',
+        list: 'A1',
+        answer: 'hissetmek',
+        quest: 'feel'),
+    Words(
         front: 'I fell yesterday and hurt my knee.',
         back: 'Dün düşüp dizimi incittim.',
         list: 'A1',
@@ -1023,6 +1085,12 @@ class WordProvider extends ChangeNotifier {
         list: 'A1',
         answer: 'hasta olmak',
         quest: 'ill'),
+    Words(
+        front: 'You can also bring a handbag with you.',
+        back: 'Yanınızda bir el çantası da getirebilirsiniz.',
+        list: 'A1',
+        answer: 'ayrıca',
+        quest: 'also'),
     Words(
         front: 'Cats usually like to sleep inside the house.',
         back: 'Kediler genellikle evin içinde uyumayı severler.',
@@ -1090,6 +1158,18 @@ class WordProvider extends ChangeNotifier {
         answer: 'gülme',
         quest: 'laugh'),
     Words(
+        front: "It's been a very mild autumn.",
+        back: 'Çok ılıman bir sonbahar oldu.',
+        list: 'A1',
+        answer: 'sonbahar',
+        quest: 'autumn'),
+    Words(
+        front: "The baby's laughter made me laugh too.",
+        back: 'Bebeğin kahkahası beni de güldürdü.',
+        list: 'A1',
+        answer: 'bebek',
+        quest: 'baby'),
+    Words(
         front: 'The leaves of this tree have a very beautiful color.',
         back: 'Bu ağacın yaprakları çok güzel bir renge sahip.',
         list: 'A1',
@@ -1126,7 +1206,7 @@ class WordProvider extends ChangeNotifier {
         answer: 'aramak',
         quest: 'looking for'),
     Words(
-        front: 'They lose(t) the ball in the last minutes of the game.',
+        front: 'They lose/t the ball in the last minutes of the game.',
         back: 'Maçın son dakikalarında topu kaybettiler.',
         list: 'A1',
         answer: 'kaybetmek',
@@ -1475,6 +1555,36 @@ class WordProvider extends ChangeNotifier {
         answer: 'çatı',
         quest: 'roof'),
     Words(
+        front: 'I always brush my teeth before going to bed.',
+        back: 'Yatmadan önce her zaman dişlerimi fırçalarım.',
+        list: 'A1',
+        answer: 'her zaman',
+        quest: 'always'),
+    Words(
+        front: 'The meeting is on 4 April.',
+        back: "Toplantı 4 Nisan'da.",
+        list: 'A1',
+        answer: 'Nisan',
+        quest: 'April'),
+    Words(
+        front: 'He wound the string into a ball.',
+        back: "İpi bir top haline getirdi.",
+        list: 'A1',
+        answer: 'top',
+        quest: 'ball'),
+    Words(
+        front: 'My favorite band will be in town tonight.',
+        back: "En sevdiğim grup bu gece şehirde olacak.",
+        list: 'A1',
+        answer: 'grup',
+        quest: 'band'),
+    Words(
+        front: 'He has some air of mystery.',
+        back: 'Biraz gizemli bir havası var.',
+        list: 'A1',
+        answer: 'hava',
+        quest: 'air'),
+    Words(
         front: 'The Earth is round.',
         back: 'Dünya yuvarlaktır.',
         list: 'A1',
@@ -1580,8 +1690,10 @@ class WordProvider extends ChangeNotifier {
         answer: 'omuz',
         quest: 'shoulder'),
     Words(
-        front: 'He shouted for help as he was drowning.',
-        back: 'Boğulurken yardım için bağırdı.',
+        front:
+            "There's no need to shout while everyone is screaming at the concert!",
+        back:
+            'Konser sırasında herkes bağırırken, senin de bağırmana gerek yok!',
         list: 'A1',
         answer: 'haykırmak',
         quest: 'shout'),
@@ -1891,12 +2003,6 @@ class WordProvider extends ChangeNotifier {
         list: "A1",
         answer: "üst kat",
         quest: "upstairs"),
-    Words(
-        front: "Are you a vegetarian? Do you eat vegetables?",
-        back: "Vejeteryan mısın? Sebze yer misin?",
-        list: "A1",
-        answer: "vejeteryan",
-        quest: "vegetable"),
     Words(
         front: "We visited a small village in the countryside.",
         back: "Kırsaldaki küçük bir köyü ziyaret ettik.",
@@ -2433,5 +2539,11 @@ class WordProvider extends ChangeNotifier {
         list: "A1",
         answer: "mağaza",
         quest: "shop"),
+    Words(
+        front: "You should have been here twenty minutes ago.",
+        back: "Yirmi dakika önce burada olmalıydın.",
+        list: "A1",
+        answer: "önce",
+        quest: "ago"),
   ];
 }

@@ -4,31 +4,33 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class WordProvider2 extends ChangeNotifier {
   List<Words2> initialList2 = [];
-  int lastIndex = 0;
-
-  Future<void> _loadLastIndex() async {
-    final prefs = await SharedPreferences.getInstance();
-    lastIndex = prefs.getInt('lastIndex') ?? 0;
-    notifyListeners(); // Notify listeners about the loaded index
-  }
-
-  Future<void> _saveLastIndex() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setInt('lastIndex', lastIndex);
-  }
-
-  void setLastIndex(int index) {
-    lastIndex = index;
-    _saveLastIndex();
-    notifyListeners(); // Notify listeners about the updated index
-  }
+  int lastIndex2 = 0;
 
   WordProvider2() {
     loadData2();
     _loadLastIndex();
-    wordsListTwo.shuffle();
-    initialList2.shuffle();
-    initialList2.addAll(wordsListTwo);
+    _initializeInitialList();
+  }
+
+  void _initializeInitialList() {
+    initialList2 = List.from(wordsListTwo);
+  }
+
+  Future<void> _loadLastIndex() async {
+    final prefs = await SharedPreferences.getInstance();
+    lastIndex2 = prefs.getInt('lastIndex2') ?? 0;
+    notifyListeners();
+  }
+
+  Future<void> _saveLastIndex() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('lastIndex2', lastIndex2);
+  }
+
+  void setLastIndex(int index) {
+    lastIndex2 = index;
+    _saveLastIndex();
+    notifyListeners();
   }
 
   void loadData2() async {
@@ -39,7 +41,7 @@ class WordProvider2 extends ChangeNotifier {
     List<String>? backList2 = prefs.getStringList('backList2');
     List<String>? frontList2 = prefs.getStringList('frontList2');
 
-    wordsListTwo.clear(); // Mevcut listeyi temizle
+    wordsListTwo.clear();
 
     if (questList2 != null &&
         answerList2 != null &&
@@ -55,6 +57,8 @@ class WordProvider2 extends ChangeNotifier {
         );
         wordsListTwo.add(word2);
       }
+    } else {
+      wordsListTwo = List.from(initialList2);
     }
 
     notifyListeners();
@@ -85,8 +89,8 @@ class WordProvider2 extends ChangeNotifier {
     if (wordsListTwo.isNotEmpty) {
       wordsListTwo.removeAt(index);
       if (index == wordsListTwo.length) {
-        // Silinen öğe son öğeyse
-        lastIndex--;
+        lastIndex2--;
+        saveData2();
       }
       if (wordsListTwo.isEmpty) {
         Navigator.pop(context);
@@ -98,13 +102,10 @@ class WordProvider2 extends ChangeNotifier {
   }
 
   void resetList2() {
-    wordsListTwo.clear(); // Mevcut listeyi sıfırla
-
-    // Başlangıç verilerini başlangıç listesi ile güncelle
+    wordsListTwo.clear();
     wordsListTwo.addAll(initialList2);
-
     saveData2();
-    notifyListeners(); // Değişiklikleri bildir
+    notifyListeners();
   }
 
   List<Words2> wordsListTwo = [
@@ -1230,7 +1231,7 @@ class WordProvider2 extends ChangeNotifier {
         back: "Sevgili John, Nasılsın?",
         list: "A2",
         answer: "sevgili",
-        quest: "dear"),
+        quest: "Dear"),
     Words2(
         front:
             "Her death was a great loss to the family.", // related to 'death'
@@ -2314,8 +2315,9 @@ class WordProvider2 extends ChangeNotifier {
       quest: 'hill',
     ),
     Words2(
-      front: 'This is his book.', // "His" is possessive pronoun
-      back: 'Bu onun kitabı.', // Changed to "onun" (possessive of "o")
+      front:
+          "We can't stop Tom climbing out of his cot.", // "His" is possessive pronoun
+      back: "Tom'un karyolasından çıkmasını engelleyemeyiz.",
       list: 'A2',
       answer: 'onun', // Changed answer to "onun"
       quest: 'his',
@@ -2646,13 +2648,7 @@ class WordProvider2 extends ChangeNotifier {
       answer: 'çocuk',
       quest: 'kid',
     ),
-    Words2(
-      front: 'Killing is illegal in most countries.',
-      back: 'Çoğu ülkede öldürmek yasadışıdır.',
-      list: 'A2',
-      answer: 'öldürme',
-      quest: 'Kill',
-    ),
+
     Words2(
       front: 'The king ruled the country for many years.',
       back: 'Kral ülkeyi uzun yıllar yönetti.',
@@ -3233,6 +3229,13 @@ class WordProvider2 extends ChangeNotifier {
       list: 'A2',
       answer: 'hiçbiri',
       quest: 'none',
+    ),
+    Words2(
+      front: 'Did you notice the new restaurant that opened on Main Street?',
+      back: "Ana Cadde'de açılan yeni restoranı fark ettin mi?",
+      list: 'A2',
+      answer: 'duyuru',
+      quest: 'notice',
     ),
     Words2(
       front: 'Did you notice the new restaurant that opened on Main Street?',

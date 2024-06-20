@@ -6,7 +6,7 @@
         <package android:name="com.google.android.googlequicksearchbox"/>
     </queries>
     <application
-        android:label="OneWord"
+        android:label="WordCard"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

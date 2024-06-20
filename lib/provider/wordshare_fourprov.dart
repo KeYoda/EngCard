@@ -87,6 +87,7 @@ class WordProvider4 extends ChangeNotifier {
       if (index == wordsListFour.length) {
         // Silinen öğe son öğeyse
         lastIndex--;
+        saveData4();
       }
       if (wordsListFour.isEmpty) {
         Navigator.pop(context);
@@ -132,7 +133,7 @@ class WordProvider4 extends ChangeNotifier {
             "Soyut sanat, yeni başlayanlar için genellikle anlaşılması zordur.",
         list: 'B2',
         answer: 'soyutlamak',
-        quest: 'abstract'),
+        quest: 'Abstract'),
     Words4(
         front: "It is not acceptable to cheat on an exam.",
         back: "Bir sınavda kopya çekmek kabul edilebilir bir şey değildir.",
@@ -146,6 +147,13 @@ class WordProvider4 extends ChangeNotifier {
         list: 'B2',
         answer: 'eşlik etmek',
         quest: 'accompany'),
+    Words4(
+        front: "Don't forget to take your account number with you to the bank.",
+        back:
+            "Bankaya giderken hesap numaranızı yanınızda götürmeyi unutmayın.",
+        list: 'B2',
+        answer: 'hesap',
+        quest: 'account'),
     Words4(
         front: "Don't forget to take your account number with you to the bank.",
         back:
@@ -219,12 +227,11 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'evlat edinmek, benimsemek',
         quest: 'adopt'),
     Words4(
-        front:
-            "He was promoted to a management position after several years of hard work.",
+        front: "See how eagerly the lobsters and the turtles all advance!",
         back:
-            "Yıllarca süren sıkı çalışmanın ardından yönetim pozisyonuna terfi etti.",
+            "Istakozların ve kaplumbağaların ne kadar hevesle ilerlediğini görün!",
         list: 'B2',
-        answer: 'terfi ettirmek',
+        answer: 'ilerleme,terfi ettirmek',
         quest: 'advance'),
     Words4(
         front: "It's none of your affair what I do in my free time.",
@@ -545,9 +552,9 @@ class WordProvider4 extends ChangeNotifier {
         quest: 'bill'),
     Words4(
         front:
-            "The police are blaming him for the robbery, but he claims he is innocent.",
+            "My boss always tries to blame other people whenever he makes a mistake.",
         back:
-            "Polis onu soygunla suçluyor, ancak o masum olduğunu iddia ediyor.",
+            "Patronum ne zaman bir hata yapsa hep başkalarını suçlamaya çalışır.",
         list: 'B2',
         answer: 'suçlamak',
         quest: 'blame'),
@@ -730,10 +737,10 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'çizelge',
         quest: 'chart'),
     Words4(
-        front: "The head chef is responsible for overseeing the kitchen staff.",
-        back: "Şef, mutfak personelini denetlemekten sorumludur.",
+        front: "Our chief concern at the moment is cutting costs",
+        back: "Şu anda en büyük endişemiz maliyetleri düşürmek.",
         list: 'B2',
-        answer: 'şef',
+        answer: 'başlıca,şef',
         quest: 'chief'),
     Words4(
         front:
@@ -1067,10 +1074,8 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'bunalım',
         quest: 'crisis'),
     Words4(
-        front:
-            "We need to establish clear criteria for evaluating job applications.",
-        back:
-            "İş başvurularını değerlendirmek için net kriterler belirlememiz gerekiyor.",
+        front: "We have a simple criterion for assessing the models.",
+        back: "Modelleri değerlendirmek için basit bir kriterimiz var.",
         list: 'B2',
         answer: 'kriter',
         quest: 'criterion'),
@@ -1269,7 +1274,7 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'ispat etmek',
         quest: 'demonstrate'),
     Words4(
-        front: "He denied all the accusations against him.",
+        front: "He deny/ied all the accusations against him.",
         back: "Yöneltilen tüm suçlamaları reddetti.",
         list: 'B2',
         answer: 'yalanlamak',
@@ -1339,9 +1344,8 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'keşfetmek',
         quest: 'detect'),
     Words4(
-        front:
-            "The archaeologists are digging for ancient artifacts in the ruins.",
-        back: "Arkeologlar kalıntılarda tarihi eserleri kazıyor.",
+        front: "He likes to dig in the garden.",
+        back: "Bahçede kazmak hoşuna gider.",
         list: 'B2',
         answer: 'kazmak',
         quest: 'dig'),
@@ -1380,8 +1384,9 @@ class WordProvider4 extends ChangeNotifier {
         quest: 'display'),
     Words4(
         front:
-            "The company is responsible for distributing flyers in the neighborhood.",
-        back: "Şirket, mahallede broşür dağıtmaktan sorumludur.",
+            "After the team won the prize, there was some disagreement over how to distribute the money.",
+        back:
+            "Ekip ödülü kazandıktan sonra, paranın nasıl dağıtılacağı konusunda bazı anlaşmazlıklar yaşandı.",
         list: 'B2',
         answer: 'dağıtmak',
         quest: 'distribute'),
@@ -1546,7 +1551,7 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'arttırmak',
         quest: 'enhance'),
     Words4(
-        front: "The police made further enquiries about the crime.",
+        front: "The police made further enquiryies about the crime.",
         back: "Polis, suç hakkında daha fazla sorgu yaptı.",
         list: 'B2',
         answer: 'sorgu',
@@ -1666,9 +1671,8 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'beklenti',
         quest: 'expectation'),
     Words4(
-        front:
-            "Traveling to other countries can be a very expense-ive experience.",
-        back: "Diğer ülkelere seyahat etmek çok masraflı bir deneyim olabilir.",
+        front: "He traveled at the expense of the company.",
+        back: "Şirketin harcamasıyla gezi yaptı.",
         list: 'B2',
         answer: 'harcama',
         quest: 'expense'),
@@ -1729,11 +1733,10 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'tesis',
         quest: 'facility'),
     Words4(
-        front: "The project failed to meet its objectives.",
-        back:
-            "Proje hedeflerine ulaşamadı (yapmama = negation of yapmak - to do)",
+        front: "His failure results from his carelessness.",
+        back: "Başarısızlığı dikkatsizliğinden kaynaklanıyor.",
         list: 'B2',
-        answer: 'yapmama',
+        answer: 'başarısızlık,yapmama',
         quest: 'failure'),
     Words4(
         front: "I have faith in your ability to succeed.",
@@ -1806,9 +1809,8 @@ class WordProvider4 extends ChangeNotifier {
         quest: 'file'),
     Words4(
         front:
-            "She is a finance-ial advisor who can help you manage your money.",
-        back:
-            "O, paranızı yönetmenize yardımcı olabilecek bir finans danışmanıdır.",
+            "He borrowed from his brother to finance the loss he made on the project.",
+        back: "Projede yaptığı kaybı finanse etmek için kardeşinden borç aldı.",
         list: 'B2',
         answer: 'finans',
         quest: 'finance'),
@@ -1833,10 +1835,8 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'düzeltmek',
         quest: 'fix'),
     Words4(
-        front:
-            "The firefighter bravely rushed into the burning building to save the people trapped inside.",
-        back:
-            "İtfaiyeci, içeride mahsur kalan insanları kurtarmak için alevlerin içine cesurca koştu.",
+        front: "We watched the flames of the fire burn.",
+        back: "Ateşin alevlerinin yanışını izledik.",
         list: 'B2',
         answer: 'alev',
         quest: 'flame'),
@@ -1854,8 +1854,10 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'esnek',
         quest: 'flexible'),
     Words4(
-        front: "The child was happily floating in the pool.",
-        back: "Çocuk havuzda mutlu bir şekilde yüzüyordu.",
+        front:
+            "I learned how to float on the surface of water in my swimming class today.",
+        back:
+            "Bugün yüzme dersimde suyun yüzeyinde nasıl yüzüleceğini öğrendim.",
         list: 'B2',
         answer: 'batmadan yüzmek',
         quest: 'float'),
@@ -1920,8 +1922,8 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'bağımsız, beleş',
         quest: 'free'),
     Words4(
-        front: "Freedom of speech is a fundamental human right.",
-        back: "Konuşma özgürlüğü temel bir insan hakkıdır.",
+        front: "Some people have to fight hard for their freedom.",
+        back: "Bazı insanlar özgürlükleri için çok mücadele etmek zorundadır.",
         list: 'B2',
         answer: 'özgürlük',
         quest: 'freedom'),
@@ -2186,8 +2188,8 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'gülünç',
         quest: 'humorous'),
     Words4(
-        front: "The movie was full of slapstick humor.",
-        back: "Film, slapstick mizahla doluydu.",
+        front: "You don't understand British humour.",
+        back: "Sen İngiliz mizahından anlamıyorsun.",
         list: 'B2',
         answer: 'mizah',
         quest: 'humour'),
@@ -2217,12 +2219,10 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'örneklemek',
         quest: 'illustrate'),
     Words4(
-        front:
-            "The children used their imagination to create a magical world in their backyard.",
-        back:
-            "Çocuklar, arka bahçelerinde büyülü bir dünya yaratmak için hayal güçlerini kullandılar.",
+        front: "The latest edition of the book has beautiful illustrations.",
+        back: "Kitabın son baskısı çok güzel illüstrasyonlara sahip.",
         list: 'B2',
-        answer: 'örnekleme',
+        answer: 'illüstrasyon,örnekleme',
         quest:
             'illustration' // 'örnekleme' can also be used for illustration, but 'tasvir' might be a more fitting choice here
         ),
@@ -2241,8 +2241,10 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'sabırsız',
         quest: 'impatient'),
     Words4(
-        front: "Her comment implied that she was not happy with the situation.",
-        back: "Her yorumu, durumdan memnun olmadığını ima ediyordu.",
+        front:
+            "My boss said the presentation was superb, but I think he was implying some sarcasm.",
+        back:
+            "Patronum sunumun mükemmel olduğunu söyledi ama sanırım biraz alaycı olduğunu ima ediyordu.",
         list: 'B2',
         answer: 'kastetmek',
         quest: 'imply'),
@@ -2328,7 +2330,7 @@ class WordProvider4 extends ChangeNotifier {
             "Başlangıçta projeye karşı tereddütlüydü, ancak sonunda ikna oldu.",
         list: 'B2',
         answer: 'başlangıçta',
-        quest: 'initially'),
+        quest: 'Initially'),
     Words4(
         front:
             "She took the initiative to organize a fundraiser for the local animal shelter.",
@@ -2361,8 +2363,9 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'ısrar etmek',
         quest: 'insist'),
     Words4(
-        front: "Her inspirational speech motivated the team to work harder.",
-        back: "İlham verici konuşması, takımı daha çok çalışmaya motive etti.",
+        front: "The teacher inspired his students to succeed in school.",
+        back:
+            "Öğretmen, öğrencilerine okulda başarılı olmaları için ilham verdi.",
         list: 'B2',
         answer: 'ilham vermek',
         quest: 'inspire'),
@@ -2479,7 +2482,7 @@ class WordProvider4 extends ChangeNotifier {
         back: "Suç mağdurları için adalet sağlanmalıdır.",
         list: 'B2',
         answer: 'adalet',
-        quest: 'justice'),
+        quest: 'Justice'),
     Words4(
         front:
             "He can justify his actions by saying that he was only trying to help.",
@@ -2578,9 +2581,8 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'satır',
         quest: 'line'),
     Words4(
-        front:
-            "The city comes alive at night with all the bars and restaurants open.",
-        back: "Şehir, tüm barlar ve restoranlar açıksa geceleri canlanır.",
+        front: "The debate in Bucharest will therefore be a very lively one",
+        back: "Bu nedenle Bükreş'teki tartışma çok canlı geçecektir.",
         list: 'B2',
         answer: 'canlı',
         quest: 'lively'),
@@ -2744,7 +2746,7 @@ class WordProvider4 extends ChangeNotifier {
         back: "Milli Eğitim Bakanı yeni bir reform planı açıkladı.",
         list: 'B2',
         answer: 'bakan',
-        quest: 'minister'),
+        quest: 'Minister'),
     Words4(
         front: "You are not allowed to buy alcohol if you are a minor.",
         back: "Reşit değilseniz alkol satın almanıza izin verilmez.",
@@ -2771,8 +2773,9 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'hata',
         quest: 'mistake'),
     Words4(
-        front: "I felt a mix of emotions when I received the news.",
-        back: "Haberi aldığımda karışık duygular yaşadım.",
+        front: "The movie received mixed reviews from both fans and critics.",
+        back:
+            "Film hem hayranlardan hem de eleştirmenlerden karışık eleştiriler aldı.",
         list: 'B2',
         answer: 'karışık',
         quest: 'mixed'),
@@ -3010,7 +3013,7 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'borçlu olmak',
         quest: 'owe'),
     Words4(
-        front: "He was pace-ing back and forth nervously before the interview.",
+        front: "He was paceing back and forth nervously before the interview.",
         back: "Mülakat öncesi gergin bir şekilde ileri geri adımlıyordu.",
         list: 'B2',
         answer: 'adımlamak',
@@ -3128,7 +3131,7 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'yalpalamak',
         quest: 'pitch'),
     Words4(
-        front: "We drove across the vast plains of the Midwest.",
+        front: "We drove across the vast plain of the Midwest.",
         back: "Orta Batı'nın geniş ovaları boyunca sürdük.",
         list: 'B2',
         answer: 'ova',
@@ -3531,7 +3534,7 @@ class WordProvider4 extends ChangeNotifier {
         back: "Fransız Devrimi, Avrupa tarihinin önemli bir dönüm noktasıydı.",
         list: 'B2',
         answer: 'ihtilal',
-        quest: 'revolution'),
+        quest: 'Revolution'),
     Words4(
         front: "He was given a reward for his bravery in saving the child.",
         back:
@@ -3871,7 +3874,7 @@ class WordProvider4 extends ChangeNotifier {
             "Güneş enerjisi, yenilenebilir ve sürdürülebilir bir enerji kaynağıdır.",
         list: 'B2',
         answer: 'güneş',
-        quest: 'solar'),
+        quest: 'Solar'),
     Words4(
         front: "I am somewhat surprised by your decision.",
         back: "Kararınıza biraz şaşırdım.",
@@ -3928,9 +3931,8 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'durağan',
         quest: 'stable'),
     Words4(
-        front:
-            "The band will be staging their new show at the theater next week.",
-        back: "Grup, önümüzdeki hafta tiyatroda yeni şovlarını sahneleyecek.",
+        front: "The dancers are practicing on stage.",
+        back: "Dansçılar sahnede pratik yapıyorlar.",
         list: 'B2',
         answer: 'sahnelemek',
         quest: 'stage'),
@@ -4021,9 +4023,8 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'yapılandırmak',
         quest: 'structure'),
     Words4(
-        front:
-            "He is struggling to find a job in the current economic climate.",
-        back: "Mevcut ekonomik ortamda iş bulmakta zorlanıyor.",
+        front: "For some people, losing weight is a significant struggle. ",
+        back: "Bazı insanlar için kilo vermek önemli bir mücadeledir.",
         list: 'B2',
         answer: 'çabalamak',
         quest: 'struggle'),
@@ -4043,11 +4044,11 @@ class WordProvider4 extends ChangeNotifier {
         front: "He submitted his application for the job online.",
         back: "İş başvurusunu online olarak gönderdi.",
         list: 'B2',
-        answer: 'sunmak',
+        answer: 'sunmak, göndermek',
         quest: 'submit'),
     Words4(
-        front: "The total cost of the repairs came to \$1,000.",
-        back: "Tamiratların toplam maliyeti 1.000 dolara ulaştı.",
+        front: "The sum of two and three is five.",
+        back: "İki ve üçün toplamı beş",
         list: 'B2',
         answer: 'toplam',
         quest: 'sum'),
@@ -4087,15 +4088,10 @@ class WordProvider4 extends ChangeNotifier {
         list: 'B2',
         answer: 'şüphelenmek',
         quest: 'suspect'),
+
     Words4(
-        front: "He swore under his breath when he dropped his phone.",
-        back: "Telefonunu düşürdüğünde nefretle söylendi.",
-        list: 'B2',
-        answer: 'sövmek',
-        quest: 'swear'),
-    Words4(
-        front: "She swept the floor to remove the dirt and dust.",
-        back: "Kiri ve tozu temizlemek için yeri süpürdü.",
+        front: "High winds sweep across the desert.",
+        back: "Şiddetli rüzgarlar çölü süpürüyor.",
         list: 'B2',
         answer: 'süpürmek',
         quest: 'sweep'),
@@ -4253,9 +4249,9 @@ class WordProvider4 extends ChangeNotifier {
         quest: 'tunnel'),
     Words4(
         front:
-            "Ultimately, the goal is to create a better future for everyone.",
+            "After a six-week trial, the accused was ultimately convicted of murder. ",
         back:
-            "Sonuç olarak, amaç herkes için daha iyi bir gelecek yaratmaktır.",
+            "Altı haftalık bir duruşmanın ardından sanık, sonunda cinayetten suçlu bulundu.",
         list: 'B2',
         answer: 'sonunda',
         quest: 'ultimately'),
@@ -4452,10 +4448,8 @@ class WordProvider4 extends ChangeNotifier {
         answer: 'genişçe',
         quest: 'widely'),
     Words4(
-        front:
-            "We saw many amazing animals on our safari trip, including lions, elephants, and zebras.",
-        back:
-            "Safari gezimizde aslanlar, filler ve zebralar da dahil olmak üzere birçok harika vahşi hayvan gördük.",
+        front: "The national park is home to a wide variety of wildlife.",
+        back: "Milli park çok çeşitli yaban hayatına ev sahipliği yapmaktadır.",
         list: 'B2',
         answer: 'yaban hayatı',
         quest: 'wildlife'),

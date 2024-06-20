@@ -1,18 +1,17 @@
 import 'package:eng_card/data/gridview.dart';
 import 'package:eng_card/screens/six_screen.dart';
-import 'package:eng_card/screens/test/test_word_screen.dart';
+import 'package:eng_card/screens/test/voice_test.dart';
 import 'package:flutter/material.dart';
 import 'package:eng_card/data/fivewords_data.dart';
 import 'package:eng_card/data/fourwords_data.dart';
 import 'package:eng_card/data/words_data.dart';
 import 'package:eng_card/data/secwords_data.dart';
 import 'package:eng_card/data/thirdwords_data.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 
-class Settings extends StatelessWidget {
-  const Settings({super.key});
+class VoiceSettings extends StatelessWidget {
+  const VoiceSettings({super.key});
 
   List<Words> filterWordsByLevel(List<Words> allWords, String level) {
     return allWords.where((word) => word.list == level).toList();
@@ -82,8 +81,8 @@ class Settings extends StatelessWidget {
           ),
           leading: Container(
             decoration: decoration,
-            height: 55.h,
-            width: 55.w,
+            height: 55,
+            width: 55,
             child: CircularProgressIndicator(
               strokeWidth: 5,
               value: progressValue,
@@ -107,12 +106,13 @@ class Settings extends StatelessWidget {
               'A1',
               progressProvider.getCircleProgress('A1'),
               createCircularBox('assets/a1.webp'),
-              TestWord(
+              VoiceTest(
                 words: filterWordsByLevel(allWords, 'A1'),
                 onComplete: () {
                   progressProvider.completeQuestion('A1');
                   listProgressProv.listProgress();
                 },
+                level: 'A1',
               ),
               wordsList.length),
           _listTile(
@@ -120,12 +120,13 @@ class Settings extends StatelessWidget {
               'A2',
               progressProvider.getCircleProgress('A2'),
               createCircularBox('assets/a2.webp'),
-              TestWord(
+              VoiceTest(
                 words: filterWordsByLevel(allWords, 'A2'),
                 onComplete: () {
                   progressProvider.completeQuestion('A2');
                   listProgressProv.listProgress1();
                 },
+                level: 'A2',
               ),
               wordsList2.length),
           _listTile(
@@ -133,12 +134,13 @@ class Settings extends StatelessWidget {
               'B1',
               progressProvider.getCircleProgress('B1'),
               createCircularBox('assets/a3.webp'),
-              TestWord(
+              VoiceTest(
                 words: filterWordsByLevel(allWords, 'B1'),
                 onComplete: () {
                   progressProvider.completeQuestion('B1');
                   listProgressProv.listProgress2();
                 },
+                level: 'B1',
               ),
               wordsList3.length),
           _listTile(
@@ -146,12 +148,13 @@ class Settings extends StatelessWidget {
               'B2',
               progressProvider.getCircleProgress('B2'),
               createCircularBox('assets/a4.webp'),
-              TestWord(
+              VoiceTest(
                 words: filterWordsByLevel(allWords, 'B2'),
                 onComplete: () {
                   progressProvider.completeQuestion('B2');
                   listProgressProv.listProgress3();
                 },
+                level: 'B2',
               ),
               wordsList4.length),
           _listTile(
@@ -159,12 +162,13 @@ class Settings extends StatelessWidget {
             'C1',
             progressProvider.getCircleProgress('C1'),
             createCircularBox('assets/a5.webp'),
-            TestWord(
+            VoiceTest(
               words: filterWordsByLevel(allWords, 'C1'),
               onComplete: () {
                 progressProvider.completeQuestion('C1');
                 listProgressProv.listProgress4();
               },
+              level: 'C1',
             ),
             wordsList5.length,
           ),

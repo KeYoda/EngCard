@@ -1,10 +1,9 @@
 import 'dart:math';
 
 import 'package:eng_card/data/gridview.dart';
-
 import 'package:eng_card/provider/progres_prov.dart';
-import 'package:eng_card/screens/settings.dart';
 import 'package:eng_card/screens/six_screen.dart';
+import 'package:eng_card/screens/test/blanc_settings.dart';
 import 'package:eng_card/screens/test/answer_button.dart';
 import 'package:eng_card/screens/test/test_data.dart';
 import 'package:eng_card/screens/test/test_result.dart';
@@ -12,44 +11,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-class TestWord extends StatefulWidget {
+class BlancTestScreen extends StatefulWidget {
   final List<Words> words;
   final VoidCallback onComplete;
+  final String level;
 
-  const TestWord({
-    super.key,
-    required this.words,
-    required this.onComplete,
-  });
+  const BlancTestScreen(
+      {super.key,
+      required this.words,
+      required this.onComplete,
+      required this.level});
 
   @override
   State<StatefulWidget> createState() {
-    return _TestWordState();
+    return _TestScreenState();
   }
 }
 
-class _TestWordState extends State<TestWord> {
+class _TestScreenState extends State<BlancTestScreen> {
   List<Words> combinedListWords = [];
-
   String? selectedAnswer;
 
-  int totalQuests = 16;
+  int totalQuests = 11;
   int scoreBlanc = 0;
 
   List<QuestionAnswer> answeredQuestionsTest = [];
 
   int currentIndex = 0;
-  int correctAnswersCount = 0;
+  int correctAnswersCount = 0; // Track correct answers
 
   final List<String> answers = [];
-  bool isDisabled = false;
-  bool showCorrectAnswer = false;
-  String? selectedAnswerText;
+  bool isDisabled = false; // Disable flag
+  bool showCorrectAnswer = false; // Yeni parametre eklendi
+  String? selectedAnswerText; // Seçilen cevabın text'i için
 
   @override
   void initState() {
     super.initState();
-
     combinedListWords = widget.words;
     generateAnswers();
   }
@@ -57,7 +55,7 @@ class _TestWordState extends State<TestWord> {
   void generateAnswers() {
     combinedListWords.shuffle();
 
-    String correctAnswer = combinedListWords[currentIndex].answer;
+    String correctAnswer = combinedListWords[currentIndex].quest;
     totalQuests--;
     answers.clear();
     answers.add(correctAnswer);
@@ -66,11 +64,12 @@ class _TestWordState extends State<TestWord> {
       do {
         randomAnswer =
             combinedListWords[Random.secure().nextInt(combinedListWords.length)]
-                .answer;
+                .quest;
       } while (randomAnswer == correctAnswer || answers.contains(randomAnswer));
       answers.add(randomAnswer);
     }
 
+    // Shuffle the answers array
     answers.shuffle();
   }
 
@@ -78,11 +77,11 @@ class _TestWordState extends State<TestWord> {
     var progressProv = Provider.of<ProgressProvider>(context, listen: false);
 
     setState(() {
+      progressProv.increaseCircleProgress(widget.words[currentIndex].list);
+      progressProv.completeQuestion(widget.words[currentIndex].list);
       isDisabled = true;
-      showCorrectAnswer = true;
+      showCorrectAnswer = true; // Doğru cevabı göster
       if (isCorrect) {
-        progressProv.increaseCircleProgress(widget.words[currentIndex].list);
-        progressProv.completeQuestion(widget.words[currentIndex].list);
         scoreBlanc = scoreBlanc + 10;
         correctAnswersCount++;
       }
@@ -101,21 +100,24 @@ class _TestWordState extends State<TestWord> {
 
       Future.delayed(const Duration(seconds: 1), () {
         setState(() {
-          if (currentIndex < 14) {
+          if (currentIndex < 9) {
             currentIndex++;
-            selectedAnswer = null;
-            isDisabled = false;
-            showCorrectAnswer = false;
-            selectedAnswerText = null;
-            generateAnswers();
+            selectedAnswer =
+                null; // Clear selected answer for the next question
+            isDisabled = false; // Re-enable the buttons
+            showCorrectAnswer =
+                false; // Doğru cevabı gösterme durumu sıfırlanıyor
+            selectedAnswerText = null; // Seçilen cevabı sıfırlıyoruz
+            generateAnswers(); // Generate new answers with a new correct answer
           } else {
+            // Navigate to the result screen
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => TestResult(
                   totalScore: scoreBlanc,
                   correctAnswer: correctAnswersCount,
-                  totalQuestions: 15,
+                  totalQuestions: 10,
                   answeredQuestions: answeredQuestionsTest,
                 ),
               ),
@@ -130,7 +132,7 @@ class _TestWordState extends State<TestWord> {
   Widget build(BuildContext context) {
     ScreenUtil.init(
       context,
-      designSize: const Size(375, 812),
+      designSize: const Size(375, 812), // Change to your design size
       minTextAdapt: true,
       splitScreenMode: true,
     );
@@ -138,7 +140,6 @@ class _TestWordState extends State<TestWord> {
     return Scaffold(
       backgroundColor: whites,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             onPressed: () {
@@ -146,7 +147,7 @@ class _TestWordState extends State<TestWord> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const Settings(),
+                  builder: (context) => const BlancSettings(),
                 ),
               );
             },
@@ -161,7 +162,7 @@ class _TestWordState extends State<TestWord> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: 40.h),
+          SizedBox(height: 50.h),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 10.w),
             child: Stack(
@@ -174,12 +175,13 @@ class _TestWordState extends State<TestWord> {
                   child: Center(
                     child: Text(
                       textAlign: TextAlign.center,
-                      combinedListWords[currentIndex].quest,
-                      style: TextStyle(
-                        color: whites,
-                        fontSize: 26.sp,
-                        fontWeight: FontWeight.bold,
+                      _getFormattedQuestion(
+                        combinedListWords[currentIndex].front,
                       ),
+                      style: TextStyle(
+                          color: whites,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -194,26 +196,27 @@ class _TestWordState extends State<TestWord> {
               ],
             ),
           ),
-          SizedBox(height: 16.h),
           Wrap(
-            spacing: 6.w,
-            runSpacing: 3.h,
+            spacing: 8.w,
+            runSpacing: 4.h,
             children: List.generate(
               answers.length,
               (index) => AnswerButton(
                 answer: answers[index],
                 isCorrect:
-                    answers[index] == combinedListWords[currentIndex].answer,
+                    answers[index] == combinedListWords[currentIndex].quest,
                 onTap: (isCorrect) {
                   setState(() {
                     selectedAnswer = answers[index];
-                    selectedAnswerText = answers[index];
+                    selectedAnswerText =
+                        answers[index]; // Seçilen cevabın text'ini ayarla
                   });
                   checkAnswer(isCorrect);
                 },
                 isDisabled: isDisabled,
                 showCorrectAnswer: showCorrectAnswer,
-                isSelected: selectedAnswerText == answers[index],
+                isSelected: selectedAnswerText ==
+                    answers[index], // Hangi butona tıklandığını kontrol et
               ),
             ),
           ),
@@ -225,7 +228,7 @@ class _TestWordState extends State<TestWord> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '15/',
+                      text: '10/',
                       style: TextStyle(
                         color: hardgreen,
                         fontSize: 17.sp,
@@ -250,9 +253,13 @@ class _TestWordState extends State<TestWord> {
             indent: 165.w,
             endIndent: 156.w,
             thickness: 4.h,
-          ),
+          )
         ],
       ),
     );
+  }
+
+  String _getFormattedQuestion(String front) {
+    return front.replaceAll(combinedListWords[currentIndex].quest, '......');
   }
 }

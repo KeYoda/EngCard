@@ -87,6 +87,7 @@ class WordProvider5 extends ChangeNotifier {
       if (index == wordsListFive.length) {
         // Silinen öğe son öğeyse
         lastIndex--;
+        saveData5();
       }
       if (wordsListFive.isEmpty) {
         Navigator.pop(context);
@@ -176,7 +177,7 @@ class WordProvider5 extends ChangeNotifier {
         back: "Bu sebepten dolayı, yaklaşımımızı değiştirmemiz gerekiyor.",
         list: 'C1',
         answer: 'bu sebepten',
-        quest: 'accordingly'),
+        quest: 'Accordingly'),
     Words5(
         front:
             "The police investigation revealed a series of accusations of corruption.",
@@ -218,9 +219,10 @@ class WordProvider5 extends ChangeNotifier {
         answer: 'şiddetli',
         quest: 'acute'),
     Words5(
-        front: "Many species are struggling to adapt to the changing climate.",
+        front:
+            "Daily life with aniridia requires constant adaptation with the environment.",
         back:
-            "Birçok tür, değişen iklime adaptasyon sağlamak için mücadele ediyor.",
+            "Aniridia ile günlük yaşam, çevreye sürekli uyum sağlamayı gerektirir.",
         list: 'C1',
         answer: 'adaptasyon',
         quest: 'adaptation'),
@@ -314,8 +316,10 @@ class WordProvider5 extends ChangeNotifier {
         answer: 'akıbet',
         quest: 'aftermath'),
     Words5(
-        front: "The child's aggressive behavior was a concern for his parents.",
-        back: "Çocuğun saldırganlığı, ebeveynleri için bir endişe kaynağıydı.",
+        front:
+            "During such moments the child is in extreme aggression and frustration.",
+        back:
+            "Bu gibi anlarda çocuk aşırı saldırganlık ve hayal kırıklığı içindedir.",
         list: 'C1',
         answer: 'saldırganlık',
         quest: 'aggression'),
@@ -406,11 +410,10 @@ class WordProvider5 extends ChangeNotifier {
         answer: 'izin',
         quest: 'allowance'),
     Words5(
-        front: "The United States and France are long-standing allies.",
-        back:
-            "Amerika Birleşik Devletleri ve Fransa uzun süredir müttefik ülkelerdir.",
+        front: "Tom is my ally at the company. ",
+        back: "Tom şirkette benim dostumdur.",
         list: 'C1',
-        answer: 'müttefik ülke',
+        answer: 'müttefik, dost',
         quest: 'ally'),
     Words5(
         front:
@@ -649,10 +652,10 @@ class WordProvider5 extends ChangeNotifier {
         answer: 'elde etmek',
         quest: 'attain'),
     Words5(
-        front: "The lawyer represented her client in court.",
-        back: "Avukat, müvekkilini mahkemede temsil etti.",
+        front: "John has hired an attorney to handle his divorce proceedings.",
+        back: "John, boşanma sürecini yönetmesi için bir avukat tuttu.",
         list: 'C1',
-        answer: 'dava vekili',
+        answer: 'avukat',
         quest: 'attorney'),
     Words5(
         front: "He attributed his success to hard work and perseverance.",
@@ -857,10 +860,11 @@ class WordProvider5 extends ChangeNotifier {
         answer: 'ihanet etmek',
         quest: 'betray'),
     Words5(
-        front: "Her wrists were bound with rope to prevent her from escaping.",
-        back: "Kaçmasını önlemek için bilekleri ip ile bağlandı.",
+        front:
+            "Please bind together all the magazines and newspapers with some string.",
+        back: "Lütfen tüm dergi ve gazeteleri bir iple birbirine bağlayın.",
         list: 'C1',
-        answer: 'ciltlemek',
+        answer: 'bağlamak',
         quest: 'bind'),
     Words5(
         front:
@@ -955,9 +959,8 @@ class WordProvider5 extends ChangeNotifier {
         answer: 'sektirmek',
         quest: 'bounce'),
     Words5(
-        front:
-            "The new agreement established clear boundaries between the two countries.",
-        back: "Yeni anlaşma, iki ülke arasındaki net sınırlar belirledi.",
+        front: "The Rhine is the boundary between France and Germany.",
+        back: "Ren nehri Fransa ve Almanya arasındaki sınırdır..",
         list: 'C1',
         answer: 'sınır',
         quest: 'boundary'),
@@ -1011,20 +1014,13 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      front: "He saw a wild animal.",
-      back: "Acımasız bir hayvan gördü.",
+      front: "This was a particularly brutal and cowardly attack",
+      back: "Bu özellikle vahşi ve korkakça bir saldırıydı",
       list: "C1",
       answer: "vahşi",
       quest: "brutal",
     ),
 
-    Words5(
-      front: "He jumped into the water.",
-      back: "Suya atladı.",
-      list: "C1",
-      answer: "sıçramak",
-      quest: "buck",
-    ),
     Words5(
       front: "He needs a good buddy to help him with this task.",
       back: "Bu işte ona yardım edecek iyi bir ahbap gerekiyor.",
@@ -1112,62 +1108,44 @@ class WordProvider5 extends ChangeNotifier {
       answer: "kabiliyet",
       quest: "capability",
     ),
-    Words5(
-      front:
-          "Kapitalizm, özel mülkiyete ve serbest piyasaya dayanan ekonomik sistemdir.",
-      back:
-          "Capitalism is an economic system based on private ownership and free market.",
-      list: "C1",
-      answer: "sermayecilik",
-      quest: "capitalism",
-    ),
 
     Words5(
-      front: "Sermayeci, yatırımlarıyla kâr elde etmeyi amaçlayan kişidir.",
-      back:
-          "A capitalist is a person who invests money with the aim of making a profit.",
-      list: "C1",
-      answer: "sermayeci",
-      quest: "capitalist",
-    ),
-
-    Words5(
-      front: "Gemi, büyük miktarda kargo taşıyordu.",
-      back: "The ship was carrying a large amount of cargo.",
+      back: "Gemi, büyük miktarda kargo taşıyordu.",
+      front: "The ship was carrying a large amount of cargo.",
       list: "C1",
       answer: "kargo",
       quest: "cargo",
     ),
 
     Words5(
-      front: "Malların taşınması için lojistik şirketiyle anlaştı.",
-      back: "He contracted a logistics company for the carriage of goods.",
+      back: "Malların taşınması için lojistik şirketiyle anlaştı.",
+      front: "He contracted a logistics company for the carriage of goods.",
       list: "C1",
       answer: "taşımacılık",
       quest: "carriage",
     ),
 
     Words5(
-      front: "Heykeltraş, mermeri dikkatlice oydu.",
-      back: "The sculptor carefully carved the marble.",
+      back: "Heykeltraş, mermeri dikkatlice oydu.",
+      front: "The sculptor carefully carved the marble.",
       list: "C1",
       answer: "oymak",
       quest: "carve",
     ),
 
     Words5(
-      front: "Kazanmayı seven arkadaşıyla birlikte casinoya gitti.",
-      back: "He went to the casino with his friend who loves to gamble.",
+      back: "Kazanmayı seven arkadaşıyla birlikte casinoya gitti.",
+      front: "He went to the casino with his friend who loves to gamble.",
       list: "C1",
       answer: "kumarhane",
       quest: "casino",
     ),
 
     Words5(
-      front: "Kazada ölenlerin sayısı oldukça yüksekti.",
-      back: "The number of casualties in the accident was very high.",
+      back: "Bu gece acil serviste çalışan nöbetçi doktor John.",
+      front: "The on-call doctor working in casualty tonight is John.",
       list: "C1",
-      answer: "kazazede",
+      answer: "acil servis",
       quest: "casualty",
     ),
 
@@ -1180,40 +1158,42 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      front: "Parti için yiyecek ve içecek temin etti.",
-      back: "He catered food and drinks for the party.",
+      back: "Parti için yiyecek ve içecek temin etti.",
+      front: "He catered food and drinks for the party.",
       list: "C1",
       answer: "temin etmek",
       quest: "cater",
     ),
 
     Words5(
-      front: "Çiftlikteki sığırlar sağlıklı görünüyordu.",
-      back: "The cattle on the farm looked healthy.",
+      back: "Çiftlikteki sığırlar sağlıklı görünüyordu.",
+      front: "The cattle on the farm looked healthy.",
       list: "C1",
       answer: "sığır",
       quest: "cattle",
     ),
 
     Words5(
-      front: "Geçerken yoldan geçen arabalara dikkat etti.",
-      back: "He paid attention to the cars passing by on the road.",
+      back:
+          "Bir okula yakın olduğundan bu bölgede dikkatli araç kullanmalısınız.",
+      front:
+          "You should drive with caution in this area because it is close to a school.",
       list: "C1",
       answer: "dikkat",
       quest: "caution",
     ),
 
     Words5(
-      front: "Tedbirli bir insan olduğu için her zaman bir planı vardı.",
-      back: "As a cautious person, he always had a plan.",
+      back: "Tedbirli bir insan olduğu için her zaman bir planı vardı.",
+      front: "As a cautious person, he always had a plan.",
       list: "C1",
       answer: "tedbirli",
       quest: "cautious",
     ),
 
     Words5(
-      front: "Artık şikayetleri dinlemekten vazgeçti.",
-      back: "He finally ceased listening to the complaints.",
+      back: "Artık şikayetleri dinlemekten vazgeçti.",
+      front: "He finally ceased listening to the complaints.",
       list: "C1",
       answer: "son vermek",
       quest: "cease",
@@ -1261,64 +1241,56 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      front: "Şirket, yeni buluşu için patent vermek için başvuruda bulundu.",
-      back: "The company applied for a charter to patent their new invention.",
+      back: "Şirket, yeni buluşu için patent vermek için başvuruda bulundu.",
+      front: "The company applied for a charter to patent their new invention.",
       list: "C1",
       answer: "patent vermek",
       quest: "charter",
     ),
 
     Words5(
-      front: "Hastalığı kronikti ve tedavisi zordu.",
-      back: "His illness was chronic and difficult to treat.",
+      back: "Hastalığı kronikti ve tedavisi zordu.",
+      front: "His illness was chronic and difficult to treat.",
       list: "C1",
       answer: "kronik",
       quest: "chronic",
     ),
 
     Words5(
-      front: "Büyük bir bilgi yığını ile karşı karşıya kaldı.",
-      back: "He was faced with a huge chunk of information.",
+      back: "Büyük bir bilgi yığını ile karşı karşıya kaldı.",
+      front: "He was faced with a huge chunk of information.",
       list: "C1",
       answer: "yığın",
       quest: "chunk",
     ),
 
     Words5(
-      front: "Haberin gazetelerde dolaşması birkaç gün sürdü.",
-      back: "It took a few days for the news to circulate in the newspapers.",
+      back: "Haberin gazetelerde dolaşması birkaç gün sürdü.",
+      front: "It took a few days for the news to circulate in the newspapers.",
       list: "C1",
       answer: "akımını sağlamak",
       quest: "circulate",
     ),
 
     Words5(
-      front: "Derginin geniş bir sürümü vardı.",
-      back: "The magazine had a wide circulation.",
+      back: "Derginin geniş bir sürümü vardı.",
+      front: "The magazine had a wide circulation.",
       list: "C1",
       answer: "sürüm",
       quest: "circulation",
     ),
 
     Words5(
-      front: "Yurttaşlık haklarını korumak önemlidir.",
-      back: "It is important to protect citizenship rights.",
+      back: "Yurttaşlık haklarını korumak önemlidir.",
+      front: "It is important to protect citizenship rights.",
       list: "C1",
       answer: "yurttaşlık",
       quest: "citizenship",
     ),
 
     Words5(
-      front: "Şehrin iyileştirilmesine yönelik civic projeler düzenlendi.",
-      back: "Civic projects were organized for the improvement of the city.",
-      list: "C1",
-      answer: "şehir ile ilgili",
-      quest: "civic",
-    ),
-
-    Words5(
-      front: "Saldırıya siviller de dahil oldu.",
-      back: "The attack also involved civilians.",
+      back: "Saldırıya siviller de dahil oldu.",
+      front: "The attack also involved civilians.",
       list: "C1",
       answer: "sivil",
       quest: "civilian",
@@ -1329,7 +1301,7 @@ class WordProvider5 extends ChangeNotifier {
           "Clarity in the words used in the sentence made the meaning clear.",
       list: "C1",
       answer: "berraklık",
-      quest: "clarity",
+      quest: "Clarity",
     ),
 
     Words5(
@@ -1366,8 +1338,10 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Okullar yaz tatili için kapanacak.",
-      front: "Schools will be closed for summer vacation.",
+      back:
+          "Fabrikanın kapanması kasaba sakinleri için yutulması zor bir haptı.",
+      front:
+          "The closure of the factory was a tough pill to swallow to the town's residents. ",
       list: "C1",
       answer: "kapanma",
       quest: "closure",
@@ -1440,18 +1414,16 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back:
-          "Toplu taşıma araçları genellikle sabah ve akşam saatlerinde kalabalık olur.",
-      front:
-          "Public transportation vehicles are usually crowded in the mornings and evenings.",
+      back: "Bu başarı kolektif bir çabanın sonucudur.",
+      front: "This success was the result of a collective effort. ",
       list: "C1",
-      answer: "toplu",
+      answer: "kolektif",
       quest: "collective",
     ),
 
     Words5(
-      back: "Kazada iki araba çarpışma yaşadı.",
-      front: "Two cars collided in the accident.",
+      front: "The car exploded a few moments after the collision.",
+      back: "Araba çarpışmadan birkaç dakika sonra patladı. ",
       list: "C1",
       answer: "çarpışma",
       quest: "collision",
@@ -1482,9 +1454,8 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Dersin sonunda derse başlamayı teklif etti.",
-      front:
-          "He suggested commencing the lesson at the end of the introduction.",
+      back: "Etkinlik sabah saat tam sekizde başlayacaktır.",
+      front: "The event will commence at exactly eight in the morning.",
       list: "C1",
       answer: "başlatmak",
       quest: "commence",
@@ -1571,8 +1542,8 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Kazaya uğradığı için tazminat talebinde bulundu.",
-      front: "He filed a compensation claim because of the accident.",
+      back: "Bu para kayıp malları telafi edecektir.",
+      front: "The money will compensate the lost goods.",
       list: "C1",
       answer: "telafi etmek",
       quest: "compensate",
@@ -1630,10 +1601,10 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Kurallara riayet etmek önemlidir.",
-      front: "It is important to comply with the rules.",
+      back: "Pastamız orijinal tarife tam olarak uyularak yapılmıştır.",
+      front: "Our cake is made in strict compliance with the original recipe.",
       list: "C1",
-      answer: "riayet",
+      answer: "uyma,uyum",
       quest: "compliance",
     ),
 
@@ -1735,8 +1706,8 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Rahip, günah çıkarmak isteyenlerle görüştü.",
-      front: "The priest met with those who wanted to confess.",
+      back: "Rahip itirafını dinledi.",
+      front: "The priest heard his confession.",
       list: "C1",
       answer: "günah çıkarma",
       quest: "confession",
@@ -1996,7 +1967,7 @@ class WordProvider5 extends ChangeNotifier {
       front: "His words contradict his behavior.",
       list: "C1",
       answer: "tezat",
-      quest: "contradiction",
+      quest: "contradict",
     ),
 
     Words5(
@@ -2079,8 +2050,8 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "IQ seviyesi ile okul başarısı arasında bir ilişki var mı?",
-      front: "Is there a correlation between IQ level and school success?",
+      back: "Romatizma, hareketsiz alışkanlıklar ve zayıflık ile ilişkilidir.",
+      front: "Arthritis is correlated with sedentary habits and weakness.",
       list: "C1",
       answer: "ilişkilendirmek",
       quest: "correlate",
@@ -2097,16 +2068,19 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Sorularınıza mektupla cevap vereceğim.",
-      front: "I will correspond to your questions by letter.",
+      back:
+          "Bu, görüntü dosyasının ne kadar bellek kullandığına karşılık gelir.",
+      front: "This corresponds to how much memory the image file uses",
       list: "C1",
       answer: "tekabül etmek",
       quest: "correspond",
     ),
 
     Words5(
-      back: "Uzun yıllar boyunca mektuplaştık.",
-      front: "We corresponded for many years.",
+      back:
+          "İki yazar arasındaki on yıllık yazışmalar tek bir ciltte toplandı.",
+      front:
+          "Ten years of correspondence between the two authors was collected into a single volume.",
       list: "C1",
       answer: "yazışma",
       quest: "correspondence",
@@ -2118,30 +2092,6 @@ class WordProvider5 extends ChangeNotifier {
       list: "C1",
       answer: "eş",
       quest: "correspondent",
-    ),
-
-    Words5(
-      back: "Bu renk, kıyafetime tam olarak karşılık geliyor.",
-      front: "This color corresponds perfectly to my outfit.",
-      list: "C1",
-      answer: "yerini tutan",
-      quest: "corresponding",
-    ),
-
-    Words5(
-      back: "Yolsuz politikacılar ülkeye zarar veriyor.",
-      front: "Corrupt politicians are harming the country.",
-      list: "C1",
-      answer: "yozlaşmış",
-      quest: "corrupt",
-    ),
-
-    Words5(
-      back: "Yolsuzluk her ülkede önemli bir sorundur.",
-      front: "Corruption is a major problem in every country.",
-      list: "C1",
-      answer: "yolsuzluk",
-      quest: "corruption",
     ),
 
     Words5(
@@ -2198,7 +2148,7 @@ class WordProvider5 extends ChangeNotifier {
       front: "Countless people live in poverty.",
       list: "C1",
       answer: "sayısız",
-      quest: "countless",
+      quest: "Countless",
     ),
 
     Words5(
@@ -2212,18 +2162,18 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Size karşı her zaman kibar davrandı.",
-      front: "He was always courteous to you.",
+      back: "Çabaları için ona teşekkür etme nezaketini gösterdi.",
+      front: "He did have the courtesy to thank her for her efforts.",
       list: "C1",
       answer: "kibarlık",
       quest: "courtesy",
     ),
 
     Words5(
-      back: "El işi ürünler satan bir esnaf.",
-      front: "A shopkeeper who sells handcrafted products.",
+      back: "Eğer değerli bir zanaatınız varsa, her zaman iş bulabilirsiniz.",
+      front: "If you have a valuable craft, you can always find work.",
       list: "C1",
-      answer: "esnaf",
+      answer: "zanaat",
       quest: "craft",
     ),
 
@@ -2350,10 +2300,10 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Hasat mevsimi yaklaşırken çiftçiler baraklara taşındı.",
-      front: "As the harvest season approached, the farmers moved to the dams.",
+      back: "Su baskını barajın taşmasına neden oldu.",
+      front: "Flooding caused the dam to overflow",
       list: "C1",
-      answer: "barak",
+      answer: "baraj",
       quest: "dam",
     ),
 
@@ -2422,9 +2372,9 @@ class WordProvider5 extends ChangeNotifier {
 
     Words5(
       back: "Kitabı en yakın arkadaşına ithaf etti.",
-      front: "He dedicated the book to his closest friend.",
+      front: "I really admire Joe's dedication to his work.",
       list: "C1",
-      answer: "ithaf",
+      answer: "bağlılık,ithaf",
       quest: "dedication",
     ),
 
@@ -2469,8 +2419,8 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Vücuttaki vitamin eksikliği sağlığı olumsuz etkiler.",
-      front: "Vitamin deficiencies in the body negatively affect health.",
+      back: "Doktor bende vitamin eksikliği olduğunu söyledi.",
+      front: "The doctor said I had a vitamin deficiency",
       list: "C1",
       answer: "eksiklik",
       quest: "deficiency",
@@ -2484,10 +2434,12 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Tehditlerine boyun eğmedik ve onu göstere göstere defies ettik.",
-      front: "We did not give in to his threats and defied him openly.",
+      back:
+          "Asker, düşman esirlerini vurma emrine karşı geldiği için hapsedildi.",
+      front:
+          "The soldier was imprisoned for defying an order to shoot the enemy captives.",
       list: "C1",
-      answer: "küçümsemek",
+      answer: "karşı gelmek",
       quest: "defy",
     ),
 
@@ -2525,8 +2477,10 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Suçlamaları reddetti.",
-      front: "He denied the accusations.",
+      back:
+          "Hastalar, tedavinin tek uygun seçenek olduğunu düşünürlerse, reddini talep edebilirler.",
+      front:
+          "Patients can appeal denials if they feel that a treatment was the only appropriate option.",
       list: "C1",
       answer: "reddetme",
       quest: "denial",
@@ -2588,8 +2542,8 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      back: "Bankaya para yatırdı.",
-      front: "He deposited money at the bank.",
+      back: "Bazı ev sahipleri benzer miktarda depozito talep edebilir.",
+      front: "Some landlords may require a deposit of a similar amount.",
       list: "C1",
       answer: "emanet",
       quest: "deposit",
@@ -2669,11 +2623,11 @@ class WordProvider5 extends ChangeNotifier {
 
     Words5(
       back:
-          "Hırsızın suçu, güvenlik kamerası görüntüleri sayesinde tespit edildi.",
+          "Erken teşhis yöntemleri birçok kanserle mücadelede çok değerli hale gelmiştir.",
       front:
-          "The thief's crime was detected thanks to security camera footage.",
+          "Early detection methods have become invaluable in the fight against many cancers.",
       list: "C1",
-      answer: "buluş",
+      answer: "tespit, buluş",
       quest: "detection",
     ),
 
@@ -2686,10 +2640,11 @@ class WordProvider5 extends ChangeNotifier {
       quest: "detention",
     ),
     Words5(
-      front: "The health of the patient is deteriorating.",
-      back: "Hastanın sağlık durumu kötüleşiyor.",
+      front:
+          "The weather started to deteriorate as soon as we got out of the car.",
+      back: "Arabadan iner inmez hava kötüleşmeye başladı.",
       list: "C1",
-      answer: "fenalaşmak",
+      answer: "kötüleşmesi",
       quest: "deteriorate",
     ),
 
@@ -2710,10 +2665,10 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      front: "He invented a new method to solve the complex problem.",
-      back: "Karmaşık sorunu çözmek için yeni bir yöntem icat etti.",
+      front: "People devised shelters in order to protect themselves.",
+      back: "İnsanlar kendilerini korumak için sığınaklar tasarladılar.",
       list: "C1",
-      answer: "icat etmek",
+      answer: "tasarlamak,bulmak",
       quest: "devise",
     ),
 
@@ -2990,16 +2945,17 @@ class WordProvider5 extends ChangeNotifier {
       quest: "documentation",
     ),
     Words5(
-      front: "They are experts in the field of artificial intelligence.",
-      back: "Yapay zeka alanında uzmanlar.",
+      front:
+          "Are you still looking for some kind of job in the political domain?",
+      back: "Hâlâ siyasi alanda bir iş mi arıyorsunuz?",
       list: "C1",
       answer: "bilgi alanı",
       quest: "domain",
     ),
 
     Words5(
-      front: "The lion is the dominant predator in the savanna.",
-      back: "Aslan, savanda baskın avcıdır.",
+      front: "Hollywood exerts dominance over the film industry",
+      back: "Hollywood film endüstrisi üzerinde hakimiyet sergiliyor.",
       list: "C1",
       answer: "hakimiyet",
       quest: "dominance",
@@ -3205,10 +3161,12 @@ class WordProvider5 extends ChangeNotifier {
       quest: "elite",
     ),
     Words5(
-      front: "The passengers boarded the ship for their journey.",
-      back: "Yolcular yolculukları için gemiye bindiler.",
+      front:
+          "Instead of settling down, he decided to embark on a journey to see the world.",
+      back:
+          "Yerleşmek yerine, dünyayı görmek için bir yolculuğa çıkmaya karar verdi.",
       list: "C1",
-      answer: "gemiye bindirmek",
+      answer: "çıkmak,gemiye bindirmek",
       quest: "embark",
     ),
 
@@ -3239,8 +3197,8 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      front: "The spirit of freedom is embodied in the national anthem.",
-      back: "Özgürlük ruhu milli marşta somutlaştırılıyor.",
+      front: "Words embody thoughts and feelings.",
+      back: "Sözcükler, düşünceleri ve duyguları somutlaştırır.",
       list: "C1",
       answer: "somutlaştırmak",
       quest: "embody",
@@ -3272,10 +3230,12 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      front: "The government enacted a new law to protect the environment.",
-      back: "Hükümet, çevreyi korumak için yeni bir yasa çıkardı.",
+      front:
+          "We need to enact laws that will make it more difficult for companies to avoid paying taxes.",
+      back:
+          "Şirketlerin vergi ödemekten kaçınmasını daha da zorlaştıracak yasalar çıkarmamız gerekiyor.",
       list: "C1",
-      answer: "sahnelemek",
+      answer: "yasalaştırmak",
       quest: "enact",
     ),
 
@@ -3330,10 +3290,10 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      front: "You need to sign the back of the check for it to be cashed.",
-      back: "Çeki bozdurmak için arkasını imzalamanız gerekiyor.",
+      front: "You can't really get a better endorsement than that. ",
+      back: "Bundan daha iyi bir onay alamazsınız.",
       list: "C1",
-      answer: "ciro",
+      answer: "onay",
       quest: "endorsement",
     ),
 
@@ -3499,8 +3459,9 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      front: "The university was established in 1863.",
-      back: "Üniversite 1863 yılında kuruldu.",
+      front:
+          "The establishment of democracy can be traced back to ancient Greece.",
+      back: "Demokrasinin kuruluşu antik Yunan'a kadar geri götürülebilir.",
       list: "C1",
       answer: "kuruluş",
       quest: "establishment",
@@ -3528,13 +3489,6 @@ class WordProvider5 extends ChangeNotifier {
       list: "C1",
       answer: "anımsatmak",
       quest: "evoke",
-    ),
-    Words5(
-      front: "The theory of evolution explains how species change over time.",
-      back: "Evrim teorisi, türlerin zamanla nasıl değiştiğini açıklar.",
-      list: "C1",
-      answer: "evrimsel",
-      quest: "evolutionary",
     ),
 
     Words5(
@@ -3570,8 +3524,10 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      front: "He was excluded from the team because of his poor sportsmanship.",
-      back: "Düşük sporcu ahlakı nedeniyle takımdan çıkarıldı.",
+      front:
+          "He tends to talk about himself to the exclusion of all other subjects.",
+      back:
+          "Diğer tüm konuları dışlayarak kendisi hakkında konuşma eğilimindedir.",
       list: "C1",
       answer: "ret",
       quest: "exclusion",
@@ -3592,13 +3548,12 @@ class WordProvider5 extends ChangeNotifier {
       answer: "özellikle",
       quest: "exclusively",
     ),
-
     Words5(
-      front: "The judge ordered the execution of the criminal.",
-      back: "Yargıç suçlunun infazını emretti.",
+      front: "The new product is designed exclusively for gamers.",
+      back: "Yeni ürün, özellikle oyuncular için tasarlanmıştır.",
       list: "C1",
-      answer: "infaz etmek",
-      quest: "execute",
+      answer: "özellikle",
+      quest: "exclusively",
     ),
 
     Words5(
@@ -3702,7 +3657,7 @@ class WordProvider5 extends ChangeNotifier {
           "Aşırılıkçı gruplar, hedeflerine ulaşmak için çoğu zaman şiddete başvururlar.",
       list: "C1",
       answer: "aşırılık yapmak",
-      quest: "extremist",
+      quest: "Extremist",
     ),
 
     Words5(
@@ -3856,16 +3811,17 @@ class WordProvider5 extends ChangeNotifier {
       quest: "flaw",
     ),
     Words5(
-      front: "The cracked vase was beyond repair.",
-      back: "Çatlamış vazo tamir edilemeyecek durumdaydı.",
+      front: "It's clear that the methodology the researchers used is flawed.",
+      back: "Araştırmacıların kullandığı metodolojinin kusurlu olduğu açıktır.",
       list: "C1",
-      answer: "çatlak",
+      answer: "kusurlu, hatalı",
       quest: "flawed",
     ),
 
     Words5(
-      front: "The frightened animals fled into the forest.",
-      back: "Korkmuş hayvanlar kaçarak ormana sığındılar.",
+      front: "Andrew Johnson had to flee his home to save his life.",
+      back:
+          "Andrew Johnson hayatını kurtarmak için evinden kaçmak zorunda kaldı.",
       list: "C1",
       answer: "kaçmak",
       quest: "flee",
@@ -3972,7 +3928,7 @@ class WordProvider5 extends ChangeNotifier {
       back: "Açıkçası, bu planın işe yarayacağını sanmıyorum.",
       list: "C1",
       answer: "açıkça",
-      quest: "frankly",
+      quest: "Frankly",
     ),
 
     Words5(
@@ -4045,8 +4001,8 @@ class WordProvider5 extends ChangeNotifier {
     ),
 
     Words5(
-      front: "She caught him gazing out the window, lost in thought.",
-      back: "Onu dalgın dalgın pencereden dışarı bakarken gözüne takıldı.",
+      front: "He turned a cold, reptilian gaze on me.",
+      back: "Soğuk, sürüngen bakışlarını bana çevirdi.",
       list: "C1",
       answer: "gözünü dikmek",
       quest: "gaze",
@@ -4148,7 +4104,7 @@ class WordProvider5 extends ChangeNotifier {
       back: "Yerçekimi, bizi yerde tutan kuvvettir.",
       list: "C1",
       answer: "yerçekimi",
-      quest: "gravity",
+      quest: "Gravity",
     ),
 
     Words5(
@@ -4252,13 +4208,6 @@ class WordProvider5 extends ChangeNotifier {
       list: "C1",
       answer: "kullanışlı",
       quest: "handy",
-    ),
-    Words5(
-      front: "He was constantly harassed by his coworkers.",
-      back: "Mesai arkadaşları tarafından sürekli tacize uğradı.",
-      list: "C1",
-      answer: "taciz",
-      quest: "harassment",
     ),
     Words5(
       front: "The computer consists of both software and hardware.",
@@ -4436,14 +4385,6 @@ class WordProvider5 extends ChangeNotifier {
       quest: "ideological",
     ),
     Words5(
-      front: "He didn't know the answer because of his sheer idiocy.",
-      back: "Saf salaklığı yüzünden cevabı bilmiyordu.",
-      list: "C1",
-      answer:
-          "salak", // "Idiot" can also be translated as "aptal" depending on the context.
-      quest: "idiot",
-    ),
-    Words5(
       front: "His ignorance of the law led him into trouble.",
       back: "Hukuku bilgisizliği onu başını derde soktu.",
       list: "C1",
@@ -4597,8 +4538,8 @@ class WordProvider5 extends ChangeNotifier {
       quest: "infamous",
     ),
     Words5(
-      front: "The baby cried incessantly throughout the night.",
-      back: "Bebek gece boyunca durmadan ağladı.",
+      front: "A group of infants are playing in the park.",
+      back: "Bir grup bebek parkta oynuyor.",
       list: "C1",
       answer: "bebek",
       quest: "infant",
@@ -4650,11 +4591,11 @@ class WordProvider5 extends ChangeNotifier {
       quest: "initiate",
     ),
     Words5(
-      front: "The doctor injected the medicine into the patient's arm.",
-      back: "Doktor, hastaya ilacı kolundan enjekte etti.",
+      front: "This injection will make you feel better.",
+      back: "Bu iğne kendinizi daha iyi hissetmenizi sağlayacaktır.",
       list: "C1",
       answer:
-          "püskürtme", // "Injection" is more about the act of injecting, "püskürtme" emphasizes squirting or spraying. A better translation is "enjeksiyon".
+          "iğne", // "Injection" is more about the act of injecting, "püskürtme" emphasizes squirting or spraying. A better translation is "enjeksiyon".
       quest: "injection",
     ),
     Words5(
@@ -4725,9 +4666,8 @@ class WordProvider5 extends ChangeNotifier {
     ),
     // Keep the existing "yetersiz" for "insufficient"
     Words5(
-      front:
-          "Her explanation was insufficient and did not answer the question.",
-      back: "Açıklaması yetersizdi ve soruyu cevaplamıyordu.",
+      front: "He screamed an insult at the referee.",
+      back: "Hakeme bağırarak hakaret etti.",
       list: "C1",
       answer:
           "hakaret etmek", // "Insult" means to deliberately say something rude or hurtful. A better translation is "hakaret" or "küfretmek".
@@ -4774,10 +4714,10 @@ class WordProvider5 extends ChangeNotifier {
     ),
     Words5(
       front:
-          "The conflict intensified as both sides increased their military presence.",
-      back: "Her iki taraf da askeri varlığını artırdıkça çatışma yoğunlaştı.",
+          "As our economy grows stronger, the war for talent will intensify.",
+      back: "Ekonomimiz güçlendikçe yetenek savaşı da şiddetlenecektir.",
       list: "C1",
-      answer: "yoğunlaştırmak",
+      answer: "şiddetlenmek",
       quest: "intensify",
     ),
     Words5(
@@ -4916,7 +4856,7 @@ class WordProvider5 extends ChangeNotifier {
       back: "İşin garip yanı, itfaiye istasyonu yandı.",
       list: "C1",
       answer: "işin garip yanı [zf]",
-      quest: "ironically",
+      quest: "Ironically",
     ),
     Words5(
       front:
@@ -5010,8 +4950,8 @@ class WordProvider5 extends ChangeNotifier {
             'landmark' // "Sınır işareti" means "boundary marker". A better translation for "landmark" is "simge" or "anıt".
         ),
     Words5(
-      front: "He placed the laptop on his lap and started working.",
-      back: "Dizüstü bilgisayarı kucağına koydu ve çalışmaya başladı.",
+      front: "Tom fell off his mother's lap.",
+      back: "Tom annesinin kucağından düştü.",
       list: "C1",
       answer: "kucak",
       quest: "lap",
@@ -5147,7 +5087,7 @@ class WordProvider5 extends ChangeNotifier {
       back: "Özgürlük, temel insan haklarından biridir.",
       list: "C1",
       answer: "özgürlük",
-      quest: "liberty",
+      quest: "Liberty",
     ),
     Words5(
       front: "You need a driver's license to operate a car.",
@@ -5169,13 +5109,6 @@ class WordProvider5 extends ChangeNotifier {
       list: "C1",
       answer: "olası olma",
       quest: "likelihood",
-    ),
-    Words5(
-      front: "He broke his leg in a car accident.",
-      back: "Trafik kazasında bacağını kırdı.",
-      list: "C1",
-      answer: "bacak",
-      quest: "limb",
     ),
     Words5(
       front: "There is a linear relationship between exercise and weight loss.",
@@ -5514,8 +5447,8 @@ class WordProvider5 extends ChangeNotifier {
       quest: "merely",
     ),
     Words5(
-      front: "The two companies are merging to create a larger corporation.",
-      back: "Bu iki şirket daha büyük bir şirket oluşturmak için birleşiyor.",
+      front: "Their companies are planning to merge in the New Year.",
+      back: "Şirketleri yeni yılda birleşmeyi planlıyor.",
       list: "C1",
       answer: "birleşmek",
       quest: "merge",
@@ -5587,7 +5520,7 @@ class WordProvider5 extends ChangeNotifier {
           "Milli Eğitim Bakanlığı, ulusal müfredatı geliştirmekten sorumludur.",
       list: "C1",
       answer: "bakanlık",
-      quest: "ministry",
+      quest: "Ministry",
     ),
     Words5(
       front: "Take a five-minute break to rest your eyes.",
@@ -5741,11 +5674,11 @@ class WordProvider5 extends ChangeNotifier {
       quest: "neglect",
     ),
     Words5(
-      front: "We live in a quiet neighborhood with friendly neighbors.",
-      back: "Sessiz bir mahallede, cana yakın komşularla yaşıyoruz.",
+      front: "The neighbouring countries decided to sign a peace treaty.",
+      back: "Komşu ülkeler bir barış antlaşması imzalamaya karar verdi.",
       list: "C1",
       answer:
-          "bitişik", // "Bitişik" means "adjacent" or "attached". A better translation for "neighbouring" is "komşu".
+          "bitişik, komşu", // "Bitişik" means "adjacent" or "attached". A better translation for "neighbouring" is "komşu".
       quest: "neighbouring",
     ),
     Words5(
@@ -5962,8 +5895,9 @@ class WordProvider5 extends ChangeNotifier {
     ),
     Words5(
       front:
-          "Despite the challenges, she remained optimistic about the future.",
-      back: "Zorluklara rağmen, gelecek hakkında iyimserlik sürdürdü.",
+          "In recent months we have seen growing optimism and confidence about Europe's future.",
+      back:
+          "Son aylarda, Avrupa'nın geleceği hakkında artan bir iyimserlik ve güven gördük.",
       list: "C1",
       answer: "iyimserlik",
       quest: "optimism",
@@ -6090,14 +6024,13 @@ class WordProvider5 extends ChangeNotifier {
       back: "Bu film için ebeveyn rehberliği önerilir.",
       list: "C1",
       answer: "ebeveyne ait",
-      quest: "parental",
+      quest: "Parental",
     ),
     Words5(
-      front: "The judge tried to remain impartial during the trial.",
-      back: "Hakim dava sırasında tarafsız kalmaya çalıştı.",
+      front: "The police got a partial description of the suspect.",
+      back: "Polis şüphelinin kısmi bir eşkalini aldı.",
       list: "C1",
-      answer:
-          "taraflı", // "Taraflı" means "biased". A better translation for "partial" is "tarafsız olmayan".
+      answer: "kısmi,taraflı",
       quest: "partial",
     ),
     Words5(
@@ -6247,7 +6180,7 @@ class WordProvider5 extends ChangeNotifier {
       back: "Korsanlar, hazine için gemilere saldıran denizci soygunculardı.",
       list: "C1",
       answer: "korsan",
-      quest: "pirate",
+      quest: "Pirate",
     ),
     Words5(
       front: "He fell into a deep pit and had to be rescued.",
@@ -6376,10 +6309,12 @@ class WordProvider5 extends ChangeNotifier {
       quest: "precedent",
     ),
     Words5(
-      front: "The function requires several parameters to work correctly.",
-      back: "Fonksiyonun doğru çalışması için birkaç parametre gerekir.",
+      front:
+          "The production of these parts requires machines with a high level of precision.",
+      back:
+          "Bu parçaların üretimi için yüksek düzeyde hassasiyete sahip makineler gerekir.",
       list: "C1",
-      answer: "parametre", // This one was already correct
+      answer: "hassasiyet", // This one was already correct
       quest: "precision",
     ),
 
@@ -6473,7 +6408,7 @@ class WordProvider5 extends ChangeNotifier {
       back: "Şu anda yeni bir proje üzerinde çalışıyorum.",
       list: "C1",
       answer: "şimdi",
-      quest: "presently",
+      quest: "Presently",
     ),
     Words5(
       front:
@@ -6520,8 +6455,8 @@ class WordProvider5 extends ChangeNotifier {
       front: "Presumably, they will arrive on time for the meeting.",
       back: "Muhtemelen toplantıya zamanında gelecekler.",
       list: "C1",
-      answer: "galiba",
-      quest: "presumably",
+      answer: "galiba, muhtemelen",
+      quest: "Presumably",
     ),
     Words5(
       front: "I presume you already know the answer to this question.",
@@ -6803,10 +6738,8 @@ class WordProvider5 extends ChangeNotifier {
       quest: "raid",
     ),
     Words5(
-      front:
-          "Thousands of people rallied in the streets to protest the government's policies.",
-      back:
-          "Hükümetin politikalarını protesto etmek için binlerce insan sokaklara toplandı.",
+      front: "The politician asked his supporters to rally to the cause.",
+      back: "Siyasetçi destekçilerinden davaya destek vermelerini istedi.",
       list: "C1",
       answer: "toplanmak",
       quest: "rally",
@@ -6849,15 +6782,15 @@ class WordProvider5 extends ChangeNotifier {
       quest: "realization",
     ),
     Words5(
-      front: "The kingdom is ruled by a wise and just king.",
-      back: "Krallık, adil ve bilge bir kral tarafından yönetiliyor.",
+      front: "The king's realm was terrorized by a dragon",
+      back: " Kralın krallığı bir ejderha tarafından terörize edildi.",
       list: "C1",
       answer: "krallık",
       quest: "realm",
     ),
     Words5(
-      front: "Please sit at the back of the bus.",
-      back: "Lütfen otobüsün arkasına oturun.",
+      front: "All deliveries should be taken to the rear of the building.",
+      back: "Tüm teslimatlar binanın arka tarafına yapılmalıdır.",
       list: "C1",
       answer: "arka",
       quest: "rear",
@@ -6956,7 +6889,7 @@ class WordProvider5 extends ChangeNotifier {
       back: "Havaya aldırmadan, kamp gezisine çıkacaklar.",
       list: "C1",
       answer: "aldırışsız",
-      quest: "regardless",
+      quest: "Regardless",
     ),
     Words5(
       front: "The company is subject to a number of regulatory requirements.",
@@ -7071,8 +7004,8 @@ class WordProvider5 extends ChangeNotifier {
       quest: "rental",
     ),
     Words5(
-      front: "The faulty product was replaced with a new one under warranty.",
-      back: "Hatalı ürün, garanti kapsamında yenisiyle değiştirildi.",
+      front: "Finding a replacement as good as her will not be easy.",
+      back: "Onun yerine yeni birini bulmak kolay olmayacak.",
       list: "C1",
       answer: "yenisiyle değiştirme",
       quest: "replacement",
@@ -7082,7 +7015,7 @@ class WordProvider5 extends ChangeNotifier {
       back: "Söylentilere göre, cumhurbaşkanı önümüzdeki hafta istifa edecek.",
       list: "C1",
       answer: "söylentilere göre",
-      quest: "reportedly",
+      quest: "Reportedly",
     ),
     Words5(
       front:
@@ -7319,10 +7252,10 @@ class WordProvider5 extends ChangeNotifier {
       quest: "rotation",
     ),
     Words5(
-      front: "The judge drew a blue line with a ruler to mark the boundary.",
-      back: "Hakim, sınırı işaretlemek için cetvelle mavi bir çizgi çekti.",
+      front: "The new leaders expatriated the ruling family.",
+      back: "Yeni liderler yönetici aileyi sınır dışı etti.",
       list: "C1",
-      answer: "cetvelle çizmek",
+      answer: "yönetim, karar",
       quest: "ruling",
     ),
     Words5(
@@ -7379,7 +7312,7 @@ class WordProvider5 extends ChangeNotifier {
       quest: "scattered",
     ),
     Words5(
-      front: "He was skeptical of the claims made by the salesperson.",
+      front: "He was sceptical of the claims made by the salesperson.",
       back: "Satış görevlisinin yaptığı iddialara şüpheyle yaklaştı.",
       list: "C1",
       answer: "kuşkucu",
@@ -7418,8 +7351,9 @@ class WordProvider5 extends ChangeNotifier {
     ),
     Words5(
       front:
-          "The situation seemed calm on the surface, but tensions were high beneath it.",
-      back: "Görünürde durum sakince görünse de, altında gerginlik yüksekti.",
+          "He remains confident and seemingly untroubled by his recent problems.",
+      back:
+          "Kendinden emin ve son zamanlarda yaşadığı sorunlardan etkilenmemiş görünüyor.",
       list: "C1",
       answer: "görünürde",
       quest: "seemingly",
@@ -7502,12 +7436,11 @@ class WordProvider5 extends ChangeNotifier {
       quest: "settlement",
     ),
     Words5(
-      front: "How long does it take to set up the new printer?",
-      back: "Yeni yazıcıyı kurmak ne kadar sürer?",
+      front: "We need to set up the meeting room before the clients arrive.",
+      back: "Müşteriler gelmeden önce toplantı odasını hazırlamamız gerekiyor.",
       list: "C1",
-      answer:
-          "kurmak", // "Set-up" can be translated as "kurmak" or "hazırlamak" depending on the context.
-      quest: "set-up",
+      answer: "kurmak, hazırlamak",
+      quest: "set up",
     ),
     Words5(
       front: "He is a major shareholder in the company.",
@@ -7553,8 +7486,9 @@ class WordProvider5 extends ChangeNotifier {
       quest: "shoot",
     ),
     Words5(
-      front: "The sweater shrunk in the wash, so I can't wear it anymore.",
-      back: "Kazak yıkandığında küçüldü, bu yüzden artık giyemiyorum.",
+      front: "Cotton clothes can easily shrink when machine washed and dried.",
+      back:
+          "Pamuklu giysiler makinede yıkanıp kurutulduğunda kolayca küçültebilir.",
       list: "C1",
       answer: "küçültmek",
       quest: "shrink",
@@ -7652,13 +7586,7 @@ class WordProvider5 extends ChangeNotifier {
           "düşüş", // "Slash" can be translated as "düşüş" here to convey the idea of a sharp decrease.
       quest: "slash",
     ),
-    Words5(
-      front: "Slavery was finally abolished in the 19th century.",
-      back: "Kölelik nihayet 19. yüzyılda kaldırıldı.",
-      list: "C1",
-      answer: "kölelik",
-      quest: "slavery",
-    ),
+
     Words5(
       front: "He inserted a new SIM card into the slot on his phone.",
       back:
@@ -7775,8 +7703,8 @@ class WordProvider5 extends ChangeNotifier {
       quest: "specimen",
     ),
     Words5(
-      front: "The fireworks display was a spectacular sight to behold.",
-      back: "Havai fişek gösterisi görsel bir şölendi.",
+      front: "The parade is the most exciting spectacle of the festival.",
+      back: "Geçit töreni festivalin en heyecan verici gösterisidir.",
       list: "C1",
       answer:
           "gösteri", // "Spectacle" can be translated as "gösteri" to convey the idea of a public event.
@@ -7797,9 +7725,8 @@ class WordProvider5 extends ChangeNotifier {
       quest: "sphere",
     ),
     Words5(
-      front:
-          "He spun the wheel on the game show and waited to see where it would land.",
-      back: " Oyun programında çarkı çevirdi ve nerede duracağını bekledi.",
+      front: "The patch of mud sent the car into a spin.",
+      back: "Çamur parçası arabayı takla attırdı.",
       list: "C1",
       answer: "döndürmek",
       quest: "spin",
@@ -8015,10 +7942,8 @@ class WordProvider5 extends ChangeNotifier {
       quest: "subscription",
     ),
     Words5(
-      front:
-          "The government provides subsidies to farmers to help them with their crops.",
-      back:
-          "Hükümet, çiftçilere mahsullerine yardımcı olmak için sübvansiyon sağlar.",
+      front: "It may be eligible for a government subsidy.",
+      back: "Devlet sübvansiyonu için uygun olabilir.",
       list: "C1",
       answer: "sübvansiyon",
       quest: "subsidy",
@@ -8203,8 +8128,8 @@ class WordProvider5 extends ChangeNotifier {
       quest: "surge",
     ),
     Words5(
-      front: "He needed surgery to remove his appendix.",
-      back: "Apanditini almak için ameliyata ihtiyacı vardı.",
+      front: "Tom put on a pair of surgical gloves.",
+      back: "Tom bir çift ameliyat eldiveni giydi.",
       list: "C1",
       answer: "ameliyat",
       quest: "surgical",
@@ -8387,7 +8312,7 @@ class WordProvider5 extends ChangeNotifier {
           "Neyse ki, yangın alarmı zamanında devreye girdi ve herkes güvenli bir şekilde tahliye edilebildi.",
       list: "C1",
       answer: "Neyse ki",
-      quest: "thankfully",
+      quest: "Thankfully",
     ),
     Words5(
       front:
@@ -8420,7 +8345,7 @@ class WordProvider5 extends ChangeNotifier {
           "Hedeflerine sıkı çalışarak ve özenle çalışarak ulaştı. Böylelikle, sıkı çalışma ile her şeyin mümkün olduğunu kanıtladı.",
       list: "C1",
       answer: "böylelikle",
-      quest: "thereby",
+      quest: "Thereby",
     ),
     Words5(
       front:
@@ -8522,10 +8447,10 @@ class WordProvider5 extends ChangeNotifier {
       quest: 'toll',
     ),
     Words5(
-      front: "The mountain peak was shrouded in mist.",
-      back: "Dağın tepesi sisle örtülüydü.",
+      front: "I live on the top floor of the building.",
+      back: "Binanın en üst katında oturuyorum.",
       list: "C1",
-      answer: "tepe",
+      answer: "en üst",
       quest: "top",
     ),
     Words5(
@@ -8611,13 +8536,7 @@ class WordProvider5 extends ChangeNotifier {
       answer: "dönüşüm",
       quest: "transformation",
     ),
-    Words5(
-      front: "The cargo ship is transporting goods through the Panama Canal.",
-      back: "Kargo gemisi, Panama Kanalı'ndan transit geçiyor.",
-      list: "C1",
-      answer: "transit, geçiş",
-      quest: "transit",
-    ),
+
     Words5(
       front:
           "The car wouldn't start because there was a problem with the transmission.",
@@ -8790,9 +8709,8 @@ class WordProvider5 extends ChangeNotifier {
     ),
     Words5(
       front:
-          "The company is constantly upgrading its software to improve functionality.",
-      back:
-          "Şirket, işlevselliği artırmak için yazılımını sürekli olarak geliştiriyor.",
+          "I would like to upgrade my ticket from economy to business class.",
+      back: "Biletimi ekonomiden business class'a yükseltmek istiyorum.",
       list: "C1",
       answer: "geliştirmek",
       quest: "upgrade",
@@ -8997,11 +8915,11 @@ class WordProvider5 extends ChangeNotifier {
     ),
     Words5(
       front:
-          "The computer system has several vulnerabilities that hackers could exploit.",
+          "Sharing your vulnerability/ies with someone you trust can deepen your connection.",
       back:
-          "Bilgisayar sisteminin, hackerların faydalanabileceği birkaç güvenlik açığı var.",
+          "Güvendiğiniz biriyle kendi kırılganlıklarınızı paylaşmak bağlantınızı derinleştirebilir.",
       list: "C1",
-      answer: "yaralanabilirlik",
+      answer: "kırılganlık",
       quest: "vulnerability",
     ),
     Words5(
@@ -9029,8 +8947,8 @@ class WordProvider5 extends ChangeNotifier {
       quest: "warehouse",
     ),
     Words5(
-      front: "The world has seen many devastating wars throughout history.",
-      back: "Dünya tarih boyunca birçok yıkıcı savaşa sahne olmuştur.",
+      front: "A regional conflict can erupt into violent warfare.",
+      back: "Bölgesel bir çatışma şiddetli bir savaşa dönüşebilir.",
       list: "C1",
       answer: "savaş",
       quest: "warfare",
@@ -9133,9 +9051,9 @@ class WordProvider5 extends ChangeNotifier {
       quest: "width",
     ),
     Words5(
-      front: "Many people volunteered their time to help clean up the park.",
+      front: "Learning English requires a willingness to study on one's own.",
       back:
-          "Parkın temizlenmesine yardım etmek için birçok kişi gönüllü olarak zaman ayırdı.",
+          "İngilizce öğrenmek, kişinin kendi başına çalışmaya istekli olmasını gerektirir.",
       list: "C1",
       answer: "gönüllülük",
       quest: "willingness",

@@ -1,120 +1,127 @@
-import 'package:eng_card/data/fivewords_data.dart';
-import 'package:eng_card/data/fourwords_data.dart';
-import 'package:eng_card/data/gridview.dart';
-import 'package:eng_card/data/secwords_data.dart';
-import 'package:eng_card/data/thirdwords_data.dart';
-import 'package:eng_card/data/words_data.dart';
+import 'package:eng_card/data/save_words.dart';
 import 'package:eng_card/screens/six_screen.dart';
-import 'package:flip_card/flip_card.dart';
-import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:eng_card/data/favorite_list.dart';
 
-class FavouritePage extends StatefulWidget {
+class FavouritePage extends StatelessWidget {
   const FavouritePage({Key? key}) : super(key: key);
-  @override
-  State<StatefulWidget> createState() {
-    return _FavouriteGrid();
-  }
-}
-
-class _FavouriteGrid extends State<FavouritePage> {
-  List<Words> combinedList = [];
 
   @override
   Widget build(BuildContext context) {
-    combinedList.addAll(wordsList);
-    combinedList.addAll(wordsList2);
-    combinedList.addAll(wordsList3);
-    combinedList.addAll(wordsList4);
-    combinedList.addAll(wordsList5);
-    combinedList.shuffle();
     return Scaffold(
+      backgroundColor: whites,
       appBar: AppBar(
-        backgroundColor: medgreen,
-        title: const Text(
-          'Alıştırma',
-          style: TextStyle(color: Colors.white),
+        backgroundColor: whites,
+        title: Text(
+          'Favori Kelimeler',
+          style: TextStyle(color: hardgreen, fontWeight: FontWeight.bold),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: whites),
         centerTitle: true,
       ),
-      backgroundColor: whites,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500), // Animasyon süresi
-        child: GridView.count(
-          key: ValueKey<int>(combinedList.length),
-          mainAxisSpacing: 6,
-          crossAxisCount: 3,
-          children: List.generate(
-            15,
-            (index) {
-              final Color color = _getColorForLevel(combinedList[index].list);
-              final FlipCardController _flipCardController =
-                  FlipCardController();
-              return Stack(
-                children: [
-                  GestureDetector(
-                    // onDoubleTap: () {
-                    //   setState(() {});
-                    // },
-                    child: FlipCard(
-                      speed: 400,
-                      controller: _flipCardController,
-                      front: Card(
-                        color: color,
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 46),
-                            Text(
-                              combinedList[index].quest,
-                            ),
-                            const SizedBox(height: 30),
-                            Row(
-                              children: [
-                                const SizedBox(width: 96),
-                                Text(
-                                  combinedList[index].list,
-                                  style: TextStyle(
-                                    color: orange,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      back: Card(
-                        color: Colors.black26,
-                        child: Center(
-                          child: Text(combinedList[index].answer),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
+      body: Consumer<FavoriteList>(
+        builder: (context, favLists, child) {
+          return Card(
+            color: hardgreen,
+            child: _FavouriteGrid(favorites: favLists.favorites),
+          );
+        },
       ),
     );
   }
 }
 
-Color _getColorForLevel(String level) {
-  switch (level) {
-    case 'A1':
-      return Colors.blueGrey.shade200;
-    case 'A2':
-      return Colors.yellow.shade200;
-    case 'B1':
-      return Colors.lightBlue.shade100;
-    case 'B2':
-      return Colors.orange.shade200;
-    case 'C1':
-      return Colors.red.shade100;
-    default:
-      return Colors.white; // Varsayılan renk
+class _FavouriteGrid extends StatefulWidget {
+  final List<SavedItem> favorites;
+
+  const _FavouriteGrid({Key? key, required this.favorites}) : super(key: key);
+
+  @override
+  __FavouriteGridState createState() => __FavouriteGridState();
+}
+
+class __FavouriteGridState extends State<_FavouriteGrid> {
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  late List<SavedItem> _currentFavorites;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentFavorites = List.from(widget.favorites);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedList(
+      key: _listKey,
+      initialItemCount: _currentFavorites.length,
+      itemBuilder: (context, index, animation) {
+        final item = _currentFavorites[index];
+        return _buildItem(context, item, index, animation);
+      },
+    );
+  }
+
+  Widget _buildItem(BuildContext context, SavedItem item, int index,
+      Animation<double> animation) {
+    return SizeTransition(
+      sizeFactor: animation,
+      child: Card(
+        margin: const EdgeInsets.all(7),
+        elevation: 4,
+        shadowColor: Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25.0),
+        ),
+        color: whites,
+        child: ListTile(
+          title: Text(
+            '     ${item.question}',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: hardgreen, fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(
+            '      ${item.answer}',
+            style: TextStyle(color: yellow, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          leading: Text(
+            item.lvClass,
+            style: TextStyle(color: hardgreen, fontWeight: FontWeight.bold),
+          ),
+          trailing: IconButton(
+            onPressed: () {
+              _removeItem(context, index);
+            },
+            icon: Icon(
+              Icons.cancel_outlined,
+              color: orange,
+              size: 17,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _removeItem(BuildContext context, int index) {
+    final removedItem = _currentFavorites[index];
+
+    // Remove the item from the AnimatedList first
+    _listKey.currentState?.removeItem(
+      index,
+      (context, animation) =>
+          _buildItem(context, removedItem, index, animation),
+      duration: const Duration(milliseconds: 300),
+    );
+
+    // Then update the state to remove the item from the list
+    setState(() {
+      _currentFavorites.removeAt(index);
+    });
+
+    // Finally, update the provider
+    Provider.of<FavoriteList>(context, listen: false).deleteFavorite(index);
   }
 }

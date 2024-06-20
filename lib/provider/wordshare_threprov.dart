@@ -85,8 +85,8 @@ class WordProvider3 extends ChangeNotifier {
     if (wordsListThre.isNotEmpty) {
       wordsListThre.removeAt(index);
       if (index == wordsListThre.length) {
-        // Silinen öğe son öğeyse
         lastIndex--;
+        saveData3();
       }
       if (wordsListThre.isEmpty) {
         Navigator.pop(context);
@@ -113,7 +113,7 @@ class WordProvider3 extends ChangeNotifier {
       back: "Size bunda yardımcı olabilirim. Kesinlikle!",
       list: 'B1',
       answer: 'kesinlikle',
-      quest: 'absolutely',
+      quest: 'Absolutely',
     ),
     Words3(
       front: "He is pursuing an academic career in history.",
@@ -324,8 +324,8 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'annoying',
     ),
     Words3(
-      front: "I live in a separate apartment from my brother.",
-      back: "Abimden ayrı bir dairede oturuyorum.",
+      front: "He took the table apart before moving it to his new house.",
+      back: "Masayı, parçalara ayrılmış halde yeni evine taşıdı.",
       list: 'B1',
       answer: 'ayrı',
       quest: 'apart',
@@ -506,8 +506,8 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'basic',
     ),
     Words3(
-      front: "My knowledge of English is based on what I learned in school.",
-      back: "İngilizce bilgim okulda öğrendiklerime dayanıyor.",
+      front: "What's the basis for your theory?",
+      back: "Teorinizin temeli nedir?",
       list: 'B1',
       answer: 'temel',
       quest: 'basis',
@@ -542,8 +542,8 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'bee',
     ),
     Words3(
-      front: "Do you believe in ghosts?",
-      back: "Hayaletlere inanır mısın?",
+      front: "He stated his belief that God created us.",
+      back: "Tanrı'nın bizi yarattığı inancını belirtti.",
       list: 'B1',
       answer: 'inanma',
       quest: 'belief',
@@ -585,7 +585,7 @@ class WordProvider3 extends ChangeNotifier {
     ),
     Words3(
       front: "He blocked my way, so I couldn't get past.",
-      back: "Geçemediğim için yoluumu engelledi.",
+      back: "Geçemediğim için yolumu engelledi.",
       list: 'B1',
       answer: 'blok, engellemek',
       quest: 'block',
@@ -599,13 +599,7 @@ class WordProvider3 extends ChangeNotifier {
       answer: 'kurul, heyet',
       quest: 'board',
     ),
-    Words3(
-      front: "The city was bombed during the war.",
-      back: "Şehir savaş sırasında bombalandı.",
-      list: 'B1',
-      answer: 'bombalamak',
-      quest: 'bomb',
-    ),
+
     Words3(
       front: "The country borders France to the north.",
       back: "Ülke, kuzeyde Fransa ile sınır komşusudur.",
@@ -663,8 +657,10 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'bubble',
     ),
     Words3(
-      front: "He bury-ied the treasure chest in the garden.",
-      back: "Hazine sandığını bahçeye gömdü.",
+      front:
+          "You should also not bury batteries that contain hazardous chemicals in a garden or park.",
+      back:
+          "Ayrıca tehlikeli kimyasallar içeren pilleri bahçeye veya parka gömmemelisiniz.",
       list: 'B1',
       answer: 'gömmek',
       quest: 'bury',
@@ -721,11 +717,12 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'careless',
     ),
     Words3(
-      front: "This word can be used in different category-ies.",
+      front:
+          "Bacterial species are broadly divided into two categories for the purpose of science and medicine.",
       back: "Bu kelime farklı kategorilerde kullanılabilir.",
       list: 'B1',
       answer: 'kategori',
-      quest: 'category',
+      quest: 'categories',
     ),
     Words3(
       front: "The paint is peeling off the ceiling.",
@@ -1062,8 +1059,9 @@ class WordProvider3 extends ChangeNotifier {
     ),
     Words3(
       front:
-          "The instructions were so confusing that I didn't know what to do.",
-      back: "Talimatlar o kadar karışıktı ki ne yapacağımı bilemedim.",
+          "If you use too many technical terms, you will confuse your audience. ",
+      back:
+          "Çok fazla teknik terim kullanırsanız, dinleyicilerinizin kafasını karıştırırsınız. ",
       list: 'B1',
       answer: 'kafasını karıştırmak',
       quest: 'confuse',
@@ -1158,9 +1156,8 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'convince',
     ),
     Words3(
-      front: "Can you turn on the air conditioner? I'm feeling a bit hot.",
-      back: "Klimayı açabilir misin? Biraz sıcak hissediyorum.",
-      // Can also be "soğutmak" depending on context (to cool food or drink)
+      front: " Air-conditioning cools a room very quickly.",
+      back: "Klima, bir odayı çok hızlı soğutur.",
       list: 'B1',
       answer: 'soğutmak',
       quest: 'cool',
@@ -1227,13 +1224,6 @@ class WordProvider3 extends ChangeNotifier {
       list: 'B1',
       answer: 'krema',
       quest: 'cream',
-    ),
-    Words3(
-      front: "The police are searching for a dangerous criminal.",
-      back: "Polis tehlikeli bir suçluyu arıyor.",
-      list: 'B1',
-      answer: 'suçlu',
-      quest: 'criminal',
     ),
     Words3(
       front: "He was criticized for his cruel treatment of animals.",
@@ -1353,8 +1343,8 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'definite',
     ),
     Words3(
-      front: "Can you define the word 'democracy' for me?",
-      back: "Demokrasi kelimesini benim için tanımlayabilir misin?",
+      front: "I created a list of important words and their definitions.",
+      back: "Önemli kelimeler ve tanımlarından oluşan bir liste oluşturdum.",
       list: 'B1',
       answer: 'tanım',
       quest: 'definition',
@@ -1506,8 +1496,9 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'donate',
     ),
     Words3(
-      front: "Please double-check your answers before submitting the test.",
-      back: "Testi teslim etmeden önce cevaplarınızı ikiye katlayın.",
+      front:
+          "In the course of the 1930s steel production in Britain approximately doubled.",
+      back: "1930'larda İngiltere'de çelik üretimi yaklaşık iki katına çıktı.",
       list: 'B1',
       answer: 'ikiye katlamak',
       quest: 'double',
@@ -1613,8 +1604,10 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'editor',
     ),
     Words3(
-      front: "Schools are responsible for educating children.",
-      back: "Okullar çocukları eğitmekten sorumludur.",
+      front:
+          "Kindergarten teachers generally educate children in reading and writing.",
+      back:
+          " Anaokulu öğretmenleri genellikle çocukları okuma ve yazma konusunda eğitir.",
       list: 'B1',
       answer: 'eğitmek',
       quest: 'educate',
@@ -1893,13 +1886,7 @@ class WordProvider3 extends ChangeNotifier {
       answer: 'deney',
       quest: 'experiment',
     ),
-    Words3(
-      front: "The bomb exploded with a deafening noise.",
-      back: "Bomba sağır edici bir gürültüyle patladı.",
-      list: 'B1',
-      answer: 'patlatmak',
-      quest: 'explode',
-    ),
+
     Words3(
       front: "The explorers set out to explore the uncharted territory.",
       back: "Kaşifler keşfedilmemiş toprakları keşfetmek için yola çıktılar.",
@@ -1997,8 +1984,8 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'favour',
     ),
     Words3(
-      front: "The child was afraid of the dark.",
-      back: "Çocuk karanlıktan korkuyordu.",
+      front: "He has a terrible fear of spiders.",
+      back: "Büyük bir örümcek korkusu var.",
       list: 'B1',
       answer: 'korkmak',
       quest: 'fear',
@@ -2114,7 +2101,7 @@ class WordProvider3 extends ChangeNotifier {
       front: "He forced me to give him my money.",
       back: "Bana zorla paramı vermemi söyledi.",
       list: 'B1',
-      answer: 'bakı yapmak',
+      answer: 'baskı yapmak',
       quest: 'force',
     ),
     Words3(
@@ -2181,12 +2168,11 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'frozen',
     ),
     Words3(
-      front: "Would you like fries with your burger? - Yes, please, fried.",
-      back:
-          "Hamburgerinizle patates kızartması ister misiniz? - Evet, lütfen kızartılmış.",
+      front: "I usually have fried eggs and coffee for breakfast.",
+      back: "Kahvaltıda genellikle kızarmış yumurta ve kahve içerim.",
       list: 'B1',
-      answer: 'kızartmak',
-      quest: 'fry',
+      answer: 'kızarmış',
+      quest: 'fried',
     ),
     Words3(
       front: "The car needs more fuel before we can continue our journey.",
@@ -2692,8 +2678,9 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'invest',
     ),
     Words3(
-      front: "The police are investigating the crime scene.",
-      back: "Polis, suç mahallini araştırıyor.",
+      front:
+          "In this study, we will investigate the source of the common cold.",
+      back: "Bu çalışmada, soğuk algınlığının kaynağını araştıracağız.",
       list: 'B1',
       answer: 'araştırmak',
       quest: 'investigate',
@@ -2765,15 +2752,7 @@ class WordProvider3 extends ChangeNotifier {
       answer: 'tekmelemek',
       quest: 'kick',
     ),
-    Words3(
-      front:
-          "Violence is never the answer. - I agree, killing is never the solution.",
-      back:
-          "Şiddet asla çözüm değildir. - Katılıyorum, öldürme asla çözüm değildir.",
-      list: 'B1',
-      answer: 'öldürme',
-      quest: 'killing',
-    ),
+
     Words3(
       front: "There are many different kinds of flowers in the world.",
       back: "Dünyada pek çok farklı çiçek türü vardır.",
@@ -2917,8 +2896,8 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'limit',
     ),
     Words3(
-      front: "She applied lipstick before going out.",
-      back: "Dışarı çıkmadan önce ruj sürdü.",
+      front: "Her lower lip trembled as if she was about to cry.",
+      back: "Alt dudağı ağlamak üzereymiş gibi titredi.",
       list: 'B1',
       answer: 'dudak',
       quest: 'lip',
@@ -3303,10 +3282,10 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'Obviously',
     ),
     Words3(
-      front: "We don't get many opportunities to travel abroad.",
-      back: "Yurtdışına seyahat etme fırsatı pek yakalamıyoruz.",
+      front: "On this special occasion we have brought a gift for you",
+      back: " Bu özel vesileyle sizler için bir hediye getirdim.",
       list: 'B1',
-      answer: 'fırsat',
+      answer: 'fırsat, vesile',
       quest: 'occasion',
     ),
     Words3(
@@ -3354,11 +3333,10 @@ class WordProvider3 extends ChangeNotifier {
       quest: 'operation',
     ),
     Words3(
-      front:
-          "The students are well-organized and prepared for the presentation.",
-      back: "Öğrenciler organize olmuş ve sunuma hazırlardır.",
+      front: "Ants live in highly organized colonies.",
+      back: "Karıncalar son derece organize koloniler halinde yaşarlar.",
       list: 'B1',
-      answer: 'organize olmuş',
+      answer: 'organize olmuş, düzenli',
       quest: 'organized',
     ),
     Words3(
@@ -3712,7 +3690,7 @@ class WordProvider3 extends ChangeNotifier {
       back: "Yoksulluk, birçok ülkede önemli bir sorundur.",
       list: 'B1',
       answer: 'yokluk',
-      quest: 'poverty',
+      quest: 'Poverty',
     ),
     Words3(
       front: "Please put some powder on your sunburn.",
@@ -4279,8 +4257,8 @@ class WordProvider3 extends ChangeNotifier {
         answer: 'gözden geçirerek düzeltmek',
         quest: 'revise'),
     Words3(
-        front: "The sun rises in the east.",
-        back: "Güneş doğuda yükselir.",
+        front: "The sun rises at seven in the morning.",
+        back: "Güneş sabah yedide doğuyor.",
         list: 'B1',
         answer: 'doğmak',
         quest: 'rise'),
@@ -4345,8 +4323,8 @@ class WordProvider3 extends ChangeNotifier {
         answer: 'örnek',
         quest: 'sample'),
     Words3(
-        front: "We built a sandcastle on the beach.",
-        back: "Plajda kumdan bir kale yaptık.",
+        front: "I shook the sand out of my towel.",
+        back: "Havlumdaki kumu silkeledim.",
         list: 'B1',
         answer: 'kum',
         quest: 'sand'),
@@ -4466,8 +4444,9 @@ class WordProvider3 extends ChangeNotifier {
         answer: 'değiştirmek, vardiya',
         quest: 'shift'),
     Words3(
-        front: "The sun is shine-ing brightly today.",
-        back: "Güneş bugün parlak bir şekilde parlıyor.",
+        front:
+            "The moon shines because its surface reflects light from the sun.",
+        back: "Ay, yüzeyi güneşten gelen ışığı yansıttığı için parlar.",
         list: 'B1',
         answer: 'parlamak',
         quest: 'shine'),
@@ -4518,8 +4497,10 @@ class WordProvider3 extends ChangeNotifier {
         answer: 'saçma sapan',
         quest: 'silly'),
     Words3(
-        front: "There are many similarities between the two cultures.",
-        back: "İki kültür arasında birçok benzerlik var.",
+        front:
+            "People tell me I look like Kate, but the only similarity is our hair color!",
+        back:
+            "İnsanlar bana Kate'e benzediğimi söylüyor ama tek benzerliğimiz saç rengimiz!",
         list: 'B1',
         answer: 'benzerlik',
         quest: 'similarity'),
@@ -5422,8 +5403,8 @@ class WordProvider3 extends ChangeNotifier {
         answer: 'yanlış',
         quest: 'wrong'),
     Words3(
-        front: "We can play in the backyard if the weather is nice.",
-        back: "Hava güzel olursa bahçede oynayabiliriz.",
+        front: "We had a picnic in our front yard.",
+        back: "Ön bahçemizde piknik yaptık.",
         list: 'B1',
         answer: 'bahçe',
         quest: 'yard'),

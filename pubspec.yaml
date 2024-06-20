@@ -60,7 +60,7 @@ dependencies:
 
 flutter_icons:
   android: "launcher_icon"
-  image_path: "assets/TestLog1.png"
+  image_path: "assets/logobig.png"
 
 
 
@@ -103,6 +103,15 @@ flutter:
      - assets/StartLogo.png
      - assets/StartLogoSec.png
      - assets/onecard_data.json
+     - assets/welcomeScreen.png
+     - assets/welcomeScreen1.png
+     - assets/logo.png
+     - assets/logoback.png
+     - assets/logobig.png
+
+
+
+
 
 
 
