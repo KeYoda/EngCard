@@ -1,3 +1,4 @@
+import 'package:eng_card/data/gridview.dart';
 import 'package:eng_card/data/save_words.dart';
 import 'package:eng_card/data/favorite_list.dart';
 import 'package:eng_card/provider/progres_prov.dart';
@@ -14,23 +15,29 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OneCard extends StatefulWidget {
-  const OneCard({super.key});
+  final String level;
+
+  const OneCard({super.key, required this.level});
 
   @override
   State<OneCard> createState() => _OneCardState();
 }
 
 class _OneCardState extends State<OneCard> {
+  FlutterTts flutterTts = FlutterTts();
   FavoriteList favoriteList = FavoriteList();
 
-  FlutterTts flutterTts = FlutterTts();
-  int index2 = 0;
   bool _showQuestion = true;
-  bool isIconVisible = true;
   bool _showAnswer = false;
+  bool isIconVisible = true;
   Color iconColor = easgreen;
-
   static const String isIconVisibleKey = 'isIconVisible';
+  void changeIcon() {
+    setState(() {
+      isIconVisible = !isIconVisible;
+      _saveIsIconVisible(isIconVisible);
+    });
+  }
 
   @override
   void initState() {
@@ -51,14 +58,67 @@ class _OneCardState extends State<OneCard> {
     await prefs.setBool(isIconVisibleKey, value);
   }
 
+  Future<void> _initTts() async {
+    await flutterTts.setLanguage('en-US');
+    await flutterTts.setPitch(1.0);
+    await flutterTts.setSpeechRate(0.4);
+    await flutterTts.awaitSpeakCompletion(true);
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.speak(text);
+  }
+
+  void _nextCard(WordProvider wordProvider) {
+    List<Words> words = wordProvider.getWords(widget.level);
+
+    if (words.isEmpty) {
+      _handleEmptyList();
+      return;
+    }
+
+    int currentIndex = wordProvider.getLastIndex(widget.level);
+    int newIndex = (currentIndex + 1) % words.length;
+
+    wordProvider.setLastIndex(widget.level, newIndex);
+
+    setState(() {
+      _showQuestion = true;
+      _showAnswer = false;
+    });
+  }
+
+  void _previousCard(WordProvider wordProvider) {
+    List<Words> words = wordProvider.getWords(widget.level);
+
+    if (words.isEmpty) {
+      _handleEmptyList();
+      return;
+    }
+
+    int currentIndex = wordProvider.getLastIndex(widget.level);
+    int newIndex = (currentIndex - 1 + words.length) % words.length;
+
+    wordProvider.setLastIndex(widget.level, newIndex);
+
+    setState(() {
+      _showQuestion = true;
+      _showAnswer = false;
+    });
+  }
+
   void _toggleFavorite() {
     var favoriteList = Provider.of<FavoriteList>(context, listen: false);
-    var wordProvider = Provider.of<WordProvider>(context, listen: false);
+    var wordProvider2 = Provider.of<WordProvider>(context, listen: false);
+    var oneWords = wordProvider2.getWords(widget.level);
+    int index = wordProvider2.getLastIndex(widget.level);
 
+    // Favori listesine eklemek ya da çıkarmak için gerekli işlemler burada yapılabilir
+    // Örneğin:
     SavedItem newFavorite = SavedItem(
-      question: wordProvider.wordsListOne[wordProvider.lastIndex].quest,
-      answer: wordProvider.wordsListOne[wordProvider.lastIndex].answer,
-      lvClass: wordProvider.wordsListOne[wordProvider.lastIndex].list,
+      question: oneWords[index].quest,
+      answer: oneWords[index].answer,
+      lvClass: oneWords[index].list,
     );
 
     if (favoriteList.favorites.contains(newFavorite)) {
@@ -71,71 +131,21 @@ class _OneCardState extends State<OneCard> {
     favoriteList.saveFavorites();
   }
 
-  void _nextCard() {
-    var wordProvider = Provider.of<WordProvider>(context, listen: false);
-
-    if (wordProvider.wordsListOne.isEmpty) {
-      _handleEmptyList();
-      return;
-    }
-
-    setState(() {
-      if (wordProvider.lastIndex + 1 < wordProvider.wordsListOne.length) {
-        wordProvider.lastIndex++;
-      } else {
-        wordProvider.lastIndex = 0;
-      }
-      _showQuestion = true;
-      _showAnswer = false;
-    });
-  }
-
-  void _previousCard() {
-    var wordProvider = Provider.of<WordProvider>(context, listen: false);
-
-    if (wordProvider.wordsListOne.isEmpty) {
-      _handleEmptyList();
-      return;
-    }
-
-    setState(() {
-      if (wordProvider.lastIndex - 1 >= 0) {
-        wordProvider.lastIndex--;
-      } else {
-        wordProvider.lastIndex = wordProvider.wordsListOne.length - 1;
-      }
-      _showQuestion = true;
-      _showAnswer = false;
-    });
-  }
-
   void _handleEmptyList() {
-    // Navigate back to the previous screen or handle the empty list scenario
     Navigator.pop(context);
-  }
-
-  Future<void> _initTts() async {
-    await flutterTts.setLanguage('en-US');
-    await flutterTts.setPitch(1.0);
-    await flutterTts.setSpeechRate(0.4);
-    await flutterTts.awaitSpeakCompletion(true);
-  }
-
-  Future<void> _speak(String text) async {
-    await flutterTts.speak(text);
   }
 
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.init(context);
-
-    FlipCardController cardController = FlipCardController();
-
-    var progressProvider = Provider.of<ProgressProvider>(context);
-    var scoreProvider = Provider.of<ScoreProvider>(context);
     var wordProvider = Provider.of<WordProvider>(context);
+    List<Words> words = wordProvider.getWords(widget.level);
+    FlipCardController cardController = FlipCardController();
+    int index = wordProvider.getLastIndex(widget.level);
 
-    if (wordProvider.wordsListOne.isEmpty) {
+    if (index >= words.length) {
+      index = 0;
+      wordProvider.setLastIndex(widget.level, 0);
+
       return Scaffold(
         backgroundColor: medgreen,
         body: Center(
@@ -147,17 +157,14 @@ class _OneCardState extends State<OneCard> {
       );
     }
 
-    String fullText = wordProvider.wordsListOne[wordProvider.lastIndex].front;
-    String targetWord = wordProvider.wordsListOne[wordProvider.lastIndex].quest;
+    Words currentWord = words[index];
 
+    var progressProvider = Provider.of<ProgressProvider>(context);
+    var scoreProvider = Provider.of<ScoreProvider>(context);
+
+    String fullText = currentWord.front;
+    String targetWord = currentWord.quest;
     int startIndex = fullText.indexOf(targetWord);
-
-    void changeIcon() {
-      setState(() {
-        isIconVisible = !isIconVisible;
-        _saveIsIconVisible(isIconVisible);
-      });
-    }
 
     Widget resultWidget;
 
@@ -167,23 +174,14 @@ class _OneCardState extends State<OneCard> {
         TextSpan(
           children: [
             TextSpan(
-              text: fullText.substring(0, startIndex),
-              style: TextStyle(fontSize: 11.sp, color: Colors.black45),
-            ),
+                text: fullText.substring(0, startIndex),
+                style: TextStyle(fontSize: 11.sp, color: Colors.black45)),
             TextSpan(
-              text: targetWord,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: targetWord ==
-                        wordProvider.wordsListOne[wordProvider.lastIndex].quest
-                    ? yellow
-                    : Colors.black45,
-              ),
-            ),
+                text: targetWord,
+                style: TextStyle(fontSize: 12.sp, color: yellow)),
             TextSpan(
-              text: fullText.substring(startIndex + targetWord.length),
-              style: TextStyle(fontSize: 11.sp, color: Colors.black45),
-            ),
+                text: fullText.substring(startIndex + targetWord.length),
+                style: TextStyle(fontSize: 11.sp, color: Colors.black45)),
           ],
         ),
         maxLines: 3,
@@ -222,8 +220,7 @@ class _OneCardState extends State<OneCard> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            _speak(wordProvider
-                                .wordsListOne[wordProvider.lastIndex].quest);
+                            _speak(words[index].quest);
                           },
                           icon: Icon(
                             Icons.settings_voice_rounded,
@@ -248,14 +245,8 @@ class _OneCardState extends State<OneCard> {
                           iconSize: 30.w,
                           color: favoriteList.favorites.any(
                             (item) =>
-                                item.question ==
-                                    wordProvider
-                                        .wordsListOne[wordProvider.lastIndex]
-                                        .quest &&
-                                item.answer ==
-                                    wordProvider
-                                        .wordsListOne[wordProvider.lastIndex]
-                                        .answer,
+                                item.question == words[index].quest &&
+                                item.answer == words[index].answer,
                           )
                               ? easgreen
                               : iconColor,
@@ -266,10 +257,8 @@ class _OneCardState extends State<OneCard> {
                     Center(
                       child: Text(
                         _showQuestion
-                            ? wordProvider
-                                .wordsListOne[wordProvider.lastIndex].quest
-                            : wordProvider
-                                .wordsListOne[wordProvider.lastIndex].answer,
+                            ? words[index].quest
+                            : words[index].answer,
                         style: TextStyle(fontSize: 30.sp, color: orange),
                       ),
                     ),
@@ -287,10 +276,8 @@ class _OneCardState extends State<OneCard> {
                         opacity: isIconVisible ? 1.0 : 0.0,
                         child: Text(
                           _showAnswer
-                              ? wordProvider
-                                  .wordsListOne[wordProvider.lastIndex].quest
-                              : wordProvider
-                                  .wordsListOne[wordProvider.lastIndex].answer,
+                              ? words[index].quest
+                              : words[index].answer,
                           style: TextStyle(color: orange, fontSize: 20.sp),
                         ),
                       ),
@@ -345,7 +332,7 @@ class _OneCardState extends State<OneCard> {
                             Center(
                               child: Text(
                                 textAlign: TextAlign.center,
-                                '${wordProvider.wordsListOne[wordProvider.lastIndex].back} ',
+                                '${words[index].back} ',
                                 maxLines: 3,
                                 style: TextStyle(
                                     fontSize: 11.sp, color: Colors.black45),
@@ -380,16 +367,15 @@ class _OneCardState extends State<OneCard> {
                         ),
                         SizedBox(width: 80.w),
                         Text(
-                          '400/ ${wordProvider.wordsListOne.length}',
+                          '400/ ${words.length}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         SizedBox(width: 65.w),
                         IconButton(
                           onPressed: () {
                             progressProvider.increaseProgress();
-                            if (wordProvider.wordsListOne.isNotEmpty) {
-                              wordProvider.deleteWord(
-                                  wordProvider.lastIndex, context);
+                            if (words.isNotEmpty) {
+                              wordProvider.deleteWord('A1', index, context);
                               scoreProvider.incrementScore(10);
                             } else {
                               const SnackBar(
@@ -418,7 +404,9 @@ class _OneCardState extends State<OneCard> {
                   width: 100.w,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: orange),
-                    onPressed: _previousCard,
+                    onPressed: () {
+                      _previousCard(wordProvider);
+                    },
                     child: Icon(
                       Icons.arrow_circle_left_outlined,
                       color: whites,
@@ -430,7 +418,9 @@ class _OneCardState extends State<OneCard> {
                   width: 100.w,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: orange),
-                    onPressed: _nextCard,
+                    onPressed: () {
+                      _nextCard(wordProvider);
+                    },
                     child:
                         Icon(Icons.arrow_circle_right_outlined, color: whites),
                   ),

@@ -1,9 +1,5 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
-import 'package:eng_card/provider/wordshare_fiveprov.dart';
-import 'package:eng_card/provider/wordshare_fourprov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
-import 'package:eng_card/provider/wordshare_threprov.dart';
-import 'package:eng_card/provider/wordshare_twoprov.dart';
 import 'package:eng_card/screens/six_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -65,10 +61,6 @@ class CheckScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var wordLists = Provider.of<WordProvider>(context);
-    var wordLists1 = Provider.of<WordProvider2>(context);
-    var wordLists2 = Provider.of<WordProvider3>(context);
-    var wordLists3 = Provider.of<WordProvider4>(context);
-    var wordLists4 = Provider.of<WordProvider5>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -123,11 +115,11 @@ class CheckScreen extends StatelessWidget {
                 width: 220,
                 child: ElevatedButton(
                   onPressed: () async {
-                    wordLists4.resetList5();
-                    wordLists3.resetList4();
-                    wordLists2.resetList3();
-                    wordLists1.resetList2();
-                    wordLists.resetList();
+                    wordLists.resetList('C1');
+                    wordLists.resetList('B2');
+                    wordLists.resetList('B1');
+                    wordLists.resetList('A2');
+                    wordLists.resetList('A1');
 
                     SharedPreferences prefs =
                         await SharedPreferences.getInstance();

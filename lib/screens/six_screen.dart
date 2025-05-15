@@ -2,11 +2,7 @@ import 'package:eng_card/data/favorite_list.dart';
 import 'package:eng_card/drawer.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
-import 'package:eng_card/provider/wordshare_fiveprov.dart';
-import 'package:eng_card/provider/wordshare_fourprov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
-import 'package:eng_card/provider/wordshare_threprov.dart';
-import 'package:eng_card/provider/wordshare_twoprov.dart';
 import 'package:eng_card/screens/five_card.dart';
 import 'package:eng_card/screens/four_card.dart';
 import 'package:eng_card/screens/one_card.dart';
@@ -52,10 +48,6 @@ class _SixScreenState extends State<SixScreen> {
     var progressProvider = Provider.of<ProgressProvider>(context);
     var scoreProvider = Provider.of<ScoreProvider>(context);
     var wordListProvider = Provider.of<WordProvider>(context);
-    var wordListProvider1 = Provider.of<WordProvider2>(context);
-    var wordListProvider2 = Provider.of<WordProvider3>(context);
-    var wordListProvider3 = Provider.of<WordProvider4>(context);
-    var wordListProvider4 = Provider.of<WordProvider5>(context);
 
     double screenWidth = ScreenUtil().screenWidth;
     double screenHeight = ScreenUtil().screenHeight;
@@ -83,7 +75,6 @@ class _SixScreenState extends State<SixScreen> {
             _buildLevelRow(
               context,
               wordListProvider,
-              wordListProvider1,
               progressProvider,
               screenWidth,
               screenHeight,
@@ -91,14 +82,13 @@ class _SixScreenState extends State<SixScreen> {
             SizedBox(height: screenHeight * 0.03),
             _buildLevelRow1(
               context,
-              wordListProvider2,
-              wordListProvider3,
+              wordListProvider,
               progressProvider,
               screenWidth,
               screenHeight,
             ),
             SizedBox(height: screenHeight * 0.03),
-            _buildFinalLevel(context, wordListProvider4, progressProvider,
+            _buildFinalLevel(context, wordListProvider, progressProvider,
                 screenWidth, screenHeight),
           ],
         ),
@@ -155,7 +145,6 @@ class _SixScreenState extends State<SixScreen> {
   Widget _buildLevelRow(
     BuildContext context,
     WordProvider wordListProvider,
-    WordProvider2 wordListProvider1,
     ProgressProvider progressProvider,
     double screenWidth,
     double screenHeight,
@@ -167,8 +156,10 @@ class _SixScreenState extends State<SixScreen> {
           context,
           'A1',
           createCircularBox('assets/a1.webp'),
-          wordListProvider.wordsListOne.isEmpty,
-          const OneCard(),
+          wordListProvider.getWords('A1').isEmpty,
+          const OneCard(
+            level: 'A1',
+          ),
           progressProvider.progressValue,
           screenWidth,
           screenHeight,
@@ -178,8 +169,10 @@ class _SixScreenState extends State<SixScreen> {
           context,
           'A2',
           createCircularBox('assets/a2.webp'),
-          wordListProvider1.wordsListTwo.isEmpty,
-          const TwoCard(),
+          wordListProvider.getWords('A2').isEmpty,
+          const TwoCard(
+            level: 'A2',
+          ),
           progressProvider.progressValue1,
           screenWidth,
           screenHeight,
@@ -190,8 +183,7 @@ class _SixScreenState extends State<SixScreen> {
 
   Widget _buildLevelRow1(
     BuildContext context,
-    WordProvider3 wordListProvider2,
-    WordProvider4 wordListProvider3,
+    WordProvider wordListProvider,
     ProgressProvider progressProvider,
     double screenWidth,
     double screenHeight,
@@ -203,8 +195,10 @@ class _SixScreenState extends State<SixScreen> {
           context,
           'B1',
           createCircularBox('assets/a3.webp'),
-          wordListProvider2.wordsListThre.isEmpty,
-          const ThreCard(),
+          wordListProvider.getWords('B1').isEmpty,
+          const ThreCard(
+            level: 'B1',
+          ),
           progressProvider.progressValue2,
           screenWidth,
           screenHeight,
@@ -214,8 +208,8 @@ class _SixScreenState extends State<SixScreen> {
           context,
           'B2',
           createCircularBox('assets/a4.webp'),
-          wordListProvider3.wordsListFour.isEmpty,
-          const FourCard(),
+          wordListProvider.getWords('B2').isEmpty,
+          const FourCard(level: 'B2'),
           progressProvider.progressValue3,
           screenWidth,
           screenHeight,
@@ -285,7 +279,7 @@ class _SixScreenState extends State<SixScreen> {
 
   Widget _buildFinalLevel(
     BuildContext context,
-    WordProvider5 wordListProvider,
+    WordProvider wordListProvider,
     ProgressProvider progressProvider,
     double screenWidth,
     double screenHeight,
@@ -297,8 +291,10 @@ class _SixScreenState extends State<SixScreen> {
           context,
           'C1',
           createCircularBox('assets/a5.webp'),
-          wordListProvider.wordsListFive.isEmpty,
-          const FiveCard(),
+          wordListProvider.getWords('C1').isEmpty,
+          const FiveCard(
+            level: 'C1',
+          ),
           progressProvider.progressValue4,
           screenWidth,
           screenHeight,

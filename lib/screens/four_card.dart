@@ -1,8 +1,9 @@
+import 'package:eng_card/data/gridview.dart';
 import 'package:eng_card/data/save_words.dart';
 import 'package:eng_card/data/favorite_list.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
-import 'package:eng_card/provider/wordshare_fourprov.dart';
+import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:eng_card/screens/six_screen.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flip_card/flip_card_controller.dart';
@@ -14,63 +15,30 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FourCard extends StatefulWidget {
-  const FourCard({super.key});
+  const FourCard({
+    super.key,
+    required this.level,
+  });
+  final String level;
+
   @override
   State<FourCard> createState() => _FourCardState();
 }
 
 class _FourCardState extends State<FourCard> {
+  FlutterTts flutterTts = FlutterTts();
   FavoriteList favoriteList = FavoriteList();
 
-  FlutterTts flutterTts = FlutterTts();
   bool _showQuestion = true;
   bool _showAnswer = false;
-  Color iconColor = easgreen;
   bool isIconVisible = true;
-
+  Color iconColor = easgreen;
   static const String isIconVisibleKey = 'isIconVisible';
-
   void changeIcon() {
     setState(() {
       isIconVisible = !isIconVisible;
       _saveIsIconVisible(isIconVisible);
     });
-  }
-
-  Future<void> _loadIsIconVisible() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      // SharedPreferences'ten isIconVisible değerini oku
-      isIconVisible = prefs.getBool(isIconVisibleKey) ?? true;
-    });
-  }
-
-  Future<void> _saveIsIconVisible(bool value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // SharedPreferences'e isIconVisible değerini kaydet
-    await prefs.setBool(isIconVisibleKey, value);
-  }
-
-  void _toggleFavorite() {
-    var favoriteList = Provider.of<FavoriteList>(context, listen: false);
-    var wordProvider4 = Provider.of<WordProvider4>(context, listen: false);
-
-    // Favori listesine eklemek ya da çıkarmak için gerekli işlemler burada yapılabilir
-    // Örneğin:
-    SavedItem newFavorite = SavedItem(
-      question: wordProvider4.wordsListFour[wordProvider4.lastIndex].quest,
-      answer: wordProvider4.wordsListFour[wordProvider4.lastIndex].answer,
-      lvClass: wordProvider4.wordsListFour[wordProvider4.lastIndex].list,
-    );
-
-    if (favoriteList.favorites.contains(newFavorite)) {
-      favoriteList.deleteFavorite(
-        favoriteList.favorites.indexOf(newFavorite),
-      );
-    } else {
-      favoriteList.addFavorite(newFavorite);
-    }
-    favoriteList.saveFavorites();
   }
 
   @override
@@ -80,34 +48,16 @@ class _FourCardState extends State<FourCard> {
     _initTts();
   }
 
-  void _nextCard() {
-    var wordProvider4 = Provider.of<WordProvider4>(context, listen: false);
-
+  Future<void> _loadIsIconVisible() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      if (wordProvider4.lastIndex + 1 < wordProvider4.wordsListFour.length) {
-        wordProvider4.lastIndex++;
-      } else {
-        // Eğer son kartta ise ilk karta git
-        wordProvider4.lastIndex = 0;
-      }
-      _showQuestion = true;
-      _showAnswer = false;
-      wordProvider4.setLastIndex(wordProvider4.lastIndex);
+      isIconVisible = prefs.getBool(isIconVisibleKey) ?? true;
     });
   }
 
-  void _previousCard() {
-    var wordProvider4 = Provider.of<WordProvider4>(context, listen: false);
-
-    setState(() {
-      if (wordProvider4.lastIndex - 1 >= 0) {
-        wordProvider4.lastIndex--;
-      } else {
-        wordProvider4.lastIndex = wordProvider4.wordsListFour.length - 1;
-      }
-      _showQuestion = true;
-      _showAnswer = false;
-    });
+  Future<void> _saveIsIconVisible(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(isIconVisibleKey, value);
   }
 
   Future<void> _initTts() async {
@@ -121,15 +71,83 @@ class _FourCardState extends State<FourCard> {
     await flutterTts.speak(text);
   }
 
+  void _nextCard(WordProvider wordProvider) {
+    List<Words> words = wordProvider.getWords(widget.level);
+
+    if (words.isEmpty) {
+      _handleEmptyList();
+      return;
+    }
+
+    int currentIndex = wordProvider.getLastIndex(widget.level);
+    int newIndex = (currentIndex + 1) % words.length;
+
+    wordProvider.setLastIndex(widget.level, newIndex);
+
+    setState(() {
+      _showQuestion = true;
+      _showAnswer = false;
+    });
+  }
+
+  void _previousCard(WordProvider wordProvider) {
+    List<Words> words = wordProvider.getWords(widget.level);
+
+    if (words.isEmpty) {
+      _handleEmptyList();
+      return;
+    }
+
+    int currentIndex = wordProvider.getLastIndex(widget.level);
+    int newIndex = (currentIndex - 1 + words.length) % words.length;
+
+    wordProvider.setLastIndex(widget.level, newIndex);
+
+    setState(() {
+      _showQuestion = true;
+      _showAnswer = false;
+    });
+  }
+
+  void _toggleFavorite() {
+    var favoriteList = Provider.of<FavoriteList>(context, listen: false);
+    var wordProvider2 = Provider.of<WordProvider>(context, listen: false);
+    var oneWords = wordProvider2.getWords(widget.level);
+    int index = wordProvider2.getLastIndex(widget.level);
+
+    // Favori listesine eklemek ya da çıkarmak için gerekli işlemler burada yapılabilir
+    // Örneğin:
+    SavedItem newFavorite = SavedItem(
+      question: oneWords[index].quest,
+      answer: oneWords[index].answer,
+      lvClass: oneWords[index].list,
+    );
+
+    if (favoriteList.favorites.contains(newFavorite)) {
+      favoriteList.deleteFavorite(
+        favoriteList.favorites.indexOf(newFavorite),
+      );
+    } else {
+      favoriteList.addFavorite(newFavorite);
+    }
+    favoriteList.saveFavorites();
+  }
+
+  void _handleEmptyList() {
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    var wordProvider = Provider.of<WordProvider>(context);
+    List<Words> words = wordProvider.getWords(widget.level);
     FlipCardController cardController = FlipCardController();
+    int index = wordProvider.getLastIndex(widget.level);
 
-    var progressProvider = Provider.of<ProgressProvider>(context);
-    var scoreProvider = Provider.of<ScoreProvider>(context);
-    var wordProvider4 = Provider.of<WordProvider4>(context);
+    if (index >= words.length) {
+      index = 0;
+      wordProvider.setLastIndex(widget.level, 0);
 
-    if (wordProvider4.wordsListFour.isEmpty) {
       return Scaffold(
         backgroundColor: medgreen,
         body: Center(
@@ -141,11 +159,13 @@ class _FourCardState extends State<FourCard> {
       );
     }
 
-    String fullText =
-        wordProvider4.wordsListFour[wordProvider4.lastIndex].front;
-    String targetWord =
-        wordProvider4.wordsListFour[wordProvider4.lastIndex].quest;
+    Words currentWord = words[index];
 
+    var progressProvider = Provider.of<ProgressProvider>(context);
+    var scoreProvider = Provider.of<ScoreProvider>(context);
+
+    String fullText = currentWord.front;
+    String targetWord = currentWord.quest;
     int startIndex = fullText.indexOf(targetWord);
 
     Widget resultWidget;
@@ -156,31 +176,19 @@ class _FourCardState extends State<FourCard> {
         TextSpan(
           children: [
             TextSpan(
-              text: fullText.substring(0, startIndex),
-              style: TextStyle(fontSize: 11.sp, color: Colors.black45),
-            ),
+                text: fullText.substring(0, startIndex),
+                style: TextStyle(fontSize: 11.sp, color: Colors.black45)),
             TextSpan(
-              text: targetWord,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: targetWord ==
-                        wordProvider4
-                            .wordsListFour[wordProvider4.lastIndex].quest
-                    ? yellow // Renk quest kelimesine göre değişecek
-                    : Colors.black45,
-              ),
-            ),
+                text: targetWord,
+                style: TextStyle(fontSize: 12.sp, color: yellow)),
             TextSpan(
-              text: fullText.substring(startIndex + targetWord.length),
-              style: TextStyle(fontSize: 11.sp, color: Colors.black45),
-            ),
+                text: fullText.substring(startIndex + targetWord.length),
+                style: TextStyle(fontSize: 11.sp, color: Colors.black45)),
           ],
         ),
         maxLines: 3,
       );
     } else {
-      // Hedef kelime bulunamadı, bu durumu kontrol etmek için bir işlem yapabilirsiniz.
-      // Örneğin, tüm metni aynı renkte göster veya başka bir işlem gerçekleştir.
       resultWidget = Center(
         child: Text(
           fullText,
@@ -216,8 +224,7 @@ class _FourCardState extends State<FourCard> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            _speak(wordProvider4
-                                .wordsListFour[wordProvider4.lastIndex].quest);
+                            _speak(words[index].quest);
                           },
                           icon: Icon(
                             Icons.settings_voice_rounded,
@@ -242,14 +249,8 @@ class _FourCardState extends State<FourCard> {
                           iconSize: 30.w,
                           color: favoriteList.favorites.any(
                             (item) =>
-                                item.question ==
-                                    wordProvider4
-                                        .wordsListFour[wordProvider4.lastIndex]
-                                        .quest &&
-                                item.answer ==
-                                    wordProvider4
-                                        .wordsListFour[wordProvider4.lastIndex]
-                                        .answer,
+                                item.question == words[index].quest &&
+                                item.answer == words[index].answer,
                           )
                               ? easgreen
                               : iconColor,
@@ -260,10 +261,8 @@ class _FourCardState extends State<FourCard> {
                     Center(
                       child: Text(
                         _showQuestion
-                            ? wordProvider4
-                                .wordsListFour[wordProvider4.lastIndex].quest
-                            : wordProvider4
-                                .wordsListFour[wordProvider4.lastIndex].answer,
+                            ? words[index].quest
+                            : words[index].answer,
                         style: TextStyle(fontSize: 30.sp, color: orange),
                       ),
                     ),
@@ -285,11 +284,8 @@ class _FourCardState extends State<FourCard> {
                         opacity: isIconVisible ? 1.0 : 0.0,
                         child: Text(
                           _showAnswer
-                              ? wordProvider4
-                                  .wordsListFour[wordProvider4.lastIndex].quest
-                              : wordProvider4
-                                  .wordsListFour[wordProvider4.lastIndex]
-                                  .answer,
+                              ? words[index].quest
+                              : words[index].answer,
                           style: TextStyle(color: orange, fontSize: 20.sp),
                         ),
                       ),
@@ -348,7 +344,7 @@ class _FourCardState extends State<FourCard> {
                             Center(
                               child: Text(
                                 textAlign: TextAlign.center,
-                                '${wordProvider4.wordsListFour[wordProvider4.lastIndex].back} ',
+                                '${words[index].back} ',
                                 maxLines: 3,
                                 style: TextStyle(
                                   fontSize: 11.sp,
@@ -391,16 +387,15 @@ class _FourCardState extends State<FourCard> {
                         ),
                         SizedBox(width: 80.w),
                         Text(
-                          '680/ ${wordProvider4.wordsListFour.length}',
+                          '680/ ${words.length}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         SizedBox(width: 65.w),
                         IconButton(
                           onPressed: () {
                             progressProvider.increaseProgress3();
-                            if (wordProvider4.wordsListFour.isNotEmpty) {
-                              wordProvider4.deleteWord4(
-                                  wordProvider4.lastIndex, context);
+                            if (words.isNotEmpty) {
+                              wordProvider.deleteWord('B2', index, context);
 
                               scoreProvider.incrementScore(25);
                             } else {
@@ -430,7 +425,9 @@ class _FourCardState extends State<FourCard> {
                   width: 100.w,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: orange),
-                    onPressed: _previousCard,
+                    onPressed: () {
+                      _previousCard(wordProvider);
+                    },
                     child: Icon(
                       Icons.arrow_circle_left_outlined,
                       color: whites,
@@ -444,7 +441,9 @@ class _FourCardState extends State<FourCard> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: orange,
                     ),
-                    onPressed: _nextCard,
+                    onPressed: () {
+                      _nextCard(wordProvider);
+                    },
                     child:
                         Icon(Icons.arrow_circle_right_outlined, color: whites),
                   ),

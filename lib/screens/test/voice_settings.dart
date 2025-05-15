@@ -110,7 +110,7 @@ class VoiceSettings extends StatelessWidget {
                 words: filterWordsByLevel(allWords, 'A1'),
                 onComplete: () {
                   progressProvider.completeQuestion('A1');
-                  listProgressProv.listProgress();
+                  listProgressProv.decreaseProgress('A1');
                 },
                 level: 'A1',
               ),
@@ -124,7 +124,7 @@ class VoiceSettings extends StatelessWidget {
                 words: filterWordsByLevel(allWords, 'A2'),
                 onComplete: () {
                   progressProvider.completeQuestion('A2');
-                  listProgressProv.listProgress1();
+                  listProgressProv.decreaseProgress('A2');
                 },
                 level: 'A2',
               ),
@@ -138,7 +138,7 @@ class VoiceSettings extends StatelessWidget {
                 words: filterWordsByLevel(allWords, 'B1'),
                 onComplete: () {
                   progressProvider.completeQuestion('B1');
-                  listProgressProv.listProgress2();
+                  listProgressProv.decreaseProgress('B1');
                 },
                 level: 'B1',
               ),
@@ -152,7 +152,7 @@ class VoiceSettings extends StatelessWidget {
                 words: filterWordsByLevel(allWords, 'B2'),
                 onComplete: () {
                   progressProvider.completeQuestion('B2');
-                  listProgressProv.listProgress3();
+                  listProgressProv.decreaseProgress('B2');
                 },
                 level: 'B2',
               ),
@@ -166,7 +166,7 @@ class VoiceSettings extends StatelessWidget {
               words: filterWordsByLevel(allWords, 'C1'),
               onComplete: () {
                 progressProvider.completeQuestion('C1');
-                listProgressProv.listProgress4();
+                listProgressProv.decreaseProgress('C1');
               },
               level: 'C1',
             ),

@@ -110,11 +110,11 @@ class BlancSettings extends StatelessWidget {
                 words: filterWordsByLevel(allWords, 'A1'),
                 onComplete: () {
                   progressProvider.completeQuestion('A1');
-                  listProgressProvider.listProgress();
+                  listProgressProvider.decreaseProgress('A1');
                 },
                 level: 'A1',
               ),
-              listProgressProvider.oneCardWords),
+              listProgressProvider.getProgress('A1')),
           _listTile(
               context,
               'A2',
@@ -124,11 +124,11 @@ class BlancSettings extends StatelessWidget {
                 words: filterWordsByLevel(allWords, 'A2'),
                 onComplete: () {
                   progressProvider.completeQuestion('A2');
-                  listProgressProvider.listProgress1();
+                  listProgressProvider.decreaseProgress('A2');
                 },
                 level: 'A2',
               ),
-              listProgressProvider.twoCardWords),
+              listProgressProvider.getProgress('A2')),
           _listTile(
               context,
               'B1',
@@ -138,11 +138,11 @@ class BlancSettings extends StatelessWidget {
                 words: filterWordsByLevel(allWords, 'B1'),
                 onComplete: () {
                   progressProvider.completeQuestion('B1');
-                  listProgressProvider.listProgress2();
+                  listProgressProvider.decreaseProgress('B1');
                 },
                 level: 'B1',
               ),
-              listProgressProvider.threCardWords),
+              listProgressProvider.getProgress('B1')),
           _listTile(
               context,
               'B2',
@@ -152,11 +152,11 @@ class BlancSettings extends StatelessWidget {
                 words: filterWordsByLevel(allWords, 'B2'),
                 onComplete: () {
                   progressProvider.completeQuestion('B2');
-                  listProgressProvider.listProgress3();
+                  listProgressProvider.decreaseProgress('B2');
                 },
                 level: 'B2',
               ),
-              listProgressProvider.fourCardWords),
+              listProgressProvider.getProgress('B2')),
           _listTile(
             context,
             'C1',
@@ -166,11 +166,11 @@ class BlancSettings extends StatelessWidget {
               words: filterWordsByLevel(allWords, 'C1'),
               onComplete: () {
                 progressProvider.completeQuestion('C1');
-                listProgressProvider.listProgress4();
+                listProgressProvider.decreaseProgress('C1');
               },
               level: 'C1',
             ),
-            listProgressProvider.fiveCardWords,
+            listProgressProvider.getProgress('C1'),
           ),
         ],
       );

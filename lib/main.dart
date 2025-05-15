@@ -1,15 +1,9 @@
 import 'package:eng_card/data/favorite_list.dart';
-import 'package:eng_card/firebase_options.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
-import 'package:eng_card/provider/wordshare_fiveprov.dart';
-import 'package:eng_card/provider/wordshare_fourprov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
-import 'package:eng_card/provider/wordshare_threprov.dart';
-import 'package:eng_card/provider/wordshare_twoprov.dart';
 import 'package:eng_card/screens/six_screen.dart';
 import 'package:eng_card/screens/start_screen.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -47,14 +41,7 @@ Future<void> checkAndRequestPermissions() async {
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   FlutterError.onError = (FlutterErrorDetails details) {
-    // Hata detaylarını loglama
-    print(details.exceptionAsString());
-    print(details.stack);
-
-    // Kullanıcıya gösterilecek hata mesajını ayarlama
     if (navigatorKey.currentContext != null) {
       showDialog(
         context: navigatorKey.currentContext!,
@@ -77,10 +64,6 @@ Future<void> main() async {
     }
   };
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
   runApp(
     MultiProvider(
       providers: [
@@ -89,10 +72,6 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => ProgressProvider()),
         ChangeNotifierProvider(create: (_) => FavoriteList()),
         ChangeNotifierProvider(create: (_) => WordProvider()),
-        ChangeNotifierProvider(create: (_) => WordProvider2()),
-        ChangeNotifierProvider(create: (_) => WordProvider3()),
-        ChangeNotifierProvider(create: (_) => WordProvider4()),
-        ChangeNotifierProvider(create: (_) => WordProvider5()),
       ],
       child: const MyApp(),
     ),

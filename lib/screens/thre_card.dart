@@ -1,8 +1,9 @@
+import 'package:eng_card/data/gridview.dart';
 import 'package:eng_card/data/save_words.dart';
 import 'package:eng_card/data/favorite_list.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
-import 'package:eng_card/provider/wordshare_threprov.dart';
+import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:eng_card/screens/six_screen.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flip_card/flip_card_controller.dart';
@@ -14,63 +15,26 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThreCard extends StatefulWidget {
-  const ThreCard({super.key});
+  const ThreCard({super.key, required this.level});
+  final String level;
   @override
   State<ThreCard> createState() => _ThreCardState();
 }
 
 class _ThreCardState extends State<ThreCard> {
+  FlutterTts flutterTts = FlutterTts();
   FavoriteList favoriteList = FavoriteList();
 
-  FlutterTts flutterTts = FlutterTts();
   bool _showQuestion = true;
   bool _showAnswer = false;
-  Color iconColor = easgreen;
   bool isIconVisible = true;
-
+  Color iconColor = easgreen;
   static const String isIconVisibleKey = 'isIconVisible';
-
   void changeIcon() {
     setState(() {
       isIconVisible = !isIconVisible;
       _saveIsIconVisible(isIconVisible);
     });
-  }
-
-  Future<void> _loadIsIconVisible() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      // SharedPreferences'ten isIconVisible değerini oku
-      isIconVisible = prefs.getBool(isIconVisibleKey) ?? true;
-    });
-  }
-
-  Future<void> _saveIsIconVisible(bool value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // SharedPreferences'e isIconVisible değerini kaydet
-    await prefs.setBool(isIconVisibleKey, value);
-  }
-
-  void _toggleFavorite() {
-    var favoriteList = Provider.of<FavoriteList>(context, listen: false);
-    var wordProvider3 = Provider.of<WordProvider3>(context, listen: false);
-
-    // Favori listesine eklemek ya da çıkarmak için gerekli işlemler burada yapılabilir
-    // Örneğin:
-    SavedItem newFavorite = SavedItem(
-      question: wordProvider3.wordsListThre[wordProvider3.lastIndex].quest,
-      answer: wordProvider3.wordsListThre[wordProvider3.lastIndex].answer,
-      lvClass: wordProvider3.wordsListThre[wordProvider3.lastIndex].list,
-    );
-
-    if (favoriteList.favorites.contains(newFavorite)) {
-      favoriteList.deleteFavorite(
-        favoriteList.favorites.indexOf(newFavorite),
-      );
-    } else {
-      favoriteList.addFavorite(newFavorite);
-    }
-    favoriteList.saveFavorites();
   }
 
   @override
@@ -80,34 +44,16 @@ class _ThreCardState extends State<ThreCard> {
     _initTts();
   }
 
-  void _nextCard() {
-    var wordProvider3 = Provider.of<WordProvider3>(context, listen: false);
-
+  Future<void> _loadIsIconVisible() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      if (wordProvider3.lastIndex + 1 < wordProvider3.wordsListThre.length) {
-        wordProvider3.lastIndex++;
-      } else {
-        // Eğer son kartta ise ilk karta git
-        wordProvider3.lastIndex = 0;
-      }
-      _showQuestion = true;
-      _showAnswer = false;
-      wordProvider3.setLastIndex(wordProvider3.lastIndex);
+      isIconVisible = prefs.getBool(isIconVisibleKey) ?? true;
     });
   }
 
-  void _previousCard() {
-    var wordProvider3 = Provider.of<WordProvider3>(context, listen: false);
-
-    setState(() {
-      if (wordProvider3.lastIndex - 1 >= 0) {
-        wordProvider3.lastIndex--;
-      } else {
-        wordProvider3.lastIndex = wordProvider3.wordsListThre.length - 1;
-      }
-      _showQuestion = true;
-      _showAnswer = false;
-    });
+  Future<void> _saveIsIconVisible(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(isIconVisibleKey, value);
   }
 
   Future<void> _initTts() async {
@@ -121,17 +67,83 @@ class _ThreCardState extends State<ThreCard> {
     await flutterTts.speak(text);
   }
 
+  void _nextCard(WordProvider wordProvider) {
+    List<Words> words = wordProvider.getWords(widget.level);
+
+    if (words.isEmpty) {
+      _handleEmptyList();
+      return;
+    }
+
+    int currentIndex = wordProvider.getLastIndex(widget.level);
+    int newIndex = (currentIndex + 1) % words.length;
+
+    wordProvider.setLastIndex(widget.level, newIndex);
+
+    setState(() {
+      _showQuestion = true;
+      _showAnswer = false;
+    });
+  }
+
+  void _previousCard(WordProvider wordProvider) {
+    List<Words> words = wordProvider.getWords(widget.level);
+
+    if (words.isEmpty) {
+      _handleEmptyList();
+      return;
+    }
+
+    int currentIndex = wordProvider.getLastIndex(widget.level);
+    int newIndex = (currentIndex - 1 + words.length) % words.length;
+
+    wordProvider.setLastIndex(widget.level, newIndex);
+
+    setState(() {
+      _showQuestion = true;
+      _showAnswer = false;
+    });
+  }
+
+  void _toggleFavorite() {
+    var favoriteList = Provider.of<FavoriteList>(context, listen: false);
+    var wordProvider2 = Provider.of<WordProvider>(context, listen: false);
+    var oneWords = wordProvider2.getWords(widget.level);
+    int index = wordProvider2.getLastIndex(widget.level);
+
+    // Favori listesine eklemek ya da çıkarmak için gerekli işlemler burada yapılabilir
+    // Örneğin:
+    SavedItem newFavorite = SavedItem(
+      question: oneWords[index].quest,
+      answer: oneWords[index].answer,
+      lvClass: oneWords[index].list,
+    );
+
+    if (favoriteList.favorites.contains(newFavorite)) {
+      favoriteList.deleteFavorite(
+        favoriteList.favorites.indexOf(newFavorite),
+      );
+    } else {
+      favoriteList.addFavorite(newFavorite);
+    }
+    favoriteList.saveFavorites();
+  }
+
+  void _handleEmptyList() {
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.init(context);
-
-    var progressProvider = Provider.of<ProgressProvider>(context);
-    var scoreProvider = Provider.of<ScoreProvider>(context);
-    var wordProvider3 = Provider.of<WordProvider3>(context);
-
+    var wordProvider = Provider.of<WordProvider>(context);
+    List<Words> words = wordProvider.getWords(widget.level);
     FlipCardController cardController = FlipCardController();
+    int index = wordProvider.getLastIndex(widget.level);
 
-    if (wordProvider3.wordsListThre.isEmpty) {
+    if (index >= words.length) {
+      index = 0;
+      wordProvider.setLastIndex(widget.level, 0);
+
       return Scaffold(
         backgroundColor: medgreen,
         body: Center(
@@ -143,11 +155,13 @@ class _ThreCardState extends State<ThreCard> {
       );
     }
 
-    String fullText =
-        wordProvider3.wordsListThre[wordProvider3.lastIndex].front;
-    String targetWord =
-        wordProvider3.wordsListThre[wordProvider3.lastIndex].quest;
+    Words currentWord = words[index];
 
+    var progressProvider = Provider.of<ProgressProvider>(context);
+    var scoreProvider = Provider.of<ScoreProvider>(context);
+
+    String fullText = currentWord.front;
+    String targetWord = currentWord.quest;
     int startIndex = fullText.indexOf(targetWord);
 
     Widget resultWidget;
@@ -158,31 +172,19 @@ class _ThreCardState extends State<ThreCard> {
         TextSpan(
           children: [
             TextSpan(
-              text: fullText.substring(0, startIndex),
-              style: TextStyle(fontSize: 11.sp, color: Colors.black45),
-            ),
+                text: fullText.substring(0, startIndex),
+                style: TextStyle(fontSize: 11.sp, color: Colors.black45)),
             TextSpan(
-              text: targetWord,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: targetWord ==
-                        wordProvider3
-                            .wordsListThre[wordProvider3.lastIndex].quest
-                    ? yellow // Renk quest kelimesine göre değişecek
-                    : Colors.black45,
-              ),
-            ),
+                text: targetWord,
+                style: TextStyle(fontSize: 12.sp, color: yellow)),
             TextSpan(
-              text: fullText.substring(startIndex + targetWord.length),
-              style: TextStyle(fontSize: 11.sp, color: Colors.black45),
-            ),
+                text: fullText.substring(startIndex + targetWord.length),
+                style: TextStyle(fontSize: 11.sp, color: Colors.black45)),
           ],
         ),
         maxLines: 3,
       );
     } else {
-      // Hedef kelime bulunamadı, bu durumu kontrol etmek için bir işlem yapabilirsiniz.
-      // Örneğin, tüm metni aynı renkte göster veya başka bir işlem gerçekleştir.
       resultWidget = Center(
         child: Text(
           fullText,
@@ -191,7 +193,6 @@ class _ThreCardState extends State<ThreCard> {
         ),
       );
     }
-
     return Scaffold(
       backgroundColor: medgreen,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -218,8 +219,7 @@ class _ThreCardState extends State<ThreCard> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            _speak(wordProvider3
-                                .wordsListThre[wordProvider3.lastIndex].quest);
+                            _speak(words[index].quest);
                           },
                           icon: Icon(
                             Icons.settings_voice_rounded,
@@ -244,14 +244,8 @@ class _ThreCardState extends State<ThreCard> {
                           iconSize: 30.w,
                           color: favoriteList.favorites.any(
                             (item) =>
-                                item.question ==
-                                    wordProvider3
-                                        .wordsListThre[wordProvider3.lastIndex]
-                                        .quest &&
-                                item.answer ==
-                                    wordProvider3
-                                        .wordsListThre[wordProvider3.lastIndex]
-                                        .answer,
+                                item.question == words[index].quest &&
+                                item.answer == words[index].answer,
                           )
                               ? easgreen
                               : iconColor,
@@ -262,10 +256,8 @@ class _ThreCardState extends State<ThreCard> {
                     Center(
                       child: Text(
                         _showQuestion
-                            ? wordProvider3
-                                .wordsListThre[wordProvider3.lastIndex].quest
-                            : wordProvider3
-                                .wordsListThre[wordProvider3.lastIndex].answer,
+                            ? words[index].quest
+                            : words[index].answer,
                         style: TextStyle(fontSize: 30.sp, color: orange),
                       ),
                     ),
@@ -287,11 +279,8 @@ class _ThreCardState extends State<ThreCard> {
                         opacity: isIconVisible ? 1.0 : 0.0,
                         child: Text(
                           _showAnswer
-                              ? wordProvider3
-                                  .wordsListThre[wordProvider3.lastIndex].quest
-                              : wordProvider3
-                                  .wordsListThre[wordProvider3.lastIndex]
-                                  .answer,
+                              ? words[index].quest
+                              : words[index].answer,
                           style: TextStyle(color: orange, fontSize: 20.sp),
                         ),
                       ),
@@ -350,7 +339,7 @@ class _ThreCardState extends State<ThreCard> {
                             Center(
                               child: Text(
                                 textAlign: TextAlign.center,
-                                '${wordProvider3.wordsListThre[wordProvider3.lastIndex].back} ',
+                                '${words[index].back} ',
                                 maxLines: 3,
                                 style: TextStyle(
                                   fontSize: 11.sp,
@@ -393,17 +382,15 @@ class _ThreCardState extends State<ThreCard> {
                         ),
                         SizedBox(width: 80.w),
                         Text(
-                          '765/ ${wordProvider3.wordsListThre.length}',
+                          '765/ ${words.length}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         SizedBox(width: 65.w),
                         IconButton(
                           onPressed: () {
                             progressProvider.increaseProgress2();
-                            if (wordProvider3.wordsListThre.isNotEmpty) {
-                              wordProvider3.deleteWord3(
-                                  wordProvider3.lastIndex, context);
-
+                            if (words.isNotEmpty) {
+                              wordProvider.deleteWord('B1', index, context);
                               scoreProvider.incrementScore(20);
                             } else {
                               const SnackBar(
@@ -432,7 +419,9 @@ class _ThreCardState extends State<ThreCard> {
                   width: ScreenUtil().setWidth(100),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: orange),
-                    onPressed: _previousCard,
+                    onPressed: () {
+                      _previousCard(wordProvider);
+                    },
                     child: Icon(
                       Icons.arrow_circle_left_outlined,
                       color: whites,
@@ -446,7 +435,9 @@ class _ThreCardState extends State<ThreCard> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: orange,
                     ),
-                    onPressed: _nextCard,
+                    onPressed: () {
+                      _nextCard(wordProvider);
+                    },
                     child:
                         Icon(Icons.arrow_circle_right_outlined, color: whites),
                   ),

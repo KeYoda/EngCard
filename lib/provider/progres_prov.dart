@@ -3,6 +3,7 @@ import 'package:eng_card/data/fourwords_data.dart';
 import 'package:eng_card/data/secwords_data.dart';
 import 'package:eng_card/data/thirdwords_data.dart';
 import 'package:eng_card/data/words_data.dart';
+import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:flutter/material.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -257,23 +258,15 @@ class ProgressProvider extends ChangeNotifier {
 ////////////////////////////////////////////////////////////////////////////////
 
 class ListProgressProvider extends ChangeNotifier {
-  int _oneCardWords = 0;
-  int _twoCardWords = 0;
-  int _threCardWords = 0;
-  int _fourCardWords = 0;
-  int _fiveCardWords = 0;
+  final Map<String, int> _cardWordCounts = {
+    'A1': 0,
+    'A2': 0,
+    'B1': 0,
+    'B2': 0,
+    'C1': 0,
+  };
 
-  int get oneCardWords => _oneCardWords;
-  int get twoCardWords => _twoCardWords;
-  int get threCardWords => _threCardWords;
-  int get fourCardWords => _fourCardWords;
-  int get fiveCardWords => _fiveCardWords;
-
-  static const String _keyOneCardWords = 'OneCardWords';
-  static const String _keyTwoCardWords = 'TwoCardWords';
-  static const String _keyThreCardWords = 'ThreCardWords';
-  static const String _keyFourCardWords = 'FourCardWords';
-  static const String _keyFiveCardWords = 'FiveCardWords';
+  Map<String, int> get cardWordCounts => _cardWordCounts;
 
   SharedPreferences? _prefs;
 
@@ -284,65 +277,36 @@ class ListProgressProvider extends ChangeNotifier {
   Future<void> _loadWordsValues() async {
     _prefs = await SharedPreferences.getInstance();
 
-    _oneCardWords = _prefs?.getInt(_keyOneCardWords) ?? wordsList.length;
-    _twoCardWords = _prefs?.getInt(_keyTwoCardWords) ?? wordsList2.length;
-    _threCardWords = _prefs?.getInt(_keyThreCardWords) ?? wordsList3.length;
-    _fourCardWords = _prefs?.getInt(_keyFourCardWords) ?? wordsList4.length;
-    _fiveCardWords = _prefs?.getInt(_keyFiveCardWords) ?? wordsList5.length;
+    for (var level in _cardWordCounts.keys) {
+      _cardWordCounts[level] = _prefs?.getInt('${level}_CardWords') ?? 0;
+    }
 
     notifyListeners();
   }
 
   Future<void> saveWordsValues() async {
-    await _prefs?.setInt(_keyOneCardWords, _oneCardWords);
-    await _prefs?.setInt(_keyTwoCardWords, _twoCardWords);
-    await _prefs?.setInt(_keyThreCardWords, _threCardWords);
-    await _prefs?.setInt(_keyFourCardWords, _fourCardWords);
-    await _prefs?.setInt(_keyFiveCardWords, _fiveCardWords);
+    for (var entry in _cardWordCounts.entries) {
+      await _prefs?.setInt('${entry.key}_CardWords', entry.value);
+    }
   }
 
-  void resetWordsProgress() {
-    _oneCardWords = wordsList.length;
-    _twoCardWords = wordsList2.length;
-    _threCardWords = wordsList3.length;
-    _fourCardWords = wordsList4.length;
-    _fiveCardWords = wordsList5.length;
-
-    notifyListeners();
-  }
-
-  void listProgress() {
-    //B2
-    _oneCardWords -= 1;
+  void resetWordsProgress({required WordProvider wordProvider}) {
+    for (var level in _cardWordCounts.keys) {
+      _cardWordCounts[level] = wordProvider.getWords(level).length;
+    }
     saveWordsValues();
     notifyListeners();
   }
 
-  void listProgress1() {
-    //B2
-    _twoCardWords -= 1;
-    saveWordsValues();
-    notifyListeners();
+  void decreaseProgress(String level) {
+    if (_cardWordCounts.containsKey(level) && _cardWordCounts[level]! > 0) {
+      _cardWordCounts[level] = _cardWordCounts[level]! - 1;
+      saveWordsValues();
+      notifyListeners();
+    }
   }
 
-  void listProgress2() {
-    //B2
-    _threCardWords -= 1;
-    saveWordsValues();
-    notifyListeners();
-  }
-
-  void listProgress3() {
-    //B2
-    _fourCardWords -= 1;
-    saveWordsValues();
-    notifyListeners();
-  }
-
-  void listProgress4() {
-    //B2
-    _fiveCardWords -= 1;
-    saveWordsValues();
-    notifyListeners();
+  int getProgress(String level) {
+    return _cardWordCounts[level] ?? 0;
   }
 }

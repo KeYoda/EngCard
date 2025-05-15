@@ -1,8 +1,9 @@
+import 'package:eng_card/data/gridview.dart';
 import 'package:eng_card/data/save_words.dart';
 import 'package:eng_card/data/favorite_list.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
-import 'package:eng_card/provider/wordshare_fiveprov.dart';
+import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:eng_card/screens/six_screen.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flip_card/flip_card_controller.dart';
@@ -14,63 +15,26 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FiveCard extends StatefulWidget {
-  const FiveCard({super.key});
+  const FiveCard({super.key, required this.level});
+  final String level;
   @override
   State<FiveCard> createState() => _FiveCardState();
 }
 
 class _FiveCardState extends State<FiveCard> {
+  FlutterTts flutterTts = FlutterTts();
   FavoriteList favoriteList = FavoriteList();
 
-  FlutterTts flutterTts = FlutterTts();
   bool _showQuestion = true;
   bool _showAnswer = false;
-  Color iconColor = easgreen;
   bool isIconVisible = true;
-
+  Color iconColor = easgreen;
   static const String isIconVisibleKey = 'isIconVisible';
-
   void changeIcon() {
     setState(() {
       isIconVisible = !isIconVisible;
       _saveIsIconVisible(isIconVisible);
     });
-  }
-
-  Future<void> _loadIsIconVisible() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      // SharedPreferences'ten isIconVisible değerini oku
-      isIconVisible = prefs.getBool(isIconVisibleKey) ?? true;
-    });
-  }
-
-  Future<void> _saveIsIconVisible(bool value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // SharedPreferences'e isIconVisible değerini kaydet
-    await prefs.setBool(isIconVisibleKey, value);
-  }
-
-  void _toggleFavorite() {
-    var favoriteList = Provider.of<FavoriteList>(context, listen: false);
-    var wordProvider5 = Provider.of<WordProvider5>(context, listen: false);
-
-    // Favori listesine eklemek ya da çıkarmak için gerekli işlemler burada yapılabilir
-    // Örneğin:
-    SavedItem newFavorite = SavedItem(
-      question: wordProvider5.wordsListFive[wordProvider5.lastIndex].quest,
-      answer: wordProvider5.wordsListFive[wordProvider5.lastIndex].answer,
-      lvClass: wordProvider5.wordsListFive[wordProvider5.lastIndex].list,
-    );
-
-    if (favoriteList.favorites.contains(newFavorite)) {
-      favoriteList.deleteFavorite(
-        favoriteList.favorites.indexOf(newFavorite),
-      );
-    } else {
-      favoriteList.addFavorite(newFavorite);
-    }
-    favoriteList.saveFavorites();
   }
 
   @override
@@ -80,34 +44,16 @@ class _FiveCardState extends State<FiveCard> {
     _initTts();
   }
 
-  void _nextCard() {
-    var wordProvider5 = Provider.of<WordProvider5>(context, listen: false);
-
+  Future<void> _loadIsIconVisible() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      if (wordProvider5.lastIndex + 1 < wordProvider5.wordsListFive.length) {
-        wordProvider5.lastIndex++;
-      } else {
-        // Eğer son kartta ise ilk karta git
-        wordProvider5.lastIndex = 0;
-      }
-      _showQuestion = true;
-      _showAnswer = false;
-      wordProvider5.setLastIndex(wordProvider5.lastIndex);
+      isIconVisible = prefs.getBool(isIconVisibleKey) ?? true;
     });
   }
 
-  void _previousCard() {
-    var wordProvider5 = Provider.of<WordProvider5>(context, listen: false);
-
-    setState(() {
-      if (wordProvider5.lastIndex - 1 >= 0) {
-        wordProvider5.lastIndex--;
-      } else {
-        wordProvider5.lastIndex = wordProvider5.wordsListFive.length - 1;
-      }
-      _showQuestion = true;
-      _showAnswer = false;
-    });
+  Future<void> _saveIsIconVisible(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(isIconVisibleKey, value);
   }
 
   Future<void> _initTts() async {
@@ -121,17 +67,83 @@ class _FiveCardState extends State<FiveCard> {
     await flutterTts.speak(text);
   }
 
+  void _nextCard(WordProvider wordProvider) {
+    List<Words> words = wordProvider.getWords(widget.level);
+
+    if (words.isEmpty) {
+      _handleEmptyList();
+      return;
+    }
+
+    int currentIndex = wordProvider.getLastIndex(widget.level);
+    int newIndex = (currentIndex + 1) % words.length;
+
+    wordProvider.setLastIndex(widget.level, newIndex);
+
+    setState(() {
+      _showQuestion = true;
+      _showAnswer = false;
+    });
+  }
+
+  void _previousCard(WordProvider wordProvider) {
+    List<Words> words = wordProvider.getWords(widget.level);
+
+    if (words.isEmpty) {
+      _handleEmptyList();
+      return;
+    }
+
+    int currentIndex = wordProvider.getLastIndex(widget.level);
+    int newIndex = (currentIndex - 1 + words.length) % words.length;
+
+    wordProvider.setLastIndex(widget.level, newIndex);
+
+    setState(() {
+      _showQuestion = true;
+      _showAnswer = false;
+    });
+  }
+
+  void _toggleFavorite() {
+    var favoriteList = Provider.of<FavoriteList>(context, listen: false);
+    var wordProvider2 = Provider.of<WordProvider>(context, listen: false);
+    var oneWords = wordProvider2.getWords(widget.level);
+    int index = wordProvider2.getLastIndex(widget.level);
+
+    // Favori listesine eklemek ya da çıkarmak için gerekli işlemler burada yapılabilir
+    // Örneğin:
+    SavedItem newFavorite = SavedItem(
+      question: oneWords[index].quest,
+      answer: oneWords[index].answer,
+      lvClass: oneWords[index].list,
+    );
+
+    if (favoriteList.favorites.contains(newFavorite)) {
+      favoriteList.deleteFavorite(
+        favoriteList.favorites.indexOf(newFavorite),
+      );
+    } else {
+      favoriteList.addFavorite(newFavorite);
+    }
+    favoriteList.saveFavorites();
+  }
+
+  void _handleEmptyList() {
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.init(context);
-
-    var progressProvider = Provider.of<ProgressProvider>(context);
-    var scoreProvider = Provider.of<ScoreProvider>(context);
-    var wordProvider5 = Provider.of<WordProvider5>(context);
-
+    var wordProvider = Provider.of<WordProvider>(context);
+    List<Words> words = wordProvider.getWords(widget.level);
     FlipCardController cardController = FlipCardController();
+    int index = wordProvider.getLastIndex(widget.level);
 
-    if (wordProvider5.wordsListFive.isEmpty) {
+    if (index >= words.length) {
+      index = 0;
+      wordProvider.setLastIndex(widget.level, 0);
+
       return Scaffold(
         backgroundColor: medgreen,
         body: Center(
@@ -143,11 +155,13 @@ class _FiveCardState extends State<FiveCard> {
       );
     }
 
-    String fullText =
-        wordProvider5.wordsListFive[wordProvider5.lastIndex].front;
-    String targetWord =
-        wordProvider5.wordsListFive[wordProvider5.lastIndex].quest;
+    Words currentWord = words[index];
 
+    var progressProvider = Provider.of<ProgressProvider>(context);
+    var scoreProvider = Provider.of<ScoreProvider>(context);
+
+    String fullText = currentWord.front;
+    String targetWord = currentWord.quest;
     int startIndex = fullText.indexOf(targetWord);
 
     Widget resultWidget;
@@ -158,31 +172,19 @@ class _FiveCardState extends State<FiveCard> {
         TextSpan(
           children: [
             TextSpan(
-              text: fullText.substring(0, startIndex),
-              style: TextStyle(fontSize: 11.sp, color: Colors.black45),
-            ),
+                text: fullText.substring(0, startIndex),
+                style: TextStyle(fontSize: 11.sp, color: Colors.black45)),
             TextSpan(
-              text: targetWord,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: targetWord ==
-                        wordProvider5
-                            .wordsListFive[wordProvider5.lastIndex].quest
-                    ? yellow // Renk quest kelimesine göre değişecek
-                    : Colors.black45,
-              ),
-            ),
+                text: targetWord,
+                style: TextStyle(fontSize: 12.sp, color: yellow)),
             TextSpan(
-              text: fullText.substring(startIndex + targetWord.length),
-              style: TextStyle(fontSize: 11.sp, color: Colors.black45),
-            ),
+                text: fullText.substring(startIndex + targetWord.length),
+                style: TextStyle(fontSize: 11.sp, color: Colors.black45)),
           ],
         ),
         maxLines: 3,
       );
     } else {
-      // Hedef kelime bulunamadı, bu durumu kontrol etmek için bir işlem yapabilirsiniz.
-      // Örneğin, tüm metni aynı renkte göster veya başka bir işlem gerçekleştir.
       resultWidget = Center(
         child: Text(
           fullText,
@@ -218,8 +220,7 @@ class _FiveCardState extends State<FiveCard> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            _speak(wordProvider5
-                                .wordsListFive[wordProvider5.lastIndex].quest);
+                            _speak(words[index].quest);
                           },
                           icon: Icon(
                             Icons.settings_voice_rounded,
@@ -244,14 +245,8 @@ class _FiveCardState extends State<FiveCard> {
                           iconSize: 30.w,
                           color: favoriteList.favorites.any(
                             (item) =>
-                                item.question ==
-                                    wordProvider5
-                                        .wordsListFive[wordProvider5.lastIndex]
-                                        .quest &&
-                                item.answer ==
-                                    wordProvider5
-                                        .wordsListFive[wordProvider5.lastIndex]
-                                        .answer,
+                                item.question == words[index].quest &&
+                                item.answer == words[index].answer,
                           )
                               ? easgreen
                               : iconColor,
@@ -262,10 +257,8 @@ class _FiveCardState extends State<FiveCard> {
                     Center(
                       child: Text(
                         _showQuestion
-                            ? wordProvider5
-                                .wordsListFive[wordProvider5.lastIndex].quest
-                            : wordProvider5
-                                .wordsListFive[wordProvider5.lastIndex].answer,
+                            ? words[index].quest
+                            : words[index].answer,
                         style: TextStyle(fontSize: 30.sp, color: orange),
                       ),
                     ),
@@ -287,11 +280,8 @@ class _FiveCardState extends State<FiveCard> {
                         opacity: isIconVisible ? 1.0 : 0.0,
                         child: Text(
                           _showAnswer
-                              ? wordProvider5
-                                  .wordsListFive[wordProvider5.lastIndex].quest
-                              : wordProvider5
-                                  .wordsListFive[wordProvider5.lastIndex]
-                                  .answer,
+                              ? words[index].quest
+                              : words[index].answer,
                           style: TextStyle(color: orange, fontSize: 20.sp),
                         ),
                       ),
@@ -350,7 +340,7 @@ class _FiveCardState extends State<FiveCard> {
                             Center(
                               child: Text(
                                 textAlign: TextAlign.center,
-                                '${wordProvider5.wordsListFive[wordProvider5.lastIndex].back} ',
+                                '${words[index].back} ',
                                 maxLines: 3,
                                 style: TextStyle(
                                   fontSize: 11.sp,
@@ -393,16 +383,15 @@ class _FiveCardState extends State<FiveCard> {
                         ),
                         SizedBox(width: 80.w),
                         Text(
-                          '1170/ ${wordProvider5.wordsListFive.length}',
+                          '1170/ ${words.length}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         SizedBox(width: 65.w),
                         IconButton(
                           onPressed: () {
                             progressProvider.increaseProgress4();
-                            if (wordProvider5.wordsListFive.isNotEmpty) {
-                              wordProvider5.deleteWord5(
-                                  wordProvider5.lastIndex, context);
+                            if (words.isNotEmpty) {
+                              wordProvider.deleteWord('C1', index, context);
 
                               scoreProvider.incrementScore(30);
                             } else {
@@ -432,7 +421,9 @@ class _FiveCardState extends State<FiveCard> {
                   width: 100.w,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: orange),
-                    onPressed: _previousCard,
+                    onPressed: () {
+                      _previousCard(wordProvider);
+                    },
                     child: Icon(
                       Icons.arrow_circle_left_outlined,
                       color: whites,
@@ -446,7 +437,9 @@ class _FiveCardState extends State<FiveCard> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: orange,
                     ),
-                    onPressed: _nextCard,
+                    onPressed: () {
+                      _nextCard(wordProvider);
+                    },
                     child:
                         Icon(Icons.arrow_circle_right_outlined, color: whites),
                   ),

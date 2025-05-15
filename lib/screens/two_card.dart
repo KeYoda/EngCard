@@ -1,8 +1,9 @@
+import 'package:eng_card/data/gridview.dart';
 import 'package:eng_card/data/save_words.dart';
 import 'package:eng_card/data/favorite_list.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
-import 'package:eng_card/provider/wordshare_twoprov.dart';
+import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:eng_card/screens/six_screen.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flip_card/flip_card_controller.dart';
@@ -14,65 +15,27 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TwoCard extends StatefulWidget {
-  const TwoCard({super.key});
+  const TwoCard({super.key, required this.level});
+  final String level;
+
   @override
   State<TwoCard> createState() => _TwoCardState();
 }
 
 class _TwoCardState extends State<TwoCard> {
+  FlutterTts flutterTts = FlutterTts();
   FavoriteList favoriteList = FavoriteList();
 
-  int currentIndex = 0;
-
-  FlutterTts flutterTts = FlutterTts();
   bool _showQuestion = true;
-  bool isIconVisible = true;
   bool _showAnswer = false;
+  bool isIconVisible = true;
   Color iconColor = easgreen;
-
   static const String isIconVisibleKey = 'isIconVisible';
-
   void changeIcon() {
     setState(() {
       isIconVisible = !isIconVisible;
       _saveIsIconVisible(isIconVisible);
     });
-  }
-
-  void _toggleFavorite() {
-    var favoriteList = Provider.of<FavoriteList>(context, listen: false);
-    var wordProvider2 = Provider.of<WordProvider2>(context, listen: false);
-
-    // Favori listesine eklemek ya da çıkarmak için gerekli işlemler burada yapılabilir
-    // Örneğin:
-    SavedItem newFavorite = SavedItem(
-      question: wordProvider2.wordsListTwo[wordProvider2.lastIndex2].quest,
-      answer: wordProvider2.wordsListTwo[wordProvider2.lastIndex2].answer,
-      lvClass: wordProvider2.wordsListTwo[wordProvider2.lastIndex2].list,
-    );
-
-    if (favoriteList.favorites.contains(newFavorite)) {
-      favoriteList.deleteFavorite(
-        favoriteList.favorites.indexOf(newFavorite),
-      );
-    } else {
-      favoriteList.addFavorite(newFavorite);
-    }
-    favoriteList.saveFavorites();
-  }
-
-  Future<void> _loadIsIconVisible() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      // SharedPreferences'ten isIconVisible değerini oku
-      isIconVisible = prefs.getBool(isIconVisibleKey) ?? true;
-    });
-  }
-
-  Future<void> _saveIsIconVisible(bool value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // SharedPreferences'e isIconVisible değerini kaydet
-    await prefs.setBool(isIconVisibleKey, value);
   }
 
   @override
@@ -82,35 +45,16 @@ class _TwoCardState extends State<TwoCard> {
     _initTts();
   }
 
-  void _nextCard() {
-    var wordProvider2 = Provider.of<WordProvider2>(context, listen: false);
-
+  Future<void> _loadIsIconVisible() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      if (wordProvider2.lastIndex2 + 1 < wordProvider2.wordsListTwo.length) {
-        wordProvider2.lastIndex2++;
-      } else {
-        // Eğer son kartta ise ilk karta git
-        wordProvider2.lastIndex2 = 0;
-      }
-      _showQuestion = true;
-      _showAnswer = false;
-      wordProvider2.setLastIndex(wordProvider2.lastIndex2);
+      isIconVisible = prefs.getBool(isIconVisibleKey) ?? true;
     });
   }
 
-  void _previousCard() {
-    var wordProvider2 = Provider.of<WordProvider2>(context, listen: false);
-
-    setState(() {
-      if (wordProvider2.lastIndex2 - 1 >= 0) {
-        wordProvider2.lastIndex2--;
-      } else {
-        wordProvider2.lastIndex2 = wordProvider2.wordsListTwo.length - 1;
-      }
-      _showQuestion = true;
-      _showAnswer = false;
-      wordProvider2.setLastIndex(wordProvider2.lastIndex2);
-    });
+  Future<void> _saveIsIconVisible(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(isIconVisibleKey, value);
   }
 
   Future<void> _initTts() async {
@@ -124,17 +68,83 @@ class _TwoCardState extends State<TwoCard> {
     await flutterTts.speak(text);
   }
 
+  void _nextCard(WordProvider wordProvider) {
+    List<Words> words = wordProvider.getWords(widget.level);
+
+    if (words.isEmpty) {
+      _handleEmptyList();
+      return;
+    }
+
+    int currentIndex = wordProvider.getLastIndex(widget.level);
+    int newIndex = (currentIndex + 1) % words.length;
+
+    wordProvider.setLastIndex(widget.level, newIndex);
+
+    setState(() {
+      _showQuestion = true;
+      _showAnswer = false;
+    });
+  }
+
+  void _previousCard(WordProvider wordProvider) {
+    List<Words> words = wordProvider.getWords(widget.level);
+
+    if (words.isEmpty) {
+      _handleEmptyList();
+      return;
+    }
+
+    int currentIndex = wordProvider.getLastIndex(widget.level);
+    int newIndex = (currentIndex - 1 + words.length) % words.length;
+
+    wordProvider.setLastIndex(widget.level, newIndex);
+
+    setState(() {
+      _showQuestion = true;
+      _showAnswer = false;
+    });
+  }
+
+  void _toggleFavorite() {
+    var favoriteList = Provider.of<FavoriteList>(context, listen: false);
+    var wordProvider2 = Provider.of<WordProvider>(context, listen: false);
+    var oneWords = wordProvider2.getWords(widget.level);
+    int index = wordProvider2.getLastIndex(widget.level);
+
+    // Favori listesine eklemek ya da çıkarmak için gerekli işlemler burada yapılabilir
+    // Örneğin:
+    SavedItem newFavorite = SavedItem(
+      question: oneWords[index].quest,
+      answer: oneWords[index].answer,
+      lvClass: oneWords[index].list,
+    );
+
+    if (favoriteList.favorites.contains(newFavorite)) {
+      favoriteList.deleteFavorite(
+        favoriteList.favorites.indexOf(newFavorite),
+      );
+    } else {
+      favoriteList.addFavorite(newFavorite);
+    }
+    favoriteList.saveFavorites();
+  }
+
+  void _handleEmptyList() {
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.init(context);
-
+    var wordProvider = Provider.of<WordProvider>(context);
+    List<Words> words = wordProvider.getWords(widget.level);
     FlipCardController cardController = FlipCardController();
+    int index = wordProvider.getLastIndex(widget.level);
 
-    var progressProvider = Provider.of<ProgressProvider>(context);
-    var scoreProvider = Provider.of<ScoreProvider>(context);
-    var wordProvider2 = Provider.of<WordProvider2>(context);
+    if (index >= words.length) {
+      index = 0;
+      wordProvider.setLastIndex(widget.level, 0);
 
-    if (wordProvider2.wordsListTwo.isEmpty) {
       return Scaffold(
         backgroundColor: medgreen,
         body: Center(
@@ -146,11 +156,13 @@ class _TwoCardState extends State<TwoCard> {
       );
     }
 
-    String fullText =
-        wordProvider2.wordsListTwo[wordProvider2.lastIndex2].front;
-    String targetWord =
-        wordProvider2.wordsListTwo[wordProvider2.lastIndex2].quest;
+    Words currentWord = words[index];
 
+    var progressProvider = Provider.of<ProgressProvider>(context);
+    var scoreProvider = Provider.of<ScoreProvider>(context);
+
+    String fullText = currentWord.front;
+    String targetWord = currentWord.quest;
     int startIndex = fullText.indexOf(targetWord);
 
     Widget resultWidget;
@@ -168,9 +180,7 @@ class _TwoCardState extends State<TwoCard> {
               text: targetWord,
               style: TextStyle(
                 fontSize: 12.sp,
-                color: targetWord ==
-                        wordProvider2
-                            .wordsListTwo[wordProvider2.lastIndex2].quest
+                color: targetWord == words[index].quest
                     ? yellow // Renk quest kelimesine göre değişecek
                     : Colors.black45,
               ),
@@ -222,8 +232,7 @@ class _TwoCardState extends State<TwoCard> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            _speak(wordProvider2
-                                .wordsListTwo[wordProvider2.lastIndex2].quest);
+                            _speak(words[index].quest);
                           },
                           icon: Icon(
                             Icons.settings_voice_rounded,
@@ -248,14 +257,8 @@ class _TwoCardState extends State<TwoCard> {
                           iconSize: 30.w,
                           color: favoriteList.favorites.any(
                             (item) =>
-                                item.question ==
-                                    wordProvider2
-                                        .wordsListTwo[wordProvider2.lastIndex2]
-                                        .quest &&
-                                item.answer ==
-                                    wordProvider2
-                                        .wordsListTwo[wordProvider2.lastIndex2]
-                                        .answer,
+                                item.question == words[index].quest &&
+                                item.answer == words[index].answer,
                           )
                               ? easgreen
                               : iconColor,
@@ -266,10 +269,8 @@ class _TwoCardState extends State<TwoCard> {
                     Center(
                       child: Text(
                         _showQuestion
-                            ? wordProvider2
-                                .wordsListTwo[wordProvider2.lastIndex2].quest
-                            : wordProvider2
-                                .wordsListTwo[wordProvider2.lastIndex2].answer,
+                            ? words[index].quest
+                            : words[index].answer,
                         style: TextStyle(fontSize: 30.sp, color: orange),
                       ),
                     ),
@@ -291,11 +292,8 @@ class _TwoCardState extends State<TwoCard> {
                         opacity: isIconVisible ? 1.0 : 0.0,
                         child: Text(
                           _showAnswer
-                              ? wordProvider2
-                                  .wordsListTwo[wordProvider2.lastIndex2].quest
-                              : wordProvider2
-                                  .wordsListTwo[wordProvider2.lastIndex2]
-                                  .answer,
+                              ? words[index].quest
+                              : words[index].answer,
                           style: TextStyle(color: orange, fontSize: 20.sp),
                         ),
                       ),
@@ -354,7 +352,7 @@ class _TwoCardState extends State<TwoCard> {
                             Center(
                               child: Text(
                                 textAlign: TextAlign.center,
-                                '${wordProvider2.wordsListTwo[wordProvider2.lastIndex2].back} ',
+                                '${words[index].back} ',
                                 maxLines: 3,
                                 style: TextStyle(
                                   fontSize: 11.sp,
@@ -397,16 +395,15 @@ class _TwoCardState extends State<TwoCard> {
                         ),
                         SizedBox(width: ScreenUtil().setWidth(80)),
                         Text(
-                          '465/ ${wordProvider2.wordsListTwo.length}',
+                          '465/ ${words.length}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         SizedBox(width: ScreenUtil().setWidth(65)),
                         IconButton(
                           onPressed: () {
                             progressProvider.increaseProgress1();
-                            if (wordProvider2.wordsListTwo.isNotEmpty) {
-                              wordProvider2.deleteWord2(
-                                  wordProvider2.lastIndex2, context);
+                            if (words.isNotEmpty) {
+                              wordProvider.deleteWord('A2', index, context);
 
                               scoreProvider.incrementScore(15);
                             } else {
@@ -436,7 +433,9 @@ class _TwoCardState extends State<TwoCard> {
                   width: ScreenUtil().setWidth(100),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: orange),
-                    onPressed: _previousCard,
+                    onPressed: () {
+                      _previousCard(wordProvider);
+                    },
                     child: Icon(
                       Icons.arrow_circle_left_outlined,
                       color: whites,
@@ -450,7 +449,9 @@ class _TwoCardState extends State<TwoCard> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: orange,
                     ),
-                    onPressed: _nextCard,
+                    onPressed: () {
+                      _nextCard(wordProvider);
+                    },
                     child:
                         Icon(Icons.arrow_circle_right_outlined, color: whites),
                   ),

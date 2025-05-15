@@ -6,11 +6,8 @@ import 'package:eng_card/data/thirdwords_data.dart';
 import 'package:eng_card/data/words_data.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
-import 'package:eng_card/provider/wordshare_fiveprov.dart';
-import 'package:eng_card/provider/wordshare_fourprov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
-import 'package:eng_card/provider/wordshare_threprov.dart';
-import 'package:eng_card/provider/wordshare_twoprov.dart';
+import 'package:eng_card/screens/ai_chat_screen.dart';
 import 'package:eng_card/screens/fav_card.dart';
 import 'package:eng_card/screens/practice_card.dart';
 import 'package:eng_card/screens/six_screen.dart';
@@ -80,6 +77,16 @@ class MainDrawer extends StatelessWidget {
         text: ' Email',
         onTap: () => _launchEmail(),
       ),
+      _createDrawerTile(context, icon: Icons.person, text: 'ChatBot',
+          onTap: () {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ChatScreen(),
+          ),
+        );
+      }),
       _createDrawerTile(
         context,
         icon: Icons.share,
@@ -296,10 +303,6 @@ void showDeleteConfirmationDialog(BuildContext context) {
   final deleteProgress = context.read<ProgressProvider>();
   final resetScore = context.read<ScoreProvider>();
   final resetWords = context.read<WordProvider>();
-  final resetWords2 = context.read<WordProvider2>();
-  final resetWords3 = context.read<WordProvider3>();
-  final resetWords4 = context.read<WordProvider4>();
-  final resetWords5 = context.read<WordProvider5>();
   final resetTestList = context.read<ListProgressProvider>();
 
   showDialog(
@@ -324,14 +327,14 @@ void showDeleteConfirmationDialog(BuildContext context) {
           TextButton(
             onPressed: () {
               deleteProgress.resetProgressLength();
-              resetTestList.resetWordsProgress();
+              resetTestList.resetWordsProgress(wordProvider: resetWords);
               deleteProgress.resetProgress();
               resetScore.resetTotalScore();
-              resetWords.resetList();
-              resetWords2.resetList2();
-              resetWords3.resetList3();
-              resetWords4.resetList4();
-              resetWords5.resetList5();
+              resetWords.resetList('A1');
+              resetWords.resetList('A2');
+              resetWords.resetList('B1');
+              resetWords.resetList('B2');
+              resetWords.resetList('C1');
 
               Navigator.of(context).pop();
             },
