@@ -7,7 +7,6 @@ import 'package:eng_card/data/words_data.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
-import 'package:eng_card/screens/ai_chat_screen.dart';
 import 'package:eng_card/screens/fav_card.dart';
 import 'package:eng_card/screens/practice_card.dart';
 import 'package:eng_card/screens/six_screen.dart';
@@ -77,16 +76,6 @@ class MainDrawer extends StatelessWidget {
         text: ' Email',
         onTap: () => _launchEmail(),
       ),
-      _createDrawerTile(context, icon: Icons.person, text: 'ChatBot',
-          onTap: () {
-        Navigator.pop(context);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const ChatScreen(),
-          ),
-        );
-      }),
       _createDrawerTile(
         context,
         icon: Icons.share,
