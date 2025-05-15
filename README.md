@@ -31,3 +31,8 @@ git clone https://github.com/KeYoda/EngCard.git
 cd EngCard
 flutter pub get
 flutter run
+
+
+👤 Geliştirici
+Umut Keskin
+📧 umutskskn@gmail.com
