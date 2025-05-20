@@ -1,10 +1,10 @@
 # 📚 WordCard - English Word Learning App
 
-WordCard, İngilizce kelime öğrenimini eğlenceli ve verimli hale getirmek için Flutter ile geliştirilmiş bir mobil uygulamadır. Kullanıcılar günlük kelimeleri öğrenebilir, favori kelimelerini saklayabilir ve gelişimlerini takip edebilir.
+WordCard is a mobile app developed with Flutter to make learning English vocabulary fun and efficient. Users can learn daily vocabulary, store their favorite words and track their progress.
 
 ---
 
-## 📸 Ekran Görüntüleri
+## 📸 Screenshots
 
 | Ana Sayfa | Favori Kelimeler | Card Ekranı |
 |-----------|------------------|-------------|
@@ -14,13 +14,13 @@ WordCard, İngilizce kelime öğrenimini eğlenceli ve verimli hale getirmek iç
 
 ---
 
-## 🚀 Özellikler
+## 🚀 Features
 
-- 🔤 Günlük İngilizce kelime kartları
-- ⭐ Favorilere ekleme ve listeleme
-- 🔍 Anlam ve örnek cümlelerle detaylı açıklamalar
-- 🧠 Tekrar sistemi
-- 📱 Modern ve kullanıcı dostu UI/UX
+- 🔤 Daily English vocabulary cards
+- ⭐ Adding and listing favorites
+- 🔍 Detailed explanations with meaning and example sentences
+- 🧠 Repeat system
+- 📱 Modern and user-friendly UI/UX
 
 ---
 
@@ -33,6 +33,6 @@ flutter pub get
 flutter run
 
 
-👤 Geliştirici
+👤 Developer
 Umut Keskin
 📧 umutskskn@gmail.com
