@@ -9,9 +9,10 @@ import 'package:eng_card/data/words_data.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
 import 'package:eng_card/screens/six_screen.dart';
+// import 'package:eng_card/screens/six_screen.dart'; // Kullanılmıyorsa kaldırılabilir
 import 'package:eng_card/screens/test/test_data.dart';
 import 'package:eng_card/screens/test/blanc_test.dart';
-import 'package:eng_card/screens/test/test_word_screen.dart';
+import 'package:eng_card/screens/test/test_word_screen.dart'; // TestWord buradaysa burayı import edin
 import 'package:eng_card/screens/test/voice_test.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,7 @@ class TestResult extends StatefulWidget {
   final int correctAnswer;
   final int totalScore;
   final List<QuestionAnswer> answeredQuestions;
+  final String level; // EKLENDİ: Yeniden başlatma için gerekli
 
   const TestResult({
     Key? key,
@@ -29,6 +31,7 @@ class TestResult extends StatefulWidget {
     required this.correctAnswer,
     required this.answeredQuestions,
     required this.totalScore,
+    required this.level, // Constructor'a eklendi
   }) : super(key: key);
 
   @override
@@ -42,11 +45,15 @@ class _TestResultState extends State<TestResult> {
   @override
   void initState() {
     super.initState();
-    buttonCols = List<Color>.filled(widget.answeredQuestions.length, hardgreen);
+    // Liste boşsa hata vermemesi için kontrol
+    int length = widget.answeredQuestions.length;
+    buttonCols = List<Color>.filled(length > 0 ? length : 1, hardgreen);
     favoriteList = Provider.of<FavoriteList>(context, listen: false);
   }
 
   void toggleFav(int index) {
+    if (widget.answeredQuestions.isEmpty) return;
+
     SavedItem newFavorite = SavedItem(
       answer: widget.answeredQuestions[index].answer,
       question: widget.answeredQuestions[index].question,
@@ -57,12 +64,12 @@ class _TestResultState extends State<TestResult> {
         favoriteList.favorites.indexOf(newFavorite),
       );
       setState(() {
-        buttonCols[index] = hardgreen; // Favori kaldırıldığında rengi güncelle
+        buttonCols[index] = hardgreen;
       });
     } else {
       favoriteList.addFavorite(newFavorite);
       setState(() {
-        buttonCols[index] = Colors.red; // Favori eklendiğinde rengi güncelle
+        buttonCols[index] = Colors.red;
       });
     }
     favoriteList.saveFavorites();
@@ -71,14 +78,15 @@ class _TestResultState extends State<TestResult> {
   @override
   Widget build(BuildContext context) {
     var progressProv = Provider.of<ProgressProvider>(context);
-    int indexLevel = 0;
 
+    // Tüm kelimeleri birleştirme mantığı (Eski yapı korundu)
     List<Words> combinedWords = []
       ..addAll(wordsList)
       ..addAll(wordsList2)
       ..addAll(wordsList3)
       ..addAll(wordsList4)
       ..addAll(wordsList5);
+
     int wrongWord = widget.totalQuestions - widget.correctAnswer;
 
     return Scaffold(
@@ -86,7 +94,7 @@ class _TestResultState extends State<TestResult> {
         automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 245, 245, 245),
         title: Text(
-          'Test Tamamlandı!',
+          'Test Tamamlandı! (${widget.level})', // Level bilgisini başlığa ekledim
           style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -107,7 +115,7 @@ class _TestResultState extends State<TestResult> {
                         bottom: 100.h,
                         left: 30.w,
                         child: Text(
-                          'Soru Sayısı:' '        ${widget.totalQuestions}',
+                          'Soru Sayısı:        ${widget.totalQuestions}',
                           style: TextStyle(color: whites, fontSize: 15.sp),
                         ),
                       ),
@@ -115,7 +123,7 @@ class _TestResultState extends State<TestResult> {
                         bottom: 70.h,
                         left: 30.w,
                         child: Text(
-                          'Doğru Sayısı:  ' '     ${widget.correctAnswer}',
+                          'Doğru Sayısı:      ${widget.correctAnswer}',
                           style: TextStyle(color: whites, fontSize: 15.sp),
                         ),
                       ),
@@ -123,7 +131,7 @@ class _TestResultState extends State<TestResult> {
                         bottom: 40.h,
                         left: 30.w,
                         child: Text(
-                          'Yanlış Sayısı:  ' '     $wrongWord',
+                          'Yanlış Sayısı:      $wrongWord',
                           style: TextStyle(color: whites, fontSize: 15.sp),
                         ),
                       ),
@@ -131,7 +139,7 @@ class _TestResultState extends State<TestResult> {
                         bottom: 70.h,
                         left: 200.w,
                         child: Text(
-                          'Puan:  ' '     ${widget.totalScore}',
+                          'Puan:      ${widget.totalScore}',
                           style: TextStyle(color: whites, fontSize: 18.sp),
                         ),
                       ),
@@ -150,52 +158,72 @@ class _TestResultState extends State<TestResult> {
                 child: Card(
                   elevation: 4,
                   color: yellow.withOpacity(0.9),
-                  child: ListView.builder(
-                    itemCount: widget.answeredQuestions.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(
-                          widget.answeredQuestions[index].question,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(widget.answeredQuestions[index].answer),
-                        leading: Text(
-                          widget.answeredQuestions[index].list,
-                          style: TextStyle(color: whites),
-                        ),
-                        trailing: IconButton(
-                          onPressed: () {
-                            toggleFav(index);
+                  child: widget.answeredQuestions.isEmpty
+                      ? Center(child: Text("Cevaplanan soru yok."))
+                      : ListView.builder(
+                          itemCount: widget.answeredQuestions.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(
+                                widget.answeredQuestions[index].question,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              subtitle:
+                                  Text(widget.answeredQuestions[index].answer),
+                              leading: Text(
+                                widget.answeredQuestions[index].list,
+                                style: TextStyle(color: whites),
+                              ),
+                              trailing: IconButton(
+                                onPressed: () {
+                                  toggleFav(index);
+                                },
+                                icon: Icon(
+                                  Icons.favorite,
+                                  color: buttonCols[index],
+                                ),
+                              ),
+                            );
                           },
-                          icon: Icon(
-                            Icons.favorite,
-                            color: buttonCols[index],
-                          ),
                         ),
-                      );
-                    },
-                  ),
                 ),
               ),
               SizedBox(height: 25.h),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        orange, // Buton rengi eklendi (Görsellik için)
+                    shape: const CircleBorder(),
+                    padding: EdgeInsets.all(20.h)),
                 onPressed: () {
+                  // Skoru güncelle
                   Provider.of<ScoreProvider>(context, listen: false)
                       .incrementScore(widget.totalScore);
+
+                  // Doğru cevap sayacını sıfırla
                   Provider.of<ProgressProvider>(context, listen: false)
                       .resetCorrectAnswers();
+
+                  // Sayfayı kapat
                   Navigator.pop(context);
+
+                  // Soru sayısına göre ilgili testi yeniden başlat
                   if (widget.totalQuestions == 15) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => TestWord(
+                          level:
+                              widget.level, // ARTIK PARAMETRE OLARAK GEÇİYORUZ
+                          words: combinedWords,
                           onComplete: () {
-                            if (progressProv.remainingQuestions == 0) {
-                              progressProv.resetProgressLength();
+                            // Map kontrolü yapıldı
+                            if (progressProv.remainingQuestions[widget.level] ==
+                                0) {
+                              progressProv.resetCorrectAnswers();
                             }
                           },
-                          words: combinedWords,
                         ),
                       ),
                     );
@@ -204,13 +232,16 @@ class _TestResultState extends State<TestResult> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => BlancTestScreen(
-                            level: widget.answeredQuestions[indexLevel].list,
+                            level: widget
+                                .level, // DÜZELTİLDİ: widget.level kullanıldı
+                            words: combinedWords,
                             onComplete: () {
-                              if (progressProv.remainingQuestions == 0) {
-                                progressProv.resetProgressLength();
+                              if (progressProv
+                                      .remainingQuestions[widget.level] ==
+                                  0) {
+                                progressProv.resetCorrectAnswers();
                               }
                             },
-                            words: combinedWords,
                           ),
                         ));
                   } else {
@@ -218,18 +249,22 @@ class _TestResultState extends State<TestResult> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => VoiceTest(
-                            level: widget.answeredQuestions[indexLevel].list,
+                            level: widget
+                                .level, // DÜZELTİLDİ: widget.level kullanıldı
+                            words: combinedWords,
                             onComplete: () {
-                              if (progressProv.remainingQuestions == 0) {
-                                progressProv.resetProgressLength();
+                              if (progressProv
+                                      .remainingQuestions[widget.level] ==
+                                  0) {
+                                progressProv.resetCorrectAnswers();
                               }
                             },
-                            words: combinedWords,
                           ),
                         ));
                   }
                 },
-                child: const Icon(Icons.restart_alt),
+                child: const Icon(Icons.restart_alt,
+                    color: Colors.white, size: 30),
               ),
             ],
           ),

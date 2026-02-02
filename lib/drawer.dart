@@ -9,7 +9,7 @@ import 'package:eng_card/provider/scor_prov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:eng_card/screens/fav_card.dart';
 import 'package:eng_card/screens/practice_card.dart';
-import 'package:eng_card/screens/six_screen.dart';
+import 'package:eng_card/screens/six_screen.dart'; // Renkler için (easgreen vb.)
 import 'package:eng_card/screens/test/blanc_test.dart';
 import 'package:eng_card/screens/test/test_word_screen.dart';
 import 'package:eng_card/screens/test/voice_test.dart';
@@ -112,8 +112,6 @@ class MainDrawer extends StatelessWidget {
       ..addAll(wordsList4)
       ..addAll(wordsList5);
 
-    // double screenHeight = ScreenUtil().screenHeight;
-
     return Drawer(
       child: Column(
         children: [
@@ -208,7 +206,7 @@ class MainDrawer extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => BlancTestScreen(
-                  level: '',
+                  level: 'Mix', // Karışık test olduğu için 'Mix' gönderiyoruz
                   onComplete: () {},
                   words: combinedWords,
                 ),
@@ -225,6 +223,8 @@ class MainDrawer extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => TestWord(
+                  // 'Genel' veya 'Mix' diyerek level ilerlemesini tetiklemiyoruz (sadece pratik)
+                  level: 'Mix',
                   onComplete: () {},
                   words: combinedWords,
                 ),
@@ -241,7 +241,7 @@ class MainDrawer extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => VoiceTest(
-                  level: '',
+                  level: 'Mix', // Karışık test
                   onComplete: () {},
                   words: combinedWords,
                 ),
@@ -289,6 +289,7 @@ class MainDrawer extends StatelessWidget {
 }
 
 void showDeleteConfirmationDialog(BuildContext context) {
+  // Provider'ları okuyoruz (listen: false yapısı read içinde zaten vardır)
   final deleteProgress = context.read<ProgressProvider>();
   final resetScore = context.read<ScoreProvider>();
   final resetWords = context.read<WordProvider>();
@@ -300,7 +301,7 @@ void showDeleteConfirmationDialog(BuildContext context) {
       return AlertDialog(
         backgroundColor: hardgreen,
         content: Text(
-          'İlerlemeyi silmek istediğinizden emin misiniz?',
+          'Tüm ilerlemeyi ve skorları silmek istediğinizden emin misiniz?',
           style: TextStyle(color: whites),
         ),
         actions: [
@@ -315,17 +316,17 @@ void showDeleteConfirmationDialog(BuildContext context) {
           ),
           TextButton(
             onPressed: () {
-              deleteProgress.resetProgressLength();
-              resetTestList.resetWordsProgress(wordProvider: resetWords);
-              deleteProgress.resetProgress();
+              // Tüm resetleme işlemlerini burada çağırıyoruz
+              deleteProgress.resetAllProgress(); // Progress ve Level reset
               resetScore.resetTotalScore();
-              resetWords.resetList('A1');
-              resetWords.resetList('A2');
-              resetWords.resetList('B1');
-              resetWords.resetList('B2');
-              resetWords.resetList('C1');
+              resetTestList.resetWordsProgress(wordProvider: resetWords);
+              resetWords.restoreAllWords();
 
               Navigator.of(context).pop();
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Tüm ilerleme sıfırlandı.')),
+              );
             },
             child: Text(
               'Evet, Sil',

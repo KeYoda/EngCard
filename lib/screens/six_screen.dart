@@ -1,13 +1,11 @@
 import 'package:eng_card/data/favorite_list.dart';
-import 'package:eng_card/drawer.dart';
+import 'package:eng_card/drawer.dart'; // MainDrawer burada varsayıyorum
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
-import 'package:eng_card/screens/five_card.dart';
-import 'package:eng_card/screens/four_card.dart';
-import 'package:eng_card/screens/one_card.dart';
-import 'package:eng_card/screens/thre_card.dart';
-import 'package:eng_card/screens/two_card.dart';
+import 'package:eng_card/screens/flash_card.dart';
+// ÖNEMLİ: Eski one_card.dart yerine yeni oluşturduğumuz flash_card_screen.dart'ı import ediyoruz.
+// Dosya adını 'flash_card_screen.dart' olarak kaydettiğinizi varsayıyorum.
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +17,7 @@ class SixScreen extends StatefulWidget {
   State<SixScreen> createState() => _SixScreenState();
 }
 
+// Yardımcı Fonksiyonlar ve Renkler
 BoxDecoration createCircularBox(String imagePath) {
   return BoxDecoration(
     shape: BoxShape.circle,
@@ -42,7 +41,10 @@ class _SixScreenState extends State<SixScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Favorileri yükle
     final favoriteList = Provider.of<FavoriteList>(context);
+    // Bu işlem build içinde sürekli çağrılmamalıdır,
+    // ancak veri yapınıza göre burada durabilir (initState daha iyidir).
     favoriteList.loadFavorites();
 
     var progressProvider = Provider.of<ProgressProvider>(context);
@@ -72,6 +74,7 @@ class _SixScreenState extends State<SixScreen> {
             SizedBox(
               height: screenHeight * 0.050,
             ),
+            // A1 ve A2 Satırı
             _buildLevelRow(
               context,
               wordListProvider,
@@ -80,6 +83,7 @@ class _SixScreenState extends State<SixScreen> {
               screenHeight,
             ),
             SizedBox(height: screenHeight * 0.03),
+            // B1 ve B2 Satırı
             _buildLevelRow1(
               context,
               wordListProvider,
@@ -88,6 +92,7 @@ class _SixScreenState extends State<SixScreen> {
               screenHeight,
             ),
             SizedBox(height: screenHeight * 0.03),
+            // C1 Satırı
             _buildFinalLevel(context, wordListProvider, progressProvider,
                 screenWidth, screenHeight),
           ],
@@ -152,28 +157,27 @@ class _SixScreenState extends State<SixScreen> {
     return Row(
       children: [
         SizedBox(width: screenWidth * 0.024),
+        // A1 KARTI
         _buildLevelCard(
           context,
           'A1',
           createCircularBox('assets/a1.webp'),
           wordListProvider.getWords('A1').isEmpty,
-          const OneCard(
-            level: 'A1',
-          ),
-          progressProvider.progressValue,
+          // ARTIK ONE CARD YOK, TEK EKRAN VAR:
+          const FlashCardScreen(level: 'A1'),
+          progressProvider.getLinearProgress('A1'),
           screenWidth,
           screenHeight,
         ),
         SizedBox(width: screenWidth * 0.01),
+        // A2 KARTI
         _buildLevelCard(
           context,
           'A2',
           createCircularBox('assets/a2.webp'),
           wordListProvider.getWords('A2').isEmpty,
-          const TwoCard(
-            level: 'A2',
-          ),
-          progressProvider.progressValue1,
+          const FlashCardScreen(level: 'A2'),
+          progressProvider.getLinearProgress('A2'),
           screenWidth,
           screenHeight,
         ),
@@ -191,26 +195,51 @@ class _SixScreenState extends State<SixScreen> {
     return Row(
       children: [
         SizedBox(width: screenWidth * 0.024),
+        // B1 KARTI
         _buildLevelCard(
           context,
           'B1',
           createCircularBox('assets/a3.webp'),
           wordListProvider.getWords('B1').isEmpty,
-          const ThreCard(
-            level: 'B1',
-          ),
-          progressProvider.progressValue2,
+          const FlashCardScreen(level: 'B1'),
+          progressProvider.getLinearProgress('B1'),
           screenWidth,
           screenHeight,
         ),
         SizedBox(width: screenWidth * 0.01),
+        // B2 KARTI
         _buildLevelCard(
           context,
           'B2',
           createCircularBox('assets/a4.webp'),
           wordListProvider.getWords('B2').isEmpty,
-          const FourCard(level: 'B2'),
-          progressProvider.progressValue3,
+          const FlashCardScreen(level: 'B2'),
+          progressProvider.getLinearProgress('B2'),
+          screenWidth,
+          screenHeight,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFinalLevel(
+    BuildContext context,
+    WordProvider wordListProvider,
+    ProgressProvider progressProvider,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    return Row(
+      children: [
+        SizedBox(width: screenWidth * 0.25),
+        // C1 KARTI
+        _buildLevelCard(
+          context,
+          'C1',
+          createCircularBox('assets/a5.webp'),
+          wordListProvider.getWords('C1').isEmpty,
+          const FlashCardScreen(level: 'C1'),
+          progressProvider.getLinearProgress('C1'),
           screenWidth,
           screenHeight,
         ),
@@ -258,6 +287,8 @@ class _SixScreenState extends State<SixScreen> {
                 height: screenHeight * 0.179,
                 decoration: decoration,
                 child: CircularProgressIndicator(
+                  // strokeAlign özelliği Flutter 3.7+ gerektirir.
+                  // Eğer hata alırsanız bu satırı silebilirsiniz.
                   strokeAlign: 2,
                   strokeWidth: 7,
                   value: progressValue,
@@ -266,6 +297,8 @@ class _SixScreenState extends State<SixScreen> {
                 ),
               ),
               Positioned(
+                // Ekran boyutuna göre konumlandırma yapmak daha sağlıklı olabilir
+                // ancak orijinal tasarımınızı bozmamak için sabit değerleri korudum.
                 right: 60,
                 bottom: 65,
                 child: Text(level, style: _textStyle),
@@ -274,32 +307,6 @@ class _SixScreenState extends State<SixScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildFinalLevel(
-    BuildContext context,
-    WordProvider wordListProvider,
-    ProgressProvider progressProvider,
-    double screenWidth,
-    double screenHeight,
-  ) {
-    return Row(
-      children: [
-        SizedBox(width: screenWidth * 0.25),
-        _buildLevelCard(
-          context,
-          'C1',
-          createCircularBox('assets/a5.webp'),
-          wordListProvider.getWords('C1').isEmpty,
-          const FiveCard(
-            level: 'C1',
-          ),
-          progressProvider.progressValue4,
-          screenWidth,
-          screenHeight,
-        ),
-      ],
     );
   }
 }

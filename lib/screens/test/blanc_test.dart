@@ -77,7 +77,7 @@ class _TestScreenState extends State<BlancTestScreen> {
     var progressProv = Provider.of<ProgressProvider>(context, listen: false);
 
     setState(() {
-      progressProv.increaseCircleProgress(widget.words[currentIndex].list);
+      progressProv.increaseLinearProgress(widget.level);
       progressProv.completeQuestion(widget.words[currentIndex].list);
       isDisabled = true;
       showCorrectAnswer = true; // Doğru cevabı göster
@@ -115,6 +115,7 @@ class _TestScreenState extends State<BlancTestScreen> {
               context,
               MaterialPageRoute(
                 builder: (context) => TestResult(
+                  level: widget.level,
                   totalScore: scoreBlanc,
                   correctAnswer: correctAnswersCount,
                   totalQuestions: 10,

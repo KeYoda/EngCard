@@ -5,15 +5,16 @@ import 'package:eng_card/data/thirdwords_data.dart';
 import 'package:eng_card/data/words_data.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:flutter/material.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProgressProvider extends ChangeNotifier {
   int _correctAnswers = 0;
-  int _totalQuest = 0;
-  double testProgressValue = 0.0;
+  int _totalQuest = 15; // Varsayılan değer atandı
+  // Test Progress
+  double _testProgressValue = 0.0;
 
-  Map<String, int> _remainingQuestions = {
+  // Kalan soruları takip eden map
+  final Map<String, int> _remainingQuestions = {
     'A1': wordsList.length,
     'A2': wordsList2.length,
     'B1': wordsList3.length,
@@ -21,6 +22,7 @@ class ProgressProvider extends ChangeNotifier {
     'C1': wordsList5.length,
   };
 
+  // Dairesel ilerlemeyi takip eden map
   Map<String, double> circleProgress = {
     'A1': 0.0,
     'A2': 0.0,
@@ -29,6 +31,16 @@ class ProgressProvider extends ChangeNotifier {
     'C1': 0.0,
   };
 
+  // Lineer (çubuk) ilerlemeyi takip eden map (Eski _progressValue1, 2, 3 yerine)
+  final Map<String, double> _linearProgress = {
+    'A1': 0.0,
+    'A2': 0.0,
+    'B1': 0.0,
+    'B2': 0.0,
+    'C1': 0.0,
+  };
+
+  // Artış miktarları
   final Map<String, double> incrementValues = {
     'A1': 0.0025,
     'A2': 0.0021505376344086,
@@ -37,18 +49,96 @@ class ProgressProvider extends ChangeNotifier {
     'C1': 0.0008547009,
   };
 
+  // Getterlar
+  Map<String, int> get remainingQuestions => _remainingQuestions;
+  int get correctAnswers => _correctAnswers;
+  int get totalQuest => _totalQuest;
+  double get testProgressValue => _testProgressValue;
+
+  // Belirli bir level'ın lineer progress değerini getirmek için
+  double getLinearProgress(String level) {
+    return _linearProgress[level] ?? 0.0;
+  }
+
+  // SharedPreferences nesnesi
+  SharedPreferences? _prefs;
+
+  ProgressProvider() {
+    _initPreferences();
+  }
+
+  Future<void> _initPreferences() async {
+    _prefs = await SharedPreferences.getInstance();
+    _loadAllValues();
+  }
+
+  // Tüm değerleri yükle
+  void _loadAllValues() {
+    if (_prefs == null) return;
+
+    // Remaining Questions Yükleme
+    _remainingQuestions.forEach((key, _) {
+      _remainingQuestions[key] =
+          _prefs!.getInt('${key}_remainingQuestions') ?? _totalQuestions(key);
+    });
+
+    // Linear Progress Yükleme (Eski progressValue'lar)
+    _linearProgress.forEach((key, _) {
+      _linearProgress[key] = _prefs!.getDouble('${key}_progressValue') ?? 0.0;
+    });
+
+    // Circle Progress Hesaplama (Kalan sorulara göre)
+    _remainingQuestions.forEach((key, val) {
+      int total = _totalQuestions(key);
+      if (total > 0) {
+        circleProgress[key] = 1 - (val / total);
+      } else {
+        circleProgress[key] = 0.0;
+      }
+    });
+
+    _testProgressValue = _prefs!.getDouble('testProgressValue') ?? 0.0;
+
+    notifyListeners();
+  }
+
+  // --- İŞLEM FONKSİYONLARI ---
+
+  // 1. Lineer Progress Artırma (FlashCardScreen için asıl lazım olan bu)
+  void increaseLinearProgress(String level) {
+    if (_linearProgress.containsKey(level) &&
+        incrementValues.containsKey(level)) {
+      double current = _linearProgress[level]!;
+      double increment = incrementValues[level]!;
+
+      // 1.0'ı (yani %100'ü) geçmesini engellemek için kontrol
+      double newValue = current + increment;
+      if (newValue > 1.0) newValue = 1.0;
+
+      _linearProgress[level] = newValue;
+
+      _prefs?.setDouble('${level}_progressValue', newValue);
+      notifyListeners();
+    }
+  }
+
+  // 2. Soru Tamamlama (Circle Progress için)
   void completeQuestion(String level) {
     if (_remainingQuestions.containsKey(level) &&
         _remainingQuestions[level] != null &&
         _remainingQuestions[level]! > 0) {
       _remainingQuestions[level] = _remainingQuestions[level]! - 1;
-      circleProgress[level] =
-          1 - (_remainingQuestions[level]! / _totalQuestions(level));
-      _saveProgressSettings();
+
+      // Circle update
+      int total = _totalQuestions(level);
+      if (total > 0) {
+        circleProgress[level] = 1 - (_remainingQuestions[level]! / total);
+      }
+
+      // Kaydet
+      _prefs?.setInt(
+          '${level}_remainingQuestions', _remainingQuestions[level]!);
       notifyListeners();
-    } else {
-      print(
-          'Error: Level $level not found in _remainingQuestions or it is null'); // Debugging için eklendi
     }
   }
 
@@ -73,165 +163,41 @@ class ProgressProvider extends ChangeNotifier {
     return circleProgress[level] ?? 0.0;
   }
 
-  void resetProgressLength() {
-    circleProgress = {
-      'A1': 0.0,
-      'A2': 0.0,
-      'B1': 0.0,
-      'B2': 0.0,
-      'C1': 0.0,
-    };
-    _remainingQuestions = {
-      'A1': wordsList.length,
-      'A2': wordsList2.length,
-      'B1': wordsList3.length,
-      'B2': wordsList4.length,
-      'C1': wordsList5.length,
-    };
-    _saveProgressSettings();
+  // --- RESET İŞLEMLERİ ---
+
+  // Tüm level ilerlemelerini sıfırla
+  void resetAllProgress() {
+    // Linear sıfırla
+    _linearProgress.updateAll((key, value) => 0.0);
+
+    // Remaining (Kalan) sıfırla - Full listeye geri döner
+    _remainingQuestions['A1'] = wordsList.length;
+    _remainingQuestions['A2'] = wordsList2.length;
+    _remainingQuestions['B1'] = wordsList3.length;
+    _remainingQuestions['B2'] = wordsList4.length;
+    _remainingQuestions['C1'] = wordsList5.length;
+
+    // Circle sıfırla
+    circleProgress.updateAll((key, value) => 0.0);
+
+    // Kaydet
+    _saveAllToPrefs();
     notifyListeners();
   }
 
-  double _progressValue = 0.0;
-  double _progressValue1 = 0.0;
-  double _progressValue2 = 0.0;
-  double _progressValue3 = 0.0;
-  double _progressValue4 = 0.0;
-  double _testProgressValue = 0.0;
+  void _saveAllToPrefs() {
+    if (_prefs == null) return;
 
-  double get progressValue => _progressValue;
-  double get progressValue1 => _progressValue1;
-  double get progressValue2 => _progressValue2;
-  double get progressValue3 => _progressValue3;
-  double get progressValue4 => _progressValue4;
-  Map<String, int> get remainingQuestions => _remainingQuestions;
+    _remainingQuestions.forEach((key, val) {
+      _prefs!.setInt('${key}_remainingQuestions', val);
+    });
 
-  int get correctAnswers => _correctAnswers;
-  int get totalQuest => _totalQuest;
-
-  // SharedPreferences anahtarları
-  static const String _keyProgressValue = 'progressValue';
-  static const String _keyProgressValue1 = 'progressValue1';
-  static const String _keyProgressValue2 = 'progressValue2';
-  static const String _keyProgressValue3 = 'progressValue3';
-  static const String _keyProgressValue4 = 'progressValue4';
-  static const String _keyTestProgressValue = 'testProgressValue';
-
-  void _loadProgressSettings() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    remainingQuestions['A1'] =
-        prefs.getInt('A1_remainingQuestions') ?? wordsList.length;
-    remainingQuestions['A2'] =
-        prefs.getInt('A2_remainingQuestions') ?? wordsList2.length;
-    remainingQuestions['B1'] =
-        prefs.getInt('B1_remainingQuestions') ?? wordsList3.length;
-    remainingQuestions['B2'] =
-        prefs.getInt('B2_remainingQuestions') ?? wordsList4.length;
-    remainingQuestions['C1'] =
-        prefs.getInt('C1_remainingQuestions') ?? wordsList5.length;
-
-    circleProgress['A1'] = 1 - (_remainingQuestions['A1']! / wordsList.length);
-    circleProgress['A2'] = 1 - (_remainingQuestions['A2']! / wordsList2.length);
-    circleProgress['B1'] = 1 - (_remainingQuestions['B1']! / wordsList3.length);
-    circleProgress['B2'] = 1 - (_remainingQuestions['B2']! / wordsList4.length);
-    circleProgress['C1'] = 1 - (_remainingQuestions['C1']! / wordsList5.length);
-
-    notifyListeners();
+    _linearProgress.forEach((key, val) {
+      _prefs!.setDouble('${key}_progressValue', val);
+    });
   }
 
-  void _saveProgressSettings() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('A1_remainingQuestions', remainingQuestions['A1']!);
-    prefs.setInt('A2_remainingQuestions', remainingQuestions['A2']!);
-    prefs.setInt('B1_remainingQuestions', remainingQuestions['B1']!);
-    prefs.setInt('B2_remainingQuestions', remainingQuestions['B2']!);
-    prefs.setInt('C1_remainingQuestions', remainingQuestions['C1']!);
-  }
-
-  // SharedPreferences nesnesi
-  SharedPreferences? _prefs;
-
-  ProgressProvider() {
-    _loadValues();
-    _loadProgressSettings();
-  }
-
-  // SharedPreferences'ten değerleri yükle
-  Future<void> _loadValues() async {
-    _prefs = await SharedPreferences.getInstance();
-    _progressValue = _prefs?.getDouble(_keyProgressValue) ?? 0.0;
-    _progressValue1 = _prefs?.getDouble(_keyProgressValue1) ?? 0.0;
-    _progressValue2 = _prefs?.getDouble(_keyProgressValue2) ?? 0.0;
-    _progressValue3 = _prefs?.getDouble(_keyProgressValue3) ?? 0.0;
-    _progressValue4 = _prefs?.getDouble(_keyProgressValue4) ?? 0.0;
-    _testProgressValue = _prefs?.getDouble(_keyTestProgressValue) ?? 0.0;
-
-    notifyListeners();
-  }
-
-  // SharedPreferences'e değerleri kaydet
-  Future<void> _saveValues() async {
-    await _prefs?.setDouble(_keyProgressValue, _progressValue);
-    await _prefs?.setDouble(_keyProgressValue1, _progressValue1);
-    await _prefs?.setDouble(_keyProgressValue2, _progressValue2);
-    await _prefs?.setDouble(_keyProgressValue3, _progressValue3);
-    await _prefs?.setDouble(_keyProgressValue4, _progressValue4);
-    await _prefs?.setDouble(_keyTestProgressValue, _testProgressValue);
-  }
-
-  void increaseProgress() {
-    //A1
-    _progressValue += 0.0025;
-    _saveValues();
-    notifyListeners();
-  }
-
-  void increaseProgress1() {
-    //A2
-    _progressValue1 += 0.0021505376344086;
-    _saveValues();
-    notifyListeners();
-  }
-
-  void increaseProgress2() {
-    //B1
-    _progressValue2 += 0.0013071895424837;
-    _saveValues();
-    notifyListeners();
-  }
-
-  void increaseProgress3() {
-    //B2
-    _progressValue3 += 0.0014705882;
-    _saveValues();
-    notifyListeners();
-  }
-
-  void increaseProgress4() {
-    //C1
-    _progressValue4 += 0.0008547009;
-    _saveValues();
-    notifyListeners();
-  }
-
-  void increaseCircleProgress(String level) {
-    circleProgress[level] =
-        (circleProgress[level] ?? 0.0) + (incrementValues[level] ?? 0.0);
-    _saveProgressSettings();
-    notifyListeners();
-  }
-
-  void resetProgress() {
-    _progressValue = 0.0;
-    _progressValue1 = 0.0;
-    _progressValue2 = 0.0;
-    _progressValue3 = 0.0;
-    _progressValue4 = 0.0;
-
-    _saveValues();
-    notifyListeners();
-  }
-
+  // --- TEST İŞLEMLERİ ---
   void incrementCorrectAnswers() {
     _correctAnswers++;
     notifyListeners();
@@ -250,11 +216,7 @@ class ProgressProvider extends ChangeNotifier {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+// LIST PROGRESS PROVIDER
 ////////////////////////////////////////////////////////////////////////////////
 
 class ListProgressProvider extends ChangeNotifier {
@@ -280,7 +242,6 @@ class ListProgressProvider extends ChangeNotifier {
     for (var level in _cardWordCounts.keys) {
       _cardWordCounts[level] = _prefs?.getInt('${level}_CardWords') ?? 0;
     }
-
     notifyListeners();
   }
 
@@ -290,8 +251,10 @@ class ListProgressProvider extends ChangeNotifier {
     }
   }
 
+  // Burada WordProvider'a ihtiyaç duyuyoruz çünkü "Full" liste uzunluğunu bilmeli
   void resetWordsProgress({required WordProvider wordProvider}) {
     for (var level in _cardWordCounts.keys) {
+      // Dinamik olarak ilgili level'ın kelime sayısını alıp resetler
       _cardWordCounts[level] = wordProvider.getWords(level).length;
     }
     saveWordsValues();

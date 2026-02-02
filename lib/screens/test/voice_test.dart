@@ -146,7 +146,7 @@ class _StateVoiceTest extends State<VoiceTest> {
 
                     // Check if the word is complete
                     if (!userInput.contains('')) {
-                      progressProv.increaseCircleProgress(widget.level);
+                      progressProv.getLinearProgress(widget.level);
                       progressProv.completeQuestion(widget.level);
                       // Wait for a short delay before moving to the next question
                       Future.delayed(const Duration(milliseconds: 500), () {
@@ -203,6 +203,7 @@ class _StateVoiceTest extends State<VoiceTest> {
           context,
           MaterialPageRoute(
             builder: (context) => TestResult(
+              level: widget.level,
               totalQuestions: 8,
               correctAnswer: correctAnswerCount,
               answeredQuestions: answeredQuestionsCard,

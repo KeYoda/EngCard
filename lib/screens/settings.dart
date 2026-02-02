@@ -108,6 +108,7 @@ class Settings extends StatelessWidget {
               progressProvider.getCircleProgress('A1'),
               createCircularBox('assets/a1.webp'),
               TestWord(
+                level: 'A1',
                 words: filterWordsByLevel(allWords, 'A1'),
                 onComplete: () {
                   progressProvider.completeQuestion('A1');
@@ -121,6 +122,7 @@ class Settings extends StatelessWidget {
               progressProvider.getCircleProgress('A2'),
               createCircularBox('assets/a2.webp'),
               TestWord(
+                level: 'A2',
                 words: filterWordsByLevel(allWords, 'A2'),
                 onComplete: () {
                   progressProvider.completeQuestion('A2');
@@ -134,6 +136,7 @@ class Settings extends StatelessWidget {
               progressProvider.getCircleProgress('B1'),
               createCircularBox('assets/a3.webp'),
               TestWord(
+                level: 'B1',
                 words: filterWordsByLevel(allWords, 'B1'),
                 onComplete: () {
                   progressProvider.completeQuestion('B1');
@@ -147,6 +150,7 @@ class Settings extends StatelessWidget {
               progressProvider.getCircleProgress('B2'),
               createCircularBox('assets/a4.webp'),
               TestWord(
+                level: 'B2',
                 words: filterWordsByLevel(allWords, 'B2'),
                 onComplete: () {
                   progressProvider.completeQuestion('B2');
@@ -160,6 +164,7 @@ class Settings extends StatelessWidget {
             progressProvider.getCircleProgress('C1'),
             createCircularBox('assets/a5.webp'),
             TestWord(
+              level: 'C1',
               words: filterWordsByLevel(allWords, 'C1'),
               onComplete: () {
                 progressProvider.completeQuestion('C1');

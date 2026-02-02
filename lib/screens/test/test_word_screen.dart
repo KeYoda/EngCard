@@ -1,10 +1,10 @@
 import 'dart:math';
 
 import 'package:eng_card/data/gridview.dart';
-
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/screens/settings.dart';
 import 'package:eng_card/screens/six_screen.dart';
+// import 'package:eng_card/screens/six_screen.dart'; // Kullanılmıyorsa kaldırın
 import 'package:eng_card/screens/test/answer_button.dart';
 import 'package:eng_card/screens/test/test_data.dart';
 import 'package:eng_card/screens/test/test_result.dart';
@@ -14,11 +14,13 @@ import 'package:provider/provider.dart';
 
 class TestWord extends StatefulWidget {
   final List<Words> words;
+  final String level; // EKLENDİ: Provider'ı güncellemek için gerekli
   final VoidCallback onComplete;
 
   const TestWord({
     super.key,
     required this.words,
+    required this.level, // Constructor'a eklendi
     required this.onComplete,
   });
 
@@ -32,8 +34,8 @@ class _TestWordState extends State<TestWord> {
   List<Words> combinedListWords = [];
 
   String? selectedAnswer;
-
-  int totalQuests = 16;
+  // Toplam soru sayısı (İsteğe göre 15 sabit kalabilir veya listenin uzunluğu olabilir)
+  int remainingQuestsDisplay = 15;
   int scoreBlanc = 0;
 
   List<QuestionAnswer> answeredQuestionsTest = [];
@@ -49,28 +51,42 @@ class _TestWordState extends State<TestWord> {
   @override
   void initState() {
     super.initState();
-
-    combinedListWords = widget.words;
+    // Gelen listeyi bozmamak için kopyasını alıyoruz
+    combinedListWords = List.from(widget.words);
     generateAnswers();
   }
 
   void generateAnswers() {
-    combinedListWords.shuffle();
-
-    String correctAnswer = combinedListWords[currentIndex].answer;
-    totalQuests--;
-    answers.clear();
-    answers.add(correctAnswer);
-    for (int i = 0; i < 4; i++) {
-      String randomAnswer;
-      do {
-        randomAnswer =
-            combinedListWords[Random.secure().nextInt(combinedListWords.length)]
-                .answer;
-      } while (randomAnswer == correctAnswer || answers.contains(randomAnswer));
-      answers.add(randomAnswer);
+    // Listeyi karıştırıyoruz ama currentIndex'i korumamız lazım,
+    // o yüzden sadece cevap şıklarını karıştırmak daha güvenli.
+    // Ancak kelime sırası her testte farklı olsun istiyorsanız,
+    // initState'de bir kere shuffle yapıp burada index ile ilerlemek daha iyidir.
+    if (currentIndex == 0) {
+      combinedListWords.shuffle();
     }
 
+    String correctAnswer = combinedListWords[currentIndex].answer;
+
+    // Sayaç mantığı
+    if (remainingQuestsDisplay > 0) remainingQuestsDisplay--;
+
+    answers.clear();
+    answers.add(correctAnswer);
+
+    // Yanlış şıkları ekle
+    int attemptCount = 0;
+    while (answers.length < 4 && attemptCount < 100) {
+      String randomAnswer =
+          combinedListWords[Random.secure().nextInt(combinedListWords.length)]
+              .answer;
+
+      if (randomAnswer != correctAnswer && !answers.contains(randomAnswer)) {
+        answers.add(randomAnswer);
+      }
+      attemptCount++;
+    }
+
+    // Eğer liste çok kısaysa ve 4 şık çıkmıyorsa döngü sonsuza girmesin diye önlem aldık.
     answers.shuffle();
   }
 
@@ -80,16 +96,22 @@ class _TestWordState extends State<TestWord> {
     setState(() {
       isDisabled = true;
       showCorrectAnswer = true;
+
       if (isCorrect) {
-        progressProv.increaseCircleProgress(widget.words[currentIndex].list);
-        progressProv.completeQuestion(widget.words[currentIndex].list);
+        // YENİ PROVIDER YAPISINA GÖRE GÜNCELLENDİ:
+        progressProv.increaseLinearProgress(widget.level);
+
+        // Bu kelimenin ait olduğu listeye göre circle progress güncellemesi
+        // (Genelde widget.level ile words[i].list aynıdır ama garanti olsun)
+        progressProv.completeQuestion(widget.level);
+
         scoreBlanc = scoreBlanc + 10;
         correctAnswersCount++;
       }
 
       if (currentIndex < combinedListWords.length) {
         String question = combinedListWords[currentIndex].quest;
-        String list = combinedListWords[currentIndex].list;
+        String list = combinedListWords[currentIndex].list; // veya widget.level
         String answer = combinedListWords[currentIndex].answer;
 
         answeredQuestionsTest.add(QuestionAnswer(
@@ -100,40 +122,56 @@ class _TestWordState extends State<TestWord> {
       }
 
       Future.delayed(const Duration(seconds: 1), () {
-        setState(() {
-          if (currentIndex < 14) {
-            currentIndex++;
-            selectedAnswer = null;
-            isDisabled = false;
-            showCorrectAnswer = false;
-            selectedAnswerText = null;
-            generateAnswers();
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TestResult(
-                  totalScore: scoreBlanc,
-                  correctAnswer: correctAnswersCount,
-                  totalQuestions: 15,
-                  answeredQuestions: answeredQuestionsTest,
+        if (mounted) {
+          // Ekranın hala açık olduğunu kontrol et
+          setState(() {
+            // 15 soruluk test veya liste bitene kadar
+            if (currentIndex < 14 &&
+                currentIndex < combinedListWords.length - 1) {
+              currentIndex++;
+              selectedAnswer = null;
+              isDisabled = false;
+              showCorrectAnswer = false;
+              selectedAnswerText = null;
+              generateAnswers();
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TestResult(
+                    level: widget.level,
+                    totalScore: scoreBlanc,
+                    correctAnswer: correctAnswersCount,
+                    totalQuestions:
+                        currentIndex + 1, // Gerçek çözülen soru sayısı
+                    answeredQuestions: answeredQuestionsTest,
+                  ),
                 ),
-              ),
-            );
-          }
-        });
+              );
+            }
+          });
+        }
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // ScreenUtil init işlemini genelde main.dart'ta yapmak daha sağlıklıdır.
+    // Ama burada kalmasında da bir sakınca yok.
     ScreenUtil.init(
       context,
       designSize: const Size(375, 812),
       minTextAdapt: true,
       splitScreenMode: true,
     );
+
+    // Hata önleme: Liste boşsa veya index taştıysa
+    if (combinedListWords.isEmpty || currentIndex >= combinedListWords.length) {
+      return Scaffold(
+        body: Center(child: Text("Test için yeterli kelime yok.")),
+      );
+    }
 
     return Scaffold(
       backgroundColor: whites,
@@ -154,7 +192,8 @@ class _TestWordState extends State<TestWord> {
           ),
         ],
         backgroundColor: whites,
-        title: const Text("Test Uygulaması"),
+        title: Text(
+            "Test Uygulaması - ${widget.level}"), // Hangi level testi olduğu görünsün
         centerTitle: true,
       ),
       body: Column(
@@ -187,8 +226,11 @@ class _TestWordState extends State<TestWord> {
                   left: 330.w,
                   top: 10.h,
                   child: Text(
-                    combinedListWords[currentIndex].list,
-                    style: TextStyle(color: orange, fontSize: 10.sp),
+                    widget.level, // Dinamik Level Gösterimi
+                    style: TextStyle(
+                        color: orange,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -205,11 +247,14 @@ class _TestWordState extends State<TestWord> {
                 isCorrect:
                     answers[index] == combinedListWords[currentIndex].answer,
                 onTap: (isCorrect) {
-                  setState(() {
-                    selectedAnswer = answers[index];
-                    selectedAnswerText = answers[index];
-                  });
-                  checkAnswer(isCorrect);
+                  // Kullanıcı zaten bir şıkkı seçtiyse tekrar tıklamasın
+                  if (!isDisabled) {
+                    setState(() {
+                      selectedAnswer = answers[index];
+                      selectedAnswerText = answers[index];
+                    });
+                    checkAnswer(isCorrect);
+                  }
                 },
                 isDisabled: isDisabled,
                 showCorrectAnswer: showCorrectAnswer,
@@ -233,7 +278,7 @@ class _TestWordState extends State<TestWord> {
                       ),
                     ),
                     TextSpan(
-                      text: '$totalQuests',
+                      text: '$remainingQuestsDisplay',
                       style: TextStyle(
                         color: orange,
                         fontSize: 17.sp,

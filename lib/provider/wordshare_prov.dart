@@ -15,11 +15,10 @@ class WordProvider extends ChangeNotifier {
   }
 
   Future<void> _initializeAll() async {
-    await initializeDummyData(); // sadece bir defa yüklenir
+    await initializeDummyData(); // Sadece ilk yüklemede veya boşsa çalışır
     await _initializeAllLevels();
-    // clearPrefs();
     _isInitialized = true;
-    notifyListeners(); // isInitialized için
+    notifyListeners();
   }
 
   Future<void> _initializeAllLevels() async {
@@ -27,11 +26,41 @@ class WordProvider extends ChangeNotifier {
       await _loadLastIndex(level);
       await loadData(level);
       _initialLists[level] = List.from(_wordLists[level] ?? []);
-      _initialLists[level]?.shuffle();
-      _wordLists[level]?.shuffle();
+      // İsteğe bağlı: Başlangıçta karıştırma
+      // _initialLists[level]?.shuffle();
+      // _wordLists[level]?.shuffle();
     }
     notifyListeners();
   }
+
+  // --- [YENİ EKLENEN] TÜM KELİMELERİ GERİ YÜKLEME FONKSİYONU ---
+  Future<void> restoreAllWords() async {
+    final levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
+
+    for (var level in levels) {
+      // 1. Orijinal kaynaktan (wordsListOne) o seviyenin kelimelerini çek
+      List<Words> originalData =
+          wordsListOne.where((w) => w.list == level).toList();
+
+      // 2. Hafızadaki listeyi güncelle
+      _wordLists[level] = List.from(originalData);
+
+      // İsteğe bağlı: Resetlendiğinde liste karışık gelsin istiyorsan açabilirsin
+      _wordLists[level]?.shuffle();
+
+      // 3. İndeksi sıfırla
+      _lastIndices[level] = 0;
+      await _saveLastIndex(level);
+
+      // 4. Telefona (SharedPreferences) taze veriyi kaydet
+      await saveData(level);
+
+      print("$level seviyesi geri yüklendi: ${originalData.length} kelime.");
+    }
+
+    notifyListeners();
+  }
+  // -------------------------------------------------------------
 
   void clearPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -44,6 +73,7 @@ class WordProvider extends ChangeNotifier {
     final levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
     for (var level in levels) {
+      // Eğer o seviyenin verisi hiç yoksa yükle
       if (prefs.getStringList('${level}_questList') == null) {
         List<Words> dummyWords =
             wordsListOne.where((w) => w.list == level).toList();
@@ -57,7 +87,7 @@ class WordProvider extends ChangeNotifier {
         await prefs.setStringList(
             '${level}_backList', dummyWords.map((e) => e.back).toList());
 
-        print("$level verileri yüklendi: ${dummyWords.length} adet");
+        print("$level ilk verileri yüklendi: ${dummyWords.length} adet");
       }
     }
   }
@@ -106,7 +136,6 @@ class WordProvider extends ChangeNotifier {
         );
       }
     }
-
     notifyListeners();
   }
 
@@ -144,16 +173,17 @@ class WordProvider extends ChangeNotifier {
     }
   }
 
+  // Tekil seviye resetleme (İhtiyaç olursa diye bıraktım)
   void resetList(String level) async {
-    // Başlangıç verilerini yeniden al
     List<Words> dummyWords =
         wordsListOne.where((w) => w.list == level).toList();
 
     _wordLists[level] = List.from(dummyWords);
-    _initialLists[level] = List.from(dummyWords); // Gerekirse yeniden yaz
+    _initialLists[level] = List.from(dummyWords);
 
-    // Shuffle istersen:
     _wordLists[level]?.shuffle();
+    _lastIndices[level] = 0; // Indexi de sıfırla
+    await _saveLastIndex(level);
 
     await saveData(level);
     notifyListeners();
