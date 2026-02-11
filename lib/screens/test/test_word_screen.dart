@@ -168,7 +168,7 @@ class _TestWordState extends State<TestWord> {
 
     // Hata önleme: Liste boşsa veya index taştıysa
     if (combinedListWords.isEmpty || currentIndex >= combinedListWords.length) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(child: Text("Test için yeterli kelime yok.")),
       );
     }
