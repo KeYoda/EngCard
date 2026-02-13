@@ -1,10 +1,9 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
+import 'package:eng_card/provider/progres_prov.dart';
+import 'package:eng_card/provider/scor_prov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
-import 'package:eng_card/screens/six_screen.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:eng_card/screens/six_screen.dart'; // Renkleri ve ana menüyü buradan alıyoruz
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +20,7 @@ class StartScreen extends StatefulWidget {
 
 class _StartScreenState extends State<StartScreen> {
   bool _isFirstRun = true;
+  bool _isLoading = true; // Yükleme durumu eklendi
 
   @override
   void initState() {
@@ -32,19 +32,20 @@ class _StartScreenState extends State<StartScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? hasStarted = prefs.getBool('hasStarted');
 
-    if (hasStarted == null || !hasStarted) {
-      setState(() {
-        _isFirstRun = true;
-      });
-    } else {
-      setState(() {
-        _isFirstRun = false;
-      });
-    }
+    setState(() {
+      _isFirstRun = (hasStarted == null || !hasStarted);
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+          backgroundColor: Color(0xFF0F2027),
+          body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       body: ConditionalBuilder(
         condition: _isFirstRun,
@@ -58,96 +59,177 @@ class _StartScreenState extends State<StartScreen> {
 class CheckScreen extends StatelessWidget {
   const CheckScreen({super.key});
 
+  // Uygulama genelindeki renk paleti
+  final Color gradientStart = const Color(0xFF0F2027);
+  final Color gradientEnd = const Color(0xFF203A43);
+  final Color accentOrange = const Color(0xFFFF9F1C);
+  final Color accentTurquoise = const Color(0xFF2EC4B6);
+
   @override
   Widget build(BuildContext context) {
-    var wordLists = Provider.of<WordProvider>(context);
+    var wordLists = Provider.of<WordProvider>(context, listen: false);
+    var scoreProvider = Provider.of<ScoreProvider>(context, listen: false);
+    var progressProvider =
+        Provider.of<ProgressProvider>(context, listen: false);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Hoşgeldin',
-          style: GoogleFonts.pacifico(
-            color: Colors.white,
-            fontSize: 30,
-            // fontWeight: FontWeight.bold,
-            letterSpacing: 4,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [gradientStart, gradientEnd],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
-        centerTitle: true,
-        elevation: 8,
-        shadowColor: Colors.white,
-        toolbarHeight: 130,
-        backgroundColor: yellow,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.elliptical(150, 30),
-            bottomRight: Radius.elliptical(150, 30),
-          ),
-        ),
-      ),
-      backgroundColor: whites,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Expanded(
-              child: SizedBox(
-                height: 300.h,
-                child: Image.asset('assets/logoback.png'),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Text(
-                'Eğitim, hayat boyu süren bir serüven ve keşif yolculuğudur. Bu yolculuğa beni de dahil etmek için aşağıdaki butona basarak başlayalım.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.dmSans(
-                    fontSize: 12.sp,
-                    color: yellow,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(height: 35.h),
-            Padding(
-              padding: EdgeInsets.all(20.0.w),
-              child: SizedBox(
-                height: 65,
-                width: 220,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    wordLists.resetList('C1');
-                    wordLists.resetList('B2');
-                    wordLists.resetList('B1');
-                    wordLists.resetList('A2');
-                    wordLists.resetList('A1');
+        child: SafeArea(
+          child: Column(
+            children: [
+              SizedBox(height: 40.h),
 
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    await prefs.setBool('hasStarted', true);
+              // --- BAŞLIK ALANI ---
+              Text(
+                'Hoş Geldin',
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 32.sp,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Container(
+                height: 4.h,
+                width: 60.w,
+                decoration: BoxDecoration(
+                  color: accentTurquoise,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
 
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const SixScreen(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 30.w),
-                    backgroundColor: hardgreen,
-                    foregroundColor: whites,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0.r),
+              const Spacer(),
+
+              // --- LOGO ALANI (Parlama Efektli) ---
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 220.w,
+                    height: 220.w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: accentTurquoise.withOpacity(0.05),
                     ),
-                    elevation: 5,
                   ),
-                  child: Text(
-                    'Hadi başlayalım',
-                    style: TextStyle(fontSize: 15.sp),
+                  SizedBox(
+                    height: 200.h,
+                    child: Image.asset(
+                      'assets/logoback.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
+              ),
+
+              const Spacer(),
+
+              // --- METİN ALANI ---
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 40.w),
+                child: Column(
+                  children: [
+                    Text(
+                      'Kelime Hazneni Genişlet',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 15.h),
+                    Text(
+                      'Eğitim, hayat boyu süren bir serüven ve keşif yolculuğudur. İngilizce serüvenine bugün harika bir başlangıç yap.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.dmSans(
+                        fontSize: 13.sp,
+                        color: Colors.white70,
+                        height: 1.6,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 50.h),
+
+              // --- BUTON ALANI ---
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 30.h),
+                child: Container(
+                  width: double.infinity,
+                  height: 60.h,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: accentOrange.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // Listeleri Resetle
+                      wordLists.resetList('C1');
+                      wordLists.resetList('B2');
+                      wordLists.resetList('B1');
+                      wordLists.resetList('A2');
+                      wordLists.resetList('A1');
+
+                      scoreProvider.resetTotalScore();
+                      progressProvider.resetAllProgress();
+
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await prefs.setBool('hasStarted', true);
+
+                      if (context.mounted) {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                              builder: (context) => const SixScreen()),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accentOrange,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Hadi Başlayalım',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 10.w),
+                        const Icon(Icons.arrow_forward_rounded),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: 20.h),
+            ],
+          ),
         ),
       ),
     );

@@ -1,23 +1,27 @@
-import 'package:eng_card/data/fivewords_data.dart';
-import 'package:eng_card/data/fourwords_data.dart';
 import 'package:eng_card/data/gridview.dart';
-import 'package:eng_card/data/secwords_data.dart';
-import 'package:eng_card/data/thirdwords_data.dart';
-import 'package:eng_card/data/words_data.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:eng_card/screens/fav_card.dart';
 import 'package:eng_card/screens/practice_card.dart';
-import 'package:eng_card/screens/six_screen.dart'; // Renkler için (easgreen vb.)
 import 'package:eng_card/screens/test/blanc_test.dart';
 import 'package:eng_card/screens/test/test_word_screen.dart';
 import 'package:eng_card/screens/test/voice_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+// --- RENKLER ---
+// Eğer SixScreen'den geliyorsa oradaki değişkenleri kullanır,
+// yoksa buradaki fallback değerleri kullanır.
+const Color drawerGradientStart = Color(0xFF0F2027);
+const Color drawerGradientEnd = Color(0xFF203A43);
+const Color accentOrange = Color(0xFFFF9F1C);
+const Color accentTurquoise = Color(0xFF2EC4B6);
+const Color whiteText = Colors.white;
 
 void _shareApp(BuildContext context) async {
   await Share.share(
@@ -29,251 +33,288 @@ void _shareApp(BuildContext context) async {
 class MainDrawer extends StatelessWidget {
   const MainDrawer({super.key});
 
-  List<Widget> buildListTiles(BuildContext context, List<Words> combinedWords) {
-    final List<Widget> tiles = [
-      _createDrawerTile(
+  @override
+  Widget build(BuildContext context) {
+    List<Words> _getWordsForLevel(String level) {
+      return wordsListOne.where((w) => w.list == level).toList();
+    }
+
+    return Drawer(
+      child: Container(
+        // Arka planı Container'a veriyoruz ki tüm ekranı (status bar dahil) kaplasın
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [drawerGradientStart, drawerGradientEnd],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        // --- DÜZELTME BURADA: SafeArea ---
+        // İçeriği SafeArea içine alıyoruz ki çentikli telefonlarda taşma yapmasın
+        child: SafeArea(
+          child: Column(
+            children: [
+              _createDrawerHeader(),
+
+              // Orta Kısım (Liste)
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: _buildListTiles(context, [
+                    ..._getWordsForLevel('A1'),
+                    ..._getWordsForLevel('A2'),
+                    ..._getWordsForLevel('B1'),
+                    ..._getWordsForLevel('B2'),
+                    ..._getWordsForLevel('C1'),
+                  ]),
+                ),
+              ),
+
+              // Alt Kısım (Versiyon)
+              // SafeArea olduğu için alt boşluğu biraz azalttım (20.h -> 10.h)
+              Padding(
+                padding: EdgeInsets.only(bottom: 10.h, top: 10.h),
+                child: Text(
+                  "WordCard v1.0",
+                  style: GoogleFonts.poppins(
+                      color: Colors.white24, fontSize: 10.sp),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _createDrawerHeader() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 30.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        border: Border(bottom: BorderSide(color: Colors.white12)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.1),
+              border: Border.all(color: accentTurquoise.withValues(alpha: 0.5)),
+            ),
+            child: Image.asset(
+              'assets/logoback.png',
+              height: 80.h,
+              width: 80.h,
+              fit: BoxFit.fill,
+            ),
+          ),
+          SizedBox(height: 15.h),
+          Text(
+            "WordCard",
+            style: GoogleFonts.poppins(
+                color: whiteText,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildListTiles(
+      BuildContext context, List<Words> combinedWords) {
+    return [
+      SizedBox(height: 10.h),
+      _createModernTile(
         context,
-        icon: Icons.home,
-        text: ' Ana Sayfa',
+        icon: Icons.home_rounded,
+        text: 'Ana Sayfa',
         onTap: () => Navigator.pop(context),
       ),
-      _createDrawerTile(
+      _createModernTile(
         context,
-        icon: Icons.favorite,
-        text: ' Favoriler',
+        icon: Icons.favorite_rounded,
+        text: 'Favoriler',
         onTap: () {
           Navigator.pop(context);
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => const FavouritePage()));
         },
       ),
-      _createDrawerTile(
+      _createModernTile(
         context,
         icon: Icons.view_carousel_rounded,
-        text: ' Alıştırma',
+        text: 'Alıştırma Kartları',
         onTap: () {
           Navigator.pop(context);
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => const PracticeCard()));
         },
       ),
-      _createExpansionTile(context, combinedWords),
-      Divider(thickness: 1.h, color: easgreen),
+
+      _createModernExpansionTile(context, combinedWords),
+
       Padding(
-        padding: EdgeInsets.only(left: 110.5.w),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+        child: const Divider(color: Colors.white12, thickness: 1),
+      ),
+
+      Padding(
+        padding: EdgeInsets.only(left: 20.w, bottom: 5.h),
         child: Text(
-          'İletişim',
-          style: TextStyle(
-              color: Colors.orange,
-              fontSize: 13.sp,
-              fontWeight: FontWeight.bold),
+          'İLETİŞİM & AYARLAR',
+          style: GoogleFonts.poppins(
+              color: Colors.white38,
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.5),
         ),
       ),
-      Divider(thickness: 1.h, color: easgreen),
-      _createDrawerTile(
+
+      _createModernTile(
         context,
-        icon: Icons.mail,
-        text: ' Email',
+        icon: Icons.mail_outline_rounded,
+        text: 'Bize Ulaşın',
         onTap: () => _launchEmail(),
       ),
-      _createDrawerTile(
+      _createModernTile(
         context,
-        icon: Icons.share,
-        text: ' Paylaş',
+        icon: Icons.share_rounded,
+        text: 'Uygulamayı Paylaş',
         onTap: () => _shareApp(context),
       ),
-      SizedBox(height: 115.h),
-      ListTile(
-        leading: Icon(
-          Icons.delete,
-          size: 17.sp,
-          color: orange,
+
+      SizedBox(height: 20.h),
+
+      // SİLME BUTONU
+      Container(
+        margin: EdgeInsets.symmetric(horizontal: 20.w),
+        decoration: BoxDecoration(
+          color: Colors.red.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
         ),
-        title: Text(
-          'İlerlemeyi Sil',
-          style: TextStyle(
-              color: orange, fontSize: 13.sp, fontWeight: FontWeight.bold),
+        child: ListTile(
+          leading: Icon(Icons.delete_forever_rounded,
+              color: Colors.redAccent, size: 22.sp),
+          title: Text(
+            'İlerlemeyi Sıfırla',
+            style: GoogleFonts.poppins(
+                color: Colors.redAccent,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600),
+          ),
+          onTap: () {
+            Navigator.pop(context);
+            showDeleteConfirmationDialog(context);
+          },
         ),
-        onTap: () {
-          Navigator.pop(context);
-          showDeleteConfirmationDialog(context);
-        },
       ),
     ];
-    return tiles;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    List<Words> combinedWords = []
-      ..addAll(wordsList)
-      ..addAll(wordsList2)
-      ..addAll(wordsList3)
-      ..addAll(wordsList4)
-      ..addAll(wordsList5);
-
-    return Drawer(
-      child: Column(
-        children: [
-          _createDrawerHeader(),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: buildListTiles(context, combinedWords),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _createDrawerHeader() {
-    return DrawerHeader(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [medgreen, hardgreen],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 250.w,
-            height: 300.h,
-            child: Image.asset(
-              'assets/logoback.png',
-              height: 300.h,
-              width: 300.w,
-              fit: BoxFit.fitWidth,
-              filterQuality: FilterQuality.high,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _createDrawerTile(
+  Widget _createModernTile(
     BuildContext context, {
     required IconData icon,
     required String text,
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        size: 19.sp,
-        color: Colors.orange,
-      ),
+      leading: Icon(icon, color: accentOrange, size: 22.sp),
       title: Text(
         text,
-        style: TextStyle(
-            color: const Color.fromARGB(255, 8, 61, 17),
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w400),
+        style: GoogleFonts.poppins(
+            color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
       ),
+      hoverColor: Colors.white.withValues(alpha: 0.05),
       onTap: onTap,
+      contentPadding: EdgeInsets.symmetric(horizontal: 25.w),
+      horizontalTitleGap: 10.w,
     );
   }
 
-  Widget _createExpansionTile(
+  Widget _createModernExpansionTile(
     BuildContext context,
     List<Words> combinedWords,
   ) {
-    return ExpansionTile(
-      backgroundColor: yellow.withOpacity(0.1),
-      leading: Icon(
-        Icons.perm_device_information,
-        color: Colors.orange,
-        size: 19.sp,
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        leading: Icon(Icons.quiz_rounded, color: accentOrange, size: 22.sp),
+        title: Text(
+          'Testler',
+          style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500),
+        ),
+        iconColor: accentTurquoise,
+        collapsedIconColor: Colors.white54,
+        childrenPadding: EdgeInsets.only(left: 20.w),
+        children: [
+          _createSubTile(context,
+              icon: Icons.edit_note_rounded,
+              text: 'Boşluk Doldurma', onTap: () {
+            Navigator.pop(context);
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => BlancTestScreen(
+                level: 'Mix',
+                onComplete: () {},
+                words: combinedWords,
+              ),
+            ));
+          }),
+          _createSubTile(context,
+              icon: Icons.translate_rounded, text: 'Kelime Anlamı', onTap: () {
+            Navigator.pop(context);
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => TestWord(
+                level: 'Mix',
+                onComplete: () {},
+                words: combinedWords,
+              ),
+            ));
+          }),
+          _createSubTile(context,
+              icon: Icons.headphones_rounded, text: 'Dinleme Testi', onTap: () {
+            Navigator.pop(context);
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => VoiceTest(
+                level: 'Mix',
+                onComplete: () {},
+                words: combinedWords,
+              ),
+            ));
+          }),
+        ],
       ),
-      title: Text(
-        ' Test',
-        style: TextStyle(
-            color: const Color.fromARGB(255, 8, 61, 17),
-            fontSize: 13.sp,
-            fontWeight: FontWeight.bold),
-      ),
-      iconColor: yellow,
-      children: <Widget>[
-        _createExpansionTileItem(
-          context,
-          icon: Icons.question_answer,
-          text: 'Boşluk Doldurma',
-          onTap: () {
-            Navigator.pop(context);
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => BlancTestScreen(
-                  level: 'Mix', // Karışık test olduğu için 'Mix' gönderiyoruz
-                  onComplete: () {},
-                  words: combinedWords,
-                ),
-              ),
-            );
-          },
-        ),
-        _createExpansionTileItem(
-          context,
-          icon: Icons.question_mark,
-          text: 'Kelime anlamı',
-          onTap: () {
-            Navigator.pop(context);
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => TestWord(
-                  // 'Genel' veya 'Mix' diyerek level ilerlemesini tetiklemiyoruz (sadece pratik)
-                  level: 'Mix',
-                  onComplete: () {},
-                  words: combinedWords,
-                ),
-              ),
-            );
-          },
-        ),
-        _createExpansionTileItem(
-          context,
-          icon: Icons.record_voice_over,
-          text: 'Dinleme',
-          onTap: () {
-            Navigator.pop(context);
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => VoiceTest(
-                  level: 'Mix', // Karışık test
-                  onComplete: () {},
-                  words: combinedWords,
-                ),
-              ),
-            );
-          },
-        ),
-      ],
     );
   }
 
-  Widget _createExpansionTileItem(
+  Widget _createSubTile(
     BuildContext context, {
     required IconData icon,
     required String text,
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        size: 13.sp,
-        color: Colors.orange,
-      ),
+      leading: Icon(icon, size: 18.sp, color: accentTurquoise),
       title: Text(
         text,
-        style: TextStyle(
-          fontSize: 11.sp,
-          color: const Color.fromARGB(255, 8, 61, 17),
-          fontWeight: FontWeight.bold,
-        ),
+        style: GoogleFonts.poppins(
+            fontSize: 13.sp,
+            color: Colors.white70,
+            fontWeight: FontWeight.w400),
       ),
       onTap: onTap,
+      contentPadding: EdgeInsets.only(left: 30.w),
+      dense: true,
+      visualDensity: VisualDensity.compact,
     );
   }
 
@@ -288,8 +329,8 @@ class MainDrawer extends StatelessWidget {
   }
 }
 
+// --- DİYALOG KUTUSU TASARIMI ---
 void showDeleteConfirmationDialog(BuildContext context) {
-  // Provider'ları okuyoruz (listen: false yapısı read içinde zaten vardır)
   final deleteProgress = context.read<ProgressProvider>();
   final resetScore = context.read<ScoreProvider>();
   final resetWords = context.read<WordProvider>();
@@ -299,39 +340,57 @@ void showDeleteConfirmationDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: hardgreen,
+        backgroundColor: const Color(0xFF203A43),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded,
+                color: Colors.redAccent, size: 28.sp),
+            SizedBox(width: 10.w),
+            Text("Dikkat", style: GoogleFonts.poppins(color: Colors.white)),
+          ],
+        ),
         content: Text(
-          'Tüm ilerlemeyi ve skorları silmek istediğinizden emin misiniz?',
-          style: TextStyle(color: whites),
+          'Tüm ilerlemeniz, skorlarınız ve öğrendiğiniz kelimeler sıfırlanacak.\n\nBu işlem geri alınamaz!',
+          style: GoogleFonts.poppins(color: Colors.white70, fontSize: 13.sp),
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text(
-              'İptal',
-              style: TextStyle(color: whites),
-            ),
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Vazgeç',
+                style: GoogleFonts.poppins(color: Colors.white54)),
           ),
-          TextButton(
-            onPressed: () {
-              // Tüm resetleme işlemlerini burada çağırıyoruz
-              deleteProgress.resetAllProgress(); // Progress ve Level reset
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () async {
+              // async eklemeyi unutmayın
+
+              // 1. Diğer verileri sıfırla
+              deleteProgress.resetAllProgress();
               resetScore.resetTotalScore();
               resetTestList.resetWordsProgress(wordProvider: resetWords);
-              resetWords.restoreAllWords();
 
-              Navigator.of(context).pop();
+              // 2. KELİMELERİ SIFIRLA VE BEKLE (await çok önemli)
+              await resetWords.restoreAllWords();
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Tüm ilerleme sıfırlandı.')),
-              );
+              if (context.mounted) {
+                Navigator.of(context).pop(); // Diyaloğu kapat
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: accentTurquoise,
+                    content: Text('Tüm veriler başarıyla sıfırlandı.',
+                        style: GoogleFonts.poppins()),
+                  ),
+                );
+              }
             },
-            child: Text(
-              'Evet, Sil',
-              style: TextStyle(color: orange),
-            ),
+            child: Text('Evet, Sil',
+                style: GoogleFonts.poppins(color: Colors.white)),
           ),
         ],
       );

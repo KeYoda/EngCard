@@ -18,15 +18,15 @@ class ReviewResultScreen extends StatelessWidget {
           children: [
             Text(
               'You have reviewed $reviewedCards cards!',
-              style: TextStyle(fontSize: 24),
+              style: const TextStyle(fontSize: 24),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(
                     context); // Navigate back to the card review screen
               },
-              child: Text('Back to Review'),
+              child: const Text('Back to Review'),
             ),
           ],
         ),

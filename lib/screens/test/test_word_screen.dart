@@ -3,24 +3,22 @@ import 'dart:math';
 import 'package:eng_card/data/gridview.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/screens/settings.dart';
-import 'package:eng_card/screens/six_screen.dart';
-// import 'package:eng_card/screens/six_screen.dart'; // Kullanılmıyorsa kaldırın
-import 'package:eng_card/screens/test/answer_button.dart';
 import 'package:eng_card/screens/test/test_data.dart';
 import 'package:eng_card/screens/test/test_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class TestWord extends StatefulWidget {
   final List<Words> words;
-  final String level; // EKLENDİ: Provider'ı güncellemek için gerekli
+  final String level;
   final VoidCallback onComplete;
 
   const TestWord({
     super.key,
     required this.words,
-    required this.level, // Constructor'a eklendi
+    required this.level,
     required this.onComplete,
   });
 
@@ -31,15 +29,20 @@ class TestWord extends StatefulWidget {
 }
 
 class _TestWordState extends State<TestWord> {
-  List<Words> combinedListWords = [];
+  // --- MODERN RENK PALETİ ---
+  final Color gradientStart = const Color(0xFF0F2027);
+  final Color gradientEnd = const Color(0xFF203A43);
+  final Color accentOrange = const Color(0xFFFF9F1C);
+  final Color accentTurquoise = const Color(0xFF2EC4B6);
+  final Color correctColor = const Color(0xFF2EC4B6); // Yeşil/Turkuaz
+  final Color wrongColor = const Color(0xFFEF476F); // Kırmızı
 
+  List<Words> combinedListWords = [];
   String? selectedAnswer;
-  // Toplam soru sayısı (İsteğe göre 15 sabit kalabilir veya listenin uzunluğu olabilir)
-  int remainingQuestsDisplay = 15;
+  int remainingQuestsDisplay = 15; // Toplam soru sayısı
   int scoreBlanc = 0;
 
   List<QuestionAnswer> answeredQuestionsTest = [];
-
   int currentIndex = 0;
   int correctAnswersCount = 0;
 
@@ -51,42 +54,38 @@ class _TestWordState extends State<TestWord> {
   @override
   void initState() {
     super.initState();
-    // Gelen listeyi bozmamak için kopyasını alıyoruz
     combinedListWords = List.from(widget.words);
+    if (combinedListWords.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pop(context);
+      });
+      return;
+    }
     generateAnswers();
   }
 
   void generateAnswers() {
-    // Listeyi karıştırıyoruz ama currentIndex'i korumamız lazım,
-    // o yüzden sadece cevap şıklarını karıştırmak daha güvenli.
-    // Ancak kelime sırası her testte farklı olsun istiyorsanız,
-    // initState'de bir kere shuffle yapıp burada index ile ilerlemek daha iyidir.
     if (currentIndex == 0) {
       combinedListWords.shuffle();
     }
 
     String correctAnswer = combinedListWords[currentIndex].answer;
 
-    // Sayaç mantığı
     if (remainingQuestsDisplay > 0) remainingQuestsDisplay--;
 
     answers.clear();
     answers.add(correctAnswer);
 
-    // Yanlış şıkları ekle
     int attemptCount = 0;
     while (answers.length < 4 && attemptCount < 100) {
       String randomAnswer =
           combinedListWords[Random.secure().nextInt(combinedListWords.length)]
               .answer;
-
       if (randomAnswer != correctAnswer && !answers.contains(randomAnswer)) {
         answers.add(randomAnswer);
       }
       attemptCount++;
     }
-
-    // Eğer liste çok kısaysa ve 4 şık çıkmıyorsa döngü sonsuza girmesin diye önlem aldık.
     answers.shuffle();
   }
 
@@ -98,34 +97,23 @@ class _TestWordState extends State<TestWord> {
       showCorrectAnswer = true;
 
       if (isCorrect) {
-        // YENİ PROVIDER YAPISINA GÖRE GÜNCELLENDİ:
         progressProv.increaseLinearProgress(widget.level);
-
-        // Bu kelimenin ait olduğu listeye göre circle progress güncellemesi
-        // (Genelde widget.level ile words[i].list aynıdır ama garanti olsun)
         progressProv.completeQuestion(widget.level);
-
-        scoreBlanc = scoreBlanc + 10;
+        scoreBlanc += 10;
         correctAnswersCount++;
       }
 
       if (currentIndex < combinedListWords.length) {
-        String question = combinedListWords[currentIndex].quest;
-        String list = combinedListWords[currentIndex].list; // veya widget.level
-        String answer = combinedListWords[currentIndex].answer;
-
         answeredQuestionsTest.add(QuestionAnswer(
-          question: question,
-          answer: answer,
-          list: list,
+          question: combinedListWords[currentIndex].quest,
+          answer: combinedListWords[currentIndex].answer,
+          list: widget.level,
         ));
       }
 
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
-          // Ekranın hala açık olduğunu kontrol et
           setState(() {
-            // 15 soruluk test veya liste bitene kadar
             if (currentIndex < 14 &&
                 currentIndex < combinedListWords.length - 1) {
               currentIndex++;
@@ -142,8 +130,7 @@ class _TestWordState extends State<TestWord> {
                     level: widget.level,
                     totalScore: scoreBlanc,
                     correctAnswer: correctAnswersCount,
-                    totalQuestions:
-                        currentIndex + 1, // Gerçek çözülen soru sayısı
+                    totalQuestions: currentIndex + 1,
                     answeredQuestions: answeredQuestionsTest,
                   ),
                 ),
@@ -157,146 +144,283 @@ class _TestWordState extends State<TestWord> {
 
   @override
   Widget build(BuildContext context) {
-    // ScreenUtil init işlemini genelde main.dart'ta yapmak daha sağlıklıdır.
-    // Ama burada kalmasında da bir sakınca yok.
-    ScreenUtil.init(
-      context,
-      designSize: const Size(375, 812),
-      minTextAdapt: true,
-      splitScreenMode: true,
-    );
-
-    // Hata önleme: Liste boşsa veya index taştıysa
     if (combinedListWords.isEmpty || currentIndex >= combinedListWords.length) {
-      return const Scaffold(
-        body: Center(child: Text("Test için yeterli kelime yok.")),
-      );
+      return const SizedBox();
     }
 
+    // İlerleme Yüzdesi
+    double progressPercent = (currentIndex + 1) / 15;
+
     return Scaffold(
-      backgroundColor: whites,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            margin: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.arrow_back_ios_new,
+                color: Colors.white, size: 18),
+          ),
+        ),
+        title: Text(
+          "Kelime Anlamı - ${widget.level}",
+          style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 18.sp),
+        ),
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const Settings(),
-                ),
-              );
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const Settings()));
             },
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.settings, color: Colors.white),
           ),
         ],
-        backgroundColor: whites,
-        title: Text(
-            "Test Uygulaması - ${widget.level}"), // Hangi level testi olduğu görünsün
-        centerTitle: true,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(height: 40.h),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 10.w),
-            child: Stack(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(8.w),
-                  color: hardgreen,
-                  height: 150.h,
-                  width: 500.w,
-                  child: Center(
-                    child: Text(
-                      textAlign: TextAlign.center,
-                      combinedListWords[currentIndex].quest,
-                      style: TextStyle(
-                        color: whites,
-                        fontSize: 26.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 330.w,
-                  top: 10.h,
-                  child: Text(
-                    widget.level, // Dinamik Level Gösterimi
-                    style: TextStyle(
-                        color: orange,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [gradientStart, gradientEnd],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          SizedBox(height: 16.h),
-          Wrap(
-            spacing: 6.w,
-            runSpacing: 3.h,
-            children: List.generate(
-              answers.length,
-              (index) => AnswerButton(
-                answer: answers[index],
-                isCorrect:
-                    answers[index] == combinedListWords[currentIndex].answer,
-                onTap: (isCorrect) {
-                  // Kullanıcı zaten bir şıkkı seçtiyse tekrar tıklamasın
-                  if (!isDisabled) {
-                    setState(() {
-                      selectedAnswer = answers[index];
-                      selectedAnswerText = answers[index];
-                    });
-                    checkAnswer(isCorrect);
-                  }
-                },
-                isDisabled: isDisabled,
-                showCorrectAnswer: showCorrectAnswer,
-                isSelected: selectedAnswerText == answers[index],
-              ),
-            ),
-          ),
-          SizedBox(height: 40.h),
-          Row(
+        ),
+        child: SafeArea(
+          child: Column(
             children: [
-              SizedBox(width: 169.w),
-              RichText(
-                text: TextSpan(
+              // --- 1. İLERLEME ÇUBUĞU ---
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 15.h),
+                child: Column(
                   children: [
-                    TextSpan(
-                      text: '15/',
-                      style: TextStyle(
-                        color: hardgreen,
-                        fontSize: 17.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Soru ${currentIndex + 1}/15",
+                          style: GoogleFonts.poppins(
+                              color: accentTurquoise,
+                              fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          "$scoreBlanc Puan",
+                          style: GoogleFonts.poppins(
+                              color: accentOrange, fontWeight: FontWeight.w600),
+                        ),
+                      ],
                     ),
-                    TextSpan(
-                      text: '$remainingQuestsDisplay',
-                      style: TextStyle(
-                        color: orange,
-                        fontSize: 17.sp,
-                        fontWeight: FontWeight.bold,
+                    SizedBox(height: 8.h),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: progressPercent,
+                        minHeight: 8.h,
+                        backgroundColor: Colors.white12,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(accentTurquoise),
                       ),
                     ),
                   ],
                 ),
               ),
+
+              // --- 2. SORU KARTI (İngilizce Kelime) ---
+              Expanded(
+                flex: 4,
+                child: Container(
+                  width: double.infinity,
+                  margin:
+                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                  padding: EdgeInsets.all(20.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      )
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Seviye Etiketi
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 12.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: accentOrange.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(15),
+                          border:
+                              Border.all(color: accentOrange.withOpacity(0.5)),
+                        ),
+                        child: Text(
+                          widget.level,
+                          style: GoogleFonts.poppins(
+                            color: accentOrange,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12.sp,
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 30.h),
+
+                      // --- DÜZELTME BURADA: FittedBox Eklendi ---
+                      // Uzun kelime gelirse otomatik küçülecek
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            combinedListWords[currentIndex].quest,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 36.sp, // Başlangıç boyutu
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 20.h),
+
+                      Text(
+                        "Bu kelimenin anlamı nedir?",
+                        style: GoogleFonts.poppins(
+                          color: Colors.white54,
+                          fontSize: 14.sp,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+
+              // --- 3. CEVAP ŞIKLARI (Liste) ---
+              Expanded(
+                flex: 5,
+                child: ListView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  itemCount: answers.length,
+                  itemBuilder: (context, index) {
+                    final answer = answers[index];
+                    final isCorrectAnswer =
+                        answer == combinedListWords[currentIndex].answer;
+
+                    return _buildModernAnswerButton(
+                      text: answer,
+                      isCorrectAnswer: isCorrectAnswer,
+                      onTap: () {
+                        if (!isDisabled) {
+                          setState(() {
+                            selectedAnswerText = answer;
+                          });
+                          checkAnswer(isCorrectAnswer);
+                        }
+                      },
+                    );
+                  },
+                ),
+              ),
+
+              SizedBox(height: 20.h),
             ],
           ),
-          Divider(
-            color: hardgreen,
-            indent: 165.w,
-            endIndent: 156.w,
-            thickness: 4.h,
-          ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  // --- MODERN BUTON TASARIMI ---
+  Widget _buildModernAnswerButton({
+    required String text,
+    required bool isCorrectAnswer,
+    required VoidCallback onTap,
+  }) {
+    Color bgColor = Colors.white;
+    Color textColor = Colors.black87;
+    Color borderColor = Colors.white;
+
+    if (showCorrectAnswer) {
+      if (isCorrectAnswer) {
+        bgColor = correctColor;
+        textColor = Colors.white;
+        borderColor = correctColor;
+      } else if (selectedAnswerText == text) {
+        bgColor = wrongColor;
+        textColor = Colors.white;
+        borderColor = wrongColor;
+      } else {
+        bgColor = Colors.white.withOpacity(0.5);
+        textColor = Colors.black38;
+      }
+    } else {
+      bgColor = Colors.white;
+      textColor = const Color(0xFF203A43);
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.symmetric(vertical: 18.h, horizontal: 20.w),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: borderColor, width: 2),
+          boxShadow: [
+            if (!isDisabled)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              )
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // --- DÜZELTME BURADA: Expanded ---
+            // Cevap şıkkı uzun olursa alt satıra geçsin
+            Expanded(
+              child: Text(
+                text,
+                style: GoogleFonts.poppins(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
+            ),
+
+            SizedBox(width: 10.w),
+
+            // Sonuç İkonu
+            if (showCorrectAnswer && isCorrectAnswer)
+              const Icon(Icons.check_circle, color: Colors.white)
+            else if (showCorrectAnswer && selectedAnswerText == text)
+              const Icon(Icons.cancel, color: Colors.white)
+            else if (!isDisabled)
+              Icon(Icons.circle_outlined, color: Colors.grey.shade300)
+          ],
+        ),
       ),
     );
   }

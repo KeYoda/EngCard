@@ -1,20 +1,23 @@
 import 'package:eng_card/data/gridview.dart';
-import 'package:eng_card/screens/six_screen.dart';
+import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:eng_card/data/fivewords_data.dart';
-import 'package:eng_card/data/fourwords_data.dart';
-import 'package:eng_card/data/thirdwords_data.dart';
-import 'package:eng_card/data/words_data.dart';
-import 'package:eng_card/data/secwords_data.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/screens/test/blanc_test.dart';
 
 class BlancSettings extends StatelessWidget {
   const BlancSettings({super.key});
 
-  List<Words> filterWordsByLevel(List<Words> allWords, String level) {
-    return allWords.where((word) => word.list == level).toList();
+  // Renk Paleti
+  final Color gradientStart = const Color(0xFF0F2027);
+  final Color gradientEnd = const Color(0xFF203A43);
+  final Color accentTurquoise = const Color(0xFF2EC4B6);
+  final Color accentOrange = const Color(0xFFFF9F1C);
+
+  List<Words> _getWordsForLevel(String level) {
+    return wordsListOne.where((w) => w.list == level).toList();
   }
 
   @override
@@ -22,170 +25,200 @@ class BlancSettings extends StatelessWidget {
     var progressProv = Provider.of<ProgressProvider>(context);
     var listProgressProv = Provider.of<ListProgressProvider>(context);
 
-    BoxDecoration createCircularBox(String imagePath) {
-      return BoxDecoration(
-        shape: BoxShape.circle,
-        image: DecorationImage(
-            image: AssetImage(imagePath),
-            fit: BoxFit.cover,
-            alignment: Alignment.center),
-      );
-    }
-
-    final List<Words> allWords = []
-      ..addAll(wordsList)
-      ..addAll(wordsList2)
-      ..addAll(wordsList3)
-      ..addAll(wordsList4)
-      ..addAll(wordsList5);
-
-    Widget _listTile(BuildContext context, String level, double progressValue,
-        BoxDecoration decoration, Widget navigate, int length) {
-      return Container(
-        decoration: BoxDecoration(
-          gradient: SweepGradient(
-            colors: [yellow, whites],
-          ),
-        ),
-        margin: const EdgeInsets.only(top: 60),
-        child: ListTile(
-          title: Text(
-            '                      $level',
-            style: TextStyle(
-              color: orange,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          subtitle: Text(
-            '                      $length/${progressProv.remainingQuestions[level]}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          trailing: ElevatedButton(
-            style:
-                ElevatedButton.styleFrom(backgroundColor: Colors.amberAccent),
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => navigate,
-                ),
-              );
-            },
-            child: Icon(
-              Icons.arrow_forward_ios,
-              color: whites,
-            ),
-          ),
-          leading: Container(
-            decoration: decoration,
-            height: 55,
-            width: 55,
-            child: CircularProgressIndicator(
-              strokeWidth: 5,
-              value: progressValue,
-              backgroundColor: medgreen,
-              valueColor: AlwaysStoppedAnimation<Color>(yellow),
-            ),
-          ),
-        ),
-      );
-    }
-
-    Widget _columnTile(
-      BuildContext context,
-      ProgressProvider progressProvider,
-      ListProgressProvider listProgressProvider,
-    ) {
-      return Column(
-        children: [
-          _listTile(
-              context,
-              'A1',
-              progressProvider.getCircleProgress('A1'),
-              createCircularBox('assets/a1.webp'),
-              BlancTestScreen(
-                words: filterWordsByLevel(allWords, 'A1'),
-                onComplete: () {
-                  progressProvider.completeQuestion('A1');
-                  listProgressProvider.decreaseProgress('A1');
-                },
-                level: 'A1',
-              ),
-              listProgressProvider.getProgress('A1')),
-          _listTile(
-              context,
-              'A2',
-              progressProvider.getCircleProgress('A2'),
-              createCircularBox('assets/a2.webp'),
-              BlancTestScreen(
-                words: filterWordsByLevel(allWords, 'A2'),
-                onComplete: () {
-                  progressProvider.completeQuestion('A2');
-                  listProgressProvider.decreaseProgress('A2');
-                },
-                level: 'A2',
-              ),
-              listProgressProvider.getProgress('A2')),
-          _listTile(
-              context,
-              'B1',
-              progressProvider.getCircleProgress('B1'),
-              createCircularBox('assets/a3.webp'),
-              BlancTestScreen(
-                words: filterWordsByLevel(allWords, 'B1'),
-                onComplete: () {
-                  progressProvider.completeQuestion('B1');
-                  listProgressProvider.decreaseProgress('B1');
-                },
-                level: 'B1',
-              ),
-              listProgressProvider.getProgress('B1')),
-          _listTile(
-              context,
-              'B2',
-              progressProvider.getCircleProgress('B2'),
-              createCircularBox('assets/a4.webp'),
-              BlancTestScreen(
-                words: filterWordsByLevel(allWords, 'B2'),
-                onComplete: () {
-                  progressProvider.completeQuestion('B2');
-                  listProgressProvider.decreaseProgress('B2');
-                },
-                level: 'B2',
-              ),
-              listProgressProvider.getProgress('B2')),
-          _listTile(
-            context,
-            'C1',
-            progressProvider.getCircleProgress('C1'),
-            createCircularBox('assets/a5.webp'),
-            BlancTestScreen(
-              words: filterWordsByLevel(allWords, 'C1'),
-              onComplete: () {
-                progressProvider.completeQuestion('C1');
-                listProgressProvider.decreaseProgress('C1');
-              },
-              level: 'C1',
-            ),
-            listProgressProvider.getProgress('C1'),
-          ),
-        ],
-      );
-    }
-
     return Scaffold(
-      backgroundColor: whites,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Test Ayarları'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: orange),
-        backgroundColor: whites,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            margin: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.arrow_back_ios_new,
+                color: Colors.white, size: 18),
+          ),
+        ),
+        title: Text(
+          'Boşluk Doldurma Ayarları',
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18.sp,
+          ),
+        ),
       ),
-      body: Center(
-        child: _columnTile(context, progressProv, listProgressProv),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [gradientStart, gradientEnd],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: ListView(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+            children: [
+              _buildLevelSettingCard(
+                context,
+                level: 'A1',
+                imagePath: 'assets/a1.webp',
+                progressValue: progressProv.getCircleProgress('A1'),
+                remaining: progressProv.remainingQuestions['A1'] ?? 0,
+                total: listProgressProv.getProgress('A1'),
+                navigate: BlancTestScreen(
+                  words: _getWordsForLevel('A1'),
+                  onComplete: () {
+                    progressProv.completeQuestion('A1');
+                    listProgressProv.decreaseProgress('A1');
+                  },
+                  level: 'A1',
+                ),
+              ),
+              _buildLevelSettingCard(
+                context,
+                level: 'A2',
+                imagePath: 'assets/a2.webp',
+                progressValue: progressProv.getCircleProgress('A2'),
+                remaining: progressProv.remainingQuestions['A2'] ?? 0,
+                total: listProgressProv.getProgress('A2'),
+                navigate: BlancTestScreen(
+                  words: _getWordsForLevel('A2'),
+                  onComplete: () {
+                    progressProv.completeQuestion('A2');
+                    listProgressProv.decreaseProgress('A2');
+                  },
+                  level: 'A2',
+                ),
+              ),
+              _buildLevelSettingCard(
+                context,
+                level: 'B1',
+                imagePath: 'assets/a3.webp',
+                progressValue: progressProv.getCircleProgress('B1'),
+                remaining: progressProv.remainingQuestions['B1'] ?? 0,
+                total: listProgressProv.getProgress('B1'),
+                navigate: BlancTestScreen(
+                  words: _getWordsForLevel('B1'),
+                  onComplete: () {
+                    progressProv.completeQuestion('B1');
+                    listProgressProv.decreaseProgress('B1');
+                  },
+                  level: 'B1',
+                ),
+              ),
+              _buildLevelSettingCard(
+                context,
+                level: 'B2',
+                imagePath: 'assets/a4.webp',
+                progressValue: progressProv.getCircleProgress('B2'),
+                remaining: progressProv.remainingQuestions['B2'] ?? 0,
+                total: listProgressProv.getProgress('B2'),
+                navigate: BlancTestScreen(
+                  words: _getWordsForLevel('B2'),
+                  onComplete: () {
+                    progressProv.completeQuestion('B2');
+                    listProgressProv.decreaseProgress('B2');
+                  },
+                  level: 'B2',
+                ),
+              ),
+              _buildLevelSettingCard(
+                context,
+                level: 'C1',
+                imagePath: 'assets/a5.webp',
+                progressValue: progressProv.getCircleProgress('C1'),
+                remaining: progressProv.remainingQuestions['C1'] ?? 0,
+                total: listProgressProv.getProgress('C1'),
+                navigate: BlancTestScreen(
+                  words: _getWordsForLevel('C1'),
+                  onComplete: () {
+                    progressProv.completeQuestion('C1');
+                    listProgressProv.decreaseProgress('C1');
+                  },
+                  level: 'C1',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLevelSettingCard(
+    BuildContext context, {
+    required String level,
+    required String imagePath,
+    required double progressValue,
+    required int remaining,
+    required int total,
+    required Widget navigate,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+      ),
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+        leading: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: 55.w,
+              height: 55.w,
+              child: CircularProgressIndicator(
+                value: progressValue,
+                strokeWidth: 4,
+                backgroundColor: Colors.white10,
+                valueColor: AlwaysStoppedAnimation<Color>(accentTurquoise),
+              ),
+            ),
+            CircleAvatar(
+              radius: 22.w,
+              backgroundImage: AssetImage(imagePath),
+            ),
+          ],
+        ),
+        title: Text(
+          "Seviye $level",
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16.sp,
+          ),
+        ),
+        subtitle: Text(
+          "Kalan Soru: $remaining / $total",
+          style: GoogleFonts.poppins(
+            color: Colors.white60,
+            fontSize: 12.sp,
+          ),
+        ),
+        trailing: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: accentOrange,
+            shape: const CircleBorder(),
+            padding: EdgeInsets.all(12.w),
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => navigate),
+            );
+          },
+          child: const Icon(Icons.play_arrow_rounded, color: Colors.white),
+        ),
       ),
     );
   }

@@ -1,192 +1,91 @@
+import 'dart:convert';
 import 'package:eng_card/data/gridview.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WordProvider extends ChangeNotifier {
-  final Map<String, List<Words>> _wordLists = {}; // Seviye bazlı tüm listeler
-  final Map<String, List<Words>> _initialLists = {};
-  final Map<String, int> _lastIndices = {};
+  final Map<String, List<Words>> _wordLists = {
+    'A1': wordsListOne.where((w) => w.list == 'A1').toList(),
+    'A2': wordsListOne.where((w) => w.list == 'A2').toList(),
+    'B1': wordsListOne.where((w) => w.list == 'B1').toList(),
+    'B2': wordsListOne.where((w) => w.list == 'B2').toList(),
+    'C1': wordsListOne.where((w) => w.list == 'C1').toList(),
+  };
 
-  bool _isInitialized = false;
-  bool get isInitialized => _isInitialized;
+  SharedPreferences? _prefs;
 
   WordProvider() {
-    _initializeAll();
+    initLists();
   }
 
-  Future<void> _initializeAll() async {
-    await initializeDummyData(); // Sadece ilk yüklemede veya boşsa çalışır
-    await _initializeAllLevels();
-    _isInitialized = true;
-    notifyListeners();
-  }
+  Future<void> initLists() async {
+    _prefs = await SharedPreferences.getInstance();
+    for (String level in ['A1', 'A2', 'B1', 'B2', 'C1']) {
+      List<String>? savedList = _prefs?.getStringList('words_$level');
 
-  Future<void> _initializeAllLevels() async {
-    for (var level in ['A1', 'A2', 'B1', 'B2', 'C1']) {
-      await _loadLastIndex(level);
-      await loadData(level);
-      _initialLists[level] = List.from(_wordLists[level] ?? []);
-      // İsteğe bağlı: Başlangıçta karıştırma
-      // _initialLists[level]?.shuffle();
-      // _wordLists[level]?.shuffle();
+      if (savedList != null) {
+        _wordLists[level] =
+            savedList.map((item) => Words.fromJson(json.decode(item))).toList();
+      } else {
+        await saveData(level);
+      }
     }
     notifyListeners();
   }
 
-  // --- [YENİ EKLENEN] TÜM KELİMELERİ GERİ YÜKLEME FONKSİYONU ---
+  List<Words> getWords(String level) {
+    if (_wordLists[level] == null) {
+      return wordsListOne.where((w) => w.list == level).toList();
+    }
+
+    return _wordLists[level]!;
+  }
+
+  void deleteWord(String level, int index, BuildContext context) {
+    if (_wordLists[level] != null && _wordLists[level]!.isNotEmpty) {
+      if (index < _wordLists[level]!.length) {
+        _wordLists[level]!.removeAt(index);
+        saveData(level);
+        notifyListeners();
+      }
+    }
+  }
+
+  void sendToBack(String level, int index) {
+    if (_wordLists[level] != null && _wordLists[level]!.isNotEmpty) {
+      if (index < _wordLists[level]!.length) {
+        Words word = _wordLists[level]!.removeAt(index);
+        _wordLists[level]!.add(word);
+        saveData(level);
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> resetList(String level) async {
+    List<Words> defaultList =
+        wordsListOne.where((w) => w.list == level).toList();
+
+    _wordLists[level] = List.from(defaultList);
+
+    await saveData(level);
+
+    notifyListeners();
+  }
+
   Future<void> restoreAllWords() async {
-    final levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
-
-    for (var level in levels) {
-      // 1. Orijinal kaynaktan (wordsListOne) o seviyenin kelimelerini çek
-      List<Words> originalData =
-          wordsListOne.where((w) => w.list == level).toList();
-
-      // 2. Hafızadaki listeyi güncelle
-      _wordLists[level] = List.from(originalData);
-
-      // İsteğe bağlı: Resetlendiğinde liste karışık gelsin istiyorsan açabilirsin
-      _wordLists[level]?.shuffle();
-
-      // 3. İndeksi sıfırla
-      _lastIndices[level] = 0;
-      await _saveLastIndex(level);
-
-      // 4. Telefona (SharedPreferences) taze veriyi kaydet
-      await saveData(level);
-
-      print("$level seviyesi geri yüklendi: ${originalData.length} kelime.");
-    }
-
-    notifyListeners();
-  }
-  // -------------------------------------------------------------
-
-  void clearPrefs() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    print("Tüm SharedPreferences verileri temizlendi.");
-  }
-
-  Future<void> initializeDummyData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
-
-    for (var level in levels) {
-      // Eğer o seviyenin verisi hiç yoksa yükle
-      if (prefs.getStringList('${level}_questList') == null) {
-        List<Words> dummyWords =
-            wordsListOne.where((w) => w.list == level).toList();
-
-        await prefs.setStringList(
-            '${level}_questList', dummyWords.map((e) => e.quest).toList());
-        await prefs.setStringList(
-            '${level}_answerList', dummyWords.map((e) => e.answer).toList());
-        await prefs.setStringList(
-            '${level}_frontList', dummyWords.map((e) => e.front).toList());
-        await prefs.setStringList(
-            '${level}_backList', dummyWords.map((e) => e.back).toList());
-
-        print("$level ilk verileri yüklendi: ${dummyWords.length} adet");
-      }
-    }
-  }
-
-  List<Words> getWords(String level) => _wordLists[level] ?? [];
-  int getLastIndex(String level) => _lastIndices[level] ?? 0;
-
-  Future<void> _loadLastIndex(String level) async {
-    final prefs = await SharedPreferences.getInstance();
-    _lastIndices[level] = prefs.getInt('${level}_lastIndex') ?? 0;
-  }
-
-  Future<void> _saveLastIndex(String level) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('${level}_lastIndex', _lastIndices[level] ?? 0);
-  }
-
-  void setLastIndex(String level, int index) {
-    _lastIndices[level] = index;
-    _saveLastIndex(level);
-    notifyListeners();
-  }
-
-  Future<void> loadData(String level) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? questList = prefs.getStringList('${level}_questList');
-    List<String>? answerList = prefs.getStringList('${level}_answerList');
-    List<String>? frontList = prefs.getStringList('${level}_frontList');
-    List<String>? backList = prefs.getStringList('${level}_backList');
-
-    _wordLists[level] = [];
-
-    if (questList != null &&
-        answerList != null &&
-        frontList != null &&
-        backList != null) {
-      for (int i = 0; i < questList.length; i++) {
-        _wordLists[level]!.add(
-          Words(
-            list: level,
-            quest: questList[i],
-            answer: answerList[i],
-            front: frontList[i],
-            back: backList[i],
-          ),
-        );
-      }
+    for (String level in ['A1', 'A2', 'B1', 'B2', 'C1']) {
+      await resetList(level);
     }
     notifyListeners();
   }
 
   Future<void> saveData(String level) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<Words> list = _wordLists[level] ?? [];
-
-    List<String> questList = list.map((w) => w.quest).toList();
-    List<String> answerList = list.map((w) => w.answer).toList();
-    List<String> frontList = list.map((w) => w.front).toList();
-    List<String> backList = list.map((w) => w.back).toList();
-
-    await prefs.setStringList('${level}_questList', questList);
-    await prefs.setStringList('${level}_answerList', answerList);
-    await prefs.setStringList('${level}_frontList', frontList);
-    await prefs.setStringList('${level}_backList', backList);
-  }
-
-  void deleteWord(String level, int index, BuildContext context) {
-    if (_wordLists[level] == null || _wordLists[level]!.isEmpty) return;
-
-    _wordLists[level]!.removeAt(index);
-
-    if (index >= (_wordLists[level]?.length ?? 0)) {
-      _lastIndices[level] = (_lastIndices[level]! - 1)
-          .clamp(0, (_wordLists[level]?.length ?? 1) - 1);
-      _saveLastIndex(level);
+    if (_prefs != null && _wordLists[level] != null) {
+      List<String> stringList =
+          _wordLists[level]!.map((word) => json.encode(word.toJson())).toList();
+      await _prefs!.setStringList('words_$level', stringList);
     }
-
-    if (_wordLists[level]!.isEmpty) {
-      Navigator.pop(context);
-    } else {
-      saveData(level);
-      notifyListeners();
-    }
-  }
-
-  // Tekil seviye resetleme (İhtiyaç olursa diye bıraktım)
-  void resetList(String level) async {
-    List<Words> dummyWords =
-        wordsListOne.where((w) => w.list == level).toList();
-
-    _wordLists[level] = List.from(dummyWords);
-    _initialLists[level] = List.from(dummyWords);
-
-    _wordLists[level]?.shuffle();
-    _lastIndices[level] = 0; // Indexi de sıfırla
-    await _saveLastIndex(level);
-
-    await saveData(level);
-    notifyListeners();
   }
 }
 

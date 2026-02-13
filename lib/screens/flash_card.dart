@@ -1,23 +1,21 @@
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:eng_card/data/gridview.dart';
 import 'package:eng_card/data/save_words.dart';
 import 'package:eng_card/data/favorite_list.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
-import 'package:eng_card/screens/six_screen.dart';
-// import 'package:eng_card/screens/six_screen.dart'; // Kullanılmıyorsa silebilirsiniz
 import 'package:flip_card/flip_card.dart';
 import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Class ismini genel bir isim yaptım
 class FlashCardScreen extends StatefulWidget {
-  final String level; // Örn: "A1", "A2", "B1" buraya gelecek
+  final String level;
 
   const FlashCardScreen({super.key, required this.level});
 
@@ -25,40 +23,54 @@ class FlashCardScreen extends StatefulWidget {
   State<FlashCardScreen> createState() => _FlashCardScreenState();
 }
 
-int _getFixedTotalCount(String level) {
-  // Kelimeleri wordsListOne (Ana veri kaynağı) üzerinden sayıyoruz
-  return wordsListOne.where((element) => element.list == level).length;
-}
-
 class _FlashCardScreenState extends State<FlashCardScreen> {
+  List<Words> shuffledWords = [];
   FlutterTts flutterTts = FlutterTts();
-  FavoriteList favoriteList = FavoriteList();
+  final CardSwiperController controller = CardSwiperController();
 
-  bool _showQuestion = true;
-  bool _showAnswer = false;
+  final Color bgGradientStart = const Color(0xFF0F2027);
+  final Color bgGradientEnd = const Color(0xFF203A43);
+  final Color cardBg = Colors.white;
+  final Color accentColor = const Color(0xFFFF9F1C);
+  final Color highlightColor = const Color(0xFFFFBF69);
+  final Color textColorMain = const Color(0xFF2EC4B6);
+  final Color textColorSub = const Color(0xFF2C3E50);
+
   bool isIconVisible = true;
-  Color iconColor = easgreen; // Renklerinizin tanımlı olduğunu varsayıyorum
   static const String isIconVisibleKey = 'isIconVisible';
-
-  void changeIcon() {
-    setState(() {
-      isIconVisible = !isIconVisible;
-      _saveIsIconVisible(isIconVisible);
-    });
-  }
+  bool isInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _loadIsIconVisible();
     _initTts();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final wordProvider = Provider.of<WordProvider>(context, listen: false);
+      final originalWords = wordProvider.getWords(widget.level);
+
+      setState(() {
+        shuffledWords = List.from(originalWords);
+        shuffledWords.shuffle();
+        isInitialized = true;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   Future<void> _loadIsIconVisible() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isIconVisible = prefs.getBool(isIconVisibleKey) ?? true;
-    });
+    if (mounted) {
+      setState(() {
+        isIconVisible = prefs.getBool(isIconVisibleKey) ?? true;
+      });
+    }
   }
 
   Future<void> _saveIsIconVisible(bool value) async {
@@ -69,7 +81,7 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
   Future<void> _initTts() async {
     await flutterTts.setLanguage('en-US');
     await flutterTts.setPitch(1.0);
-    await flutterTts.setSpeechRate(0.4);
+    await flutterTts.setSpeechRate(0.5);
     await flutterTts.awaitSpeakCompletion(true);
   }
 
@@ -77,370 +89,539 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
     await flutterTts.speak(text);
   }
 
-  void _nextCard(WordProvider wordProvider) {
-    // widget.level sayesinde hangi sayfadaysak o veriyi çeker
-    List<Words> words = wordProvider.getWords(widget.level);
-
-    if (words.isEmpty) {
-      _handleEmptyList();
-      return;
-    }
-
-    int currentIndex = wordProvider.getLastIndex(widget.level);
-    int newIndex = (currentIndex + 1) % words.length;
-
-    wordProvider.setLastIndex(widget.level, newIndex);
-
-    setState(() {
-      _showQuestion = true;
-      _showAnswer = false;
-    });
+  int _getFixedTotalCount(String level) {
+    return wordsListOne.where((element) => element.list == level).length;
   }
 
-  void _previousCard(WordProvider wordProvider) {
-    List<Words> words = wordProvider.getWords(widget.level);
+  bool _onSwipe(
+    int previousIndex,
+    int? currentIndex,
+    CardSwiperDirection direction,
+    WordProvider wordProvider,
+    ProgressProvider progressProvider,
+    ScoreProvider scoreProvider,
+    List<Words> localList,
+  ) {
+    if (direction == CardSwiperDirection.right) {
+      scoreProvider.incrementScore(10);
+      progressProvider.increaseLinearProgress(widget.level);
 
-    if (words.isEmpty) {
-      _handleEmptyList();
-      return;
+      Future.delayed(Duration.zero, () {
+        if (mounted && localList.isNotEmpty) {
+          wordProvider.deleteWord(widget.level, 0, context);
+
+          setState(() {
+            shuffledWords.removeAt(0);
+            (Text('${shuffledWords.length}'));
+          });
+        }
+      });
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Öğrenildi! +10 Puan",
+              style: GoogleFonts.poppins(color: Colors.black)),
+          backgroundColor: Colors.white,
+          duration: const Duration(milliseconds: 300),
+        ),
+      );
+    } else if (direction == CardSwiperDirection.left) {
+      Future.delayed(Duration.zero, () {
+        if (mounted && localList.isNotEmpty) {
+          wordProvider.sendToBack(widget.level, 0);
+
+          setState(() {
+            Words movedWord = shuffledWords.removeAt(0);
+            shuffledWords.add(movedWord);
+          });
+        }
+      });
     }
 
-    int currentIndex = wordProvider.getLastIndex(widget.level);
-    int newIndex = (currentIndex - 1 + words.length) % words.length;
-
-    wordProvider.setLastIndex(widget.level, newIndex);
-
-    setState(() {
-      _showQuestion = true;
-      _showAnswer = false;
-    });
+    return true;
   }
 
-  void _toggleFavorite() {
+  void _toggleFavorite(WordProvider wordProvider, List<Words> words) {
+    if (words.isEmpty) return;
     var favoriteList = Provider.of<FavoriteList>(context, listen: false);
-    var wordProvider2 = Provider.of<WordProvider>(context, listen: false);
-    var oneWords = wordProvider2.getWords(widget.level);
-    int index = wordProvider2.getLastIndex(widget.level);
+    Words currentWord = words[0];
 
     SavedItem newFavorite = SavedItem(
-      question: oneWords[index].quest,
-      answer: oneWords[index].answer,
-      lvClass: oneWords[index].list,
+      question: currentWord.quest,
+      answer: currentWord.answer,
+      lvClass: currentWord.list,
     );
 
     if (favoriteList.favorites.contains(newFavorite)) {
-      favoriteList.deleteFavorite(
-        favoriteList.favorites.indexOf(newFavorite),
-      );
+      favoriteList.deleteFavorite(favoriteList.favorites.indexOf(newFavorite));
     } else {
       favoriteList.addFavorite(newFavorite);
     }
     favoriteList.saveFavorites();
-  }
-
-  void _handleEmptyList() {
-    Navigator.pop(context);
+    setState(() {});
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     var wordProvider = Provider.of<WordProvider>(context);
-    // Dinamik level kullanımı
-    List<Words> words = wordProvider.getWords(widget.level);
-    FlipCardController cardController = FlipCardController();
-    int index = wordProvider.getLastIndex(widget.level);
-
-    if (index >= words.length) {
-      // Eğer liste boşaldıysa veya index taştıysa
-      if (words.isEmpty) {
-        // Liste tamamen boşsa geri dönülebilir veya boş ekran gösterilebilir
-        return Scaffold(
-          backgroundColor: medgreen,
-          body: Center(
-              child: Text("Liste Tamamlandı",
-                  style: TextStyle(color: Colors.white, fontSize: 20.sp))),
-        );
-      }
-      index = 0;
-      wordProvider.setLastIndex(widget.level, 0);
-    }
-
-    Words currentWord = words[index];
-
     var progressProvider = Provider.of<ProgressProvider>(context);
     var scoreProvider = Provider.of<ScoreProvider>(context);
+    var favoriteList = Provider.of<FavoriteList>(context);
 
-    String fullText = currentWord.front;
-    String targetWord = currentWord.quest;
-    int startIndex = fullText.indexOf(targetWord);
-
-    Widget resultWidget;
-
-    if (startIndex != -1) {
-      resultWidget = Text.rich(
-        textAlign: TextAlign.center,
-        TextSpan(
-          children: [
-            TextSpan(
-                text: fullText.substring(0, startIndex),
-                style: TextStyle(fontSize: 11.sp, color: Colors.black45)),
-            TextSpan(
-                text: targetWord,
-                style: TextStyle(fontSize: 12.sp, color: yellow)),
-            TextSpan(
-                text: fullText.substring(startIndex + targetWord.length),
-                style: TextStyle(fontSize: 11.sp, color: Colors.black45)),
-          ],
-        ),
-        maxLines: 3,
-      );
-    } else {
-      resultWidget = Center(
-        child: Text(
-          fullText,
-          style: TextStyle(fontSize: 12.sp, color: Colors.black45),
-          maxLines: 3,
-        ),
-      );
+    if (shuffledWords.isEmpty) {
+      return _buildEmptyState();
     }
 
     return Scaffold(
-      backgroundColor: medgreen,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(systemNavigationBarColor: medgreen),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [bgGradientStart, bgGradientEnd],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.arrow_back_ios_new,
+                            color: Colors.white, size: 18.sp),
+                      ),
+                    ),
+                    SizedBox(width: 15.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Level ${widget.level}",
+                            style: GoogleFonts.poppins(
+                                color: Colors.white70, fontSize: 12.sp),
+                          ),
+                          SizedBox(height: 5.h),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: _getFixedTotalCount(widget.level) > 0
+                                  ? (_getFixedTotalCount(widget.level) -
+                                          shuffledWords.length) /
+                                      _getFixedTotalCount(widget.level)
+                                  : 0,
+                              minHeight: 8.h,
+                              backgroundColor: Colors.white12,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(accentColor),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 15.w),
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: accentColor.withOpacity(0.5)),
+                      ),
+                      child: Text(
+                        '${shuffledWords.length}',
+                        style: GoogleFonts.poppins(
+                            color: accentColor, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 10,
+                child: CardSwiper(
+                  controller: controller,
+                  cardsCount: shuffledWords.length,
+                  key: ValueKey(
+                      "${shuffledWords.length}_${shuffledWords.isNotEmpty ? shuffledWords.first.quest : 'empty'}"),
+                  numberOfCardsDisplayed:
+                      shuffledWords.length < 3 ? shuffledWords.length : 3,
+                  backCardOffset: const Offset(0, 35),
+                  padding: EdgeInsets.fromLTRB(24.w, 10.h, 24.w, 40.h),
+                  cardBuilder:
+                      (context, index, horizontalOffset, verticalOffset) {
+                    if (index >= shuffledWords.length) return Container();
+                    return _buildFlipCard(shuffledWords[index]);
+                  },
+                  onSwipe: (previousIndex, currentIndex, direction) {
+                    return _onSwipe(
+                        previousIndex,
+                        currentIndex,
+                        direction,
+                        wordProvider,
+                        progressProvider,
+                        scoreProvider,
+                        shuffledWords);
+                  },
+                  allowedSwipeDirection:
+                      const AllowedSwipeDirection.only(right: true, left: true),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: 30.h, left: 30.w, right: 30.w),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildCircleButton(
+                      icon: Icons.favorite,
+                      isActive: shuffledWords.isNotEmpty &&
+                          favoriteList.favorites.any((item) =>
+                              item.question == shuffledWords[0].quest),
+                      activeColor: Colors.redAccent,
+                      onTap: () => _toggleFavorite(wordProvider, shuffledWords),
+                    ),
+                    _buildCircleButton(
+                      icon: Icons.volume_up_rounded,
+                      size: 70.w,
+                      isActive: true,
+                      activeColor: textColorMain,
+                      iconSize: 35.sp,
+                      onTap: () {
+                        if (shuffledWords.isNotEmpty)
+                          _speak(shuffledWords[0].quest);
+                      },
+                    ),
+                    _buildCircleButton(
+                      icon: isIconVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      isActive: isIconVisible,
+                      activeColor: accentColor,
+                      onTap: () {
+                        setState(() {
+                          isIconVisible = !isIconVisible;
+                          _saveIsIconVisible(isIconVisible);
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              colors: [bgGradientStart, bgGradientEnd],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(height: 18.h),
-            Text(
-              'WordCard - ${widget.level}', // Başlıkta hangi level olduğunu gösterir
-              style: const TextStyle(color: Colors.white),
+          children: [
+            Container(
+              padding: EdgeInsets.all(30.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.celebration, color: accentColor, size: 80.sp),
             ),
-            SizedBox(
-              height: 570.h,
-              width: 337.w,
-              child: Card(
-                color: whites,
-                child: Column(
+            SizedBox(height: 30.h),
+            Text("Harika İş!",
+                style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 28.sp,
+                    fontWeight: FontWeight.bold)),
+            SizedBox(height: 10.h),
+            Text("Bu seviyedeki tüm kelimeleri bitirdin.",
+                style: GoogleFonts.poppins(
+                    color: Colors.white70, fontSize: 16.sp)),
+            SizedBox(height: 40.h),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accentColor,
+                padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 15.h),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+              ),
+              onPressed: () async {
+                var wordProvider =
+                    Provider.of<WordProvider>(context, listen: false);
+
+                wordProvider.resetList(widget.level);
+
+                var originalWords = wordProvider.getWords(widget.level);
+
+                setState(() {
+                  shuffledWords = List.from(originalWords);
+                  shuffledWords.shuffle();
+                });
+              },
+              icon: const Icon(Icons.refresh, color: Colors.white),
+              label: Text("Seviyeyi Sıfırla & Tekrar Oyna",
+                  style: GoogleFonts.poppins(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+            SizedBox(height: 20.h),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Listeye Dön",
+                  style: GoogleFonts.poppins(
+                      color: Colors.white54, fontWeight: FontWeight.w600)),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCircleButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    bool isActive = false,
+    Color activeColor = Colors.blue,
+    double? size,
+    double? iconSize,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size ?? 55.w,
+        height: size ?? 55.w,
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white : Colors.white.withOpacity(0.1),
+          shape: BoxShape.circle,
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                      color: activeColor.withOpacity(0.4),
+                      blurRadius: 15,
+                      offset: Offset(0, 5))
+                ]
+              : [],
+        ),
+        child: Icon(
+          icon,
+          color: isActive ? activeColor : Colors.white60,
+          size: iconSize ?? 28.sp,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFlipCard(Words word) {
+    FlipCardController localController = FlipCardController();
+    return FlipCard(
+      controller: localController,
+      direction: FlipDirection.HORIZONTAL,
+      side: CardSide.FRONT,
+      speed: 500,
+      front: _buildCardFace(word: word, isFront: true),
+      back: _buildCardFace(word: word, isFront: false),
+    );
+  }
+
+  Widget _buildCardFace({required Words word, required bool isFront}) {
+    String mainText = isFront ? word.quest : word.answer;
+    String subText = isFront ? word.front : word.back;
+    String hintText = word.answer;
+
+    Widget sentenceWidget;
+    if (isFront) {
+      String lowerSubText = subText.toLowerCase();
+      String lowerMainText = mainText.toLowerCase();
+      int startIndex = lowerSubText.indexOf(lowerMainText);
+
+      if (startIndex != -1) {
+        sentenceWidget = Text.rich(
+          textAlign: TextAlign.center,
+          TextSpan(
+            children: [
+              TextSpan(
+                text: subText.substring(0, startIndex),
+                style: GoogleFonts.poppins(
+                    fontSize: 18.sp, color: textColorSub, height: 1.5),
+              ),
+              TextSpan(
+                text:
+                    subText.substring(startIndex, startIndex + mainText.length),
+                style: GoogleFonts.poppins(
+                  fontSize: 19.sp,
+                  color: Colors.black,
+                  backgroundColor: highlightColor,
+                  fontWeight: FontWeight.bold,
+                  height: 1.5,
+                ),
+              ),
+              TextSpan(
+                text: subText.substring(startIndex + mainText.length),
+                style: GoogleFonts.poppins(
+                    fontSize: 18.sp, color: textColorSub, height: 1.5),
+              ),
+            ],
+          ),
+        );
+      } else {
+        sentenceWidget = Text(subText,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+                fontSize: 18.sp, color: textColorSub, height: 1.5));
+      }
+    } else {
+      sentenceWidget = Text(subText,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.poppins(
+              fontSize: 18.sp, color: textColorSub, height: 1.5));
+    }
+
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          )
+        ],
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            top: -50,
+            right: -50,
+            child: Container(
+              width: 150.w,
+              height: 150.w,
+              decoration: BoxDecoration(
+                color: textColorMain.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 25.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: isFront
+                          ? textColorMain.withOpacity(0.1)
+                          : Colors.grey.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      isFront ? "ENGLISH" : "TURKISH",
+                      style: GoogleFonts.poppins(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.bold,
+                          color: isFront ? textColorMain : Colors.grey,
+                          letterSpacing: 1.2),
+                    ),
+                  ),
+                  SizedBox(height: 30.h),
+                  Container(
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    child: Text(
+                      mainText,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 36.sp,
+                        color: isFront ? textColorMain : Colors.black87,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 30.h),
+                  Container(
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    child: sentenceWidget,
+                  ),
+                  SizedBox(height: 50.h),
+                ],
+              ),
+            ),
+          ),
+          if (isFront && isIconVisible)
+            Positioned(
+              bottom: 40.h,
+              left: 20.w,
+              right: 20.w,
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(height: 7.h),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            _speak(words[index].quest);
-                          },
-                          icon: Icon(
-                            Icons.settings_voice_rounded,
-                            color: orange,
-                          ),
-                        ),
-                        SizedBox(width: 223.w),
-                        IconButton(
-                          onPressed: () {
-                            setState(() {
-                              iconColor = Colors.red;
-                              _toggleFavorite();
-                              Future.delayed(const Duration(milliseconds: 800),
-                                  () {
-                                setState(() {
-                                  iconColor = easgreen;
-                                });
-                              });
-                            });
-                          },
-                          icon: const Icon(Icons.favorite),
-                          iconSize: 30.w,
-                          color: favoriteList.favorites.any(
-                            (item) =>
-                                item.question == words[index].quest &&
-                                item.answer == words[index].answer,
-                          )
-                              ? easgreen
-                              : iconColor,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 13.h),
-                    Center(
+                    Icon(Icons.lightbulb, color: accentColor, size: 20.sp),
+                    SizedBox(width: 10.w),
+                    Flexible(
                       child: Text(
-                        _showQuestion
-                            ? words[index].quest
-                            : words[index].answer,
-                        style: TextStyle(fontSize: 30.sp, color: orange),
-                      ),
-                    ),
-                    SizedBox(height: 35.h),
-                    const Divider(
-                      color: Color.fromARGB(255, 55, 150, 111),
-                      endIndent: 17,
-                      indent: 17,
-                    ),
-                    SizedBox(height: 68.h),
-                    SizedBox(
-                      height: isIconVisible ? null : 29.sp,
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 400),
-                        opacity: isIconVisible ? 1.0 : 0.0,
-                        child: Text(
-                          _showAnswer
-                              ? words[index].quest
-                              : words[index].answer,
-                          style: TextStyle(color: orange, fontSize: 20.sp),
+                        hintText,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          color: Colors.black87,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ),
-                    SizedBox(height: 90.h),
-                    FlipCard(
-                      controller: cardController,
-                      speed: 500,
-                      front: Container(
-                        padding: const EdgeInsets.all(30),
-                        color: whites,
-                        height: 160.h,
-                        width: 310.w,
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              bottom: 91.sp,
-                              child: Text(
-                                '"',
-                                style: TextStyle(
-                                    fontSize: 19.sp, color: hardgreen),
-                              ),
-                            ),
-                            Center(child: resultWidget),
-                            Positioned(
-                              right: 8.sp,
-                              top: 105.sp,
-                              child: Text(
-                                '"',
-                                style: TextStyle(
-                                    fontSize: 19.sp, color: hardgreen),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      back: Container(
-                        padding: const EdgeInsets.all(30),
-                        height: 160.h,
-                        width: 310.w,
-                        color: whites,
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              bottom: 91.sp,
-                              child: Text(
-                                '"',
-                                style: TextStyle(
-                                    fontSize: 19.sp, color: hardgreen),
-                              ),
-                            ),
-                            Center(
-                              child: Text(
-                                textAlign: TextAlign.center,
-                                '${words[index].back} ',
-                                maxLines: 3,
-                                style: TextStyle(
-                                    fontSize: 11.sp, color: Colors.black45),
-                              ),
-                            ),
-                            Positioned(
-                              right: 8.sp,
-                              top: 105.sp,
-                              child: Text(
-                                '"',
-                                style: TextStyle(
-                                    fontSize: 19.sp, color: hardgreen),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(child: SizedBox(height: 20.h)),
-                    Divider(endIndent: 17, indent: 17, color: easgreen),
-                    Row(
-                      children: [
-                        SizedBox(width: 10.w),
-                        IconButton(
-                          onPressed: () {
-                            changeIcon();
-                            _saveIsIconVisible(isIconVisible);
-                          },
-                          icon: isIconVisible
-                              ? const Icon(Icons.visibility)
-                              : const Icon(Icons.visibility_off),
-                        ),
-                        SizedBox(width: 80.w),
-                        Text(
-                          // Buradaki 400 sayısı sabit mi yoksa level'a göre değişiyor mu?
-                          // Değişiyorsa words.length kullanmak mantıklı.
-                          '${words.length} / ${_getFixedTotalCount(widget.level)}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(width: 65.w),
-                        IconButton(
-                          onPressed: () {
-                            progressProvider
-                                .increaseLinearProgress(widget.level);
-                            if (words.isNotEmpty) {
-                              wordProvider.deleteWord(
-                                  widget.level, index, context);
-                              scoreProvider.incrementScore(10);
-                            } else {
-                              const SnackBar(
-                                content: Text('Congrats'),
-                              );
-                            }
-                          },
-                          icon: Icon(
-                            Icons.check_circle,
-                            color: easgreen,
-                            size: 36.w,
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 15.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                SizedBox(
-                  height: 40.h,
-                  width: 100.w,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: orange),
-                    onPressed: () {
-                      _previousCard(wordProvider);
-                    },
-                    child: Icon(
-                      Icons.arrow_circle_left_outlined,
-                      color: whites,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 40.h,
-                  width: 100.w,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: orange),
-                    onPressed: () {
-                      _nextCard(wordProvider);
-                    },
-                    child:
-                        Icon(Icons.arrow_circle_right_outlined, color: whites),
-                  ),
-                ),
-              ],
+          Positioned(
+            bottom: 15.h,
+            left: 0,
+            right: 0,
+            child: Text(
+              isFront ? "Çeviriyi görmek için dokun" : "Geri dönmek için dokun",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 10.sp,
+                color: Colors.grey.withOpacity(0.6),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

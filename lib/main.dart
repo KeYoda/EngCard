@@ -22,7 +22,6 @@ Future<void> checkAndRequestPermissions() async {
   var storageStatus = await Permission.storage.request();
 
   if (microphoneStatus.isGranted && storageStatus.isGranted) {
-    // İzinler verilmiş durumda
   } else {
     Map<Permission, PermissionStatus> status = await [
       Permission.microphone,
@@ -31,10 +30,7 @@ Future<void> checkAndRequestPermissions() async {
 
     if (status[Permission.microphone] == PermissionStatus.granted &&
         status[Permission.storage] == PermissionStatus.granted) {
-      // İzinler başarıyla verildi
-    } else {
-      // İzinler reddedildi
-    }
+    } else {}
   }
 }
 
@@ -42,25 +38,17 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
     if (navigatorKey.currentContext != null) {
-      showDialog(
-        context: navigatorKey.currentContext!,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Bir Hata Oluştu'),
-            content:
-                const Text('Bir hata meydana geldi. Lütfen tekrar deneyin.'),
-            actions: [
-              TextButton(
-                child: const Text('Kapat'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: navigatorKey.currentContext!,
+          builder: (context) => AlertDialog(
+            title: const Text("Hata"),
+            content: Text(details.exception.toString()),
+          ),
+        );
+      });
     }
   };
 
