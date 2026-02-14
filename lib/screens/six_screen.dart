@@ -2,8 +2,10 @@ import 'package:eng_card/data/favorite_list.dart';
 import 'package:eng_card/drawer.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
+import 'package:eng_card/provider/streak_prov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:eng_card/screens/flash_card.dart';
+import 'package:eng_card/widgets/streak_celebration.dart'; // YENİ WIDGET
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,14 +25,21 @@ Color yellow = const Color(0xFFFFBF69);
 Color whites = Colors.white;
 
 class _SixScreenState extends State<SixScreen> {
+  // Animasyon durumu kontrolü
+  bool _showCelebration = false;
+
   @override
   Widget build(BuildContext context) {
+    // Provider tanımları
     final favoriteList = Provider.of<FavoriteList>(context);
     favoriteList.loadFavorites();
 
     var progressProvider = Provider.of<ProgressProvider>(context);
     var scoreProvider = Provider.of<ScoreProvider>(context);
     var wordListProvider = Provider.of<WordProvider>(context);
+
+    // YENİ EKLENEN STREAK PROVIDER
+    var streakProvider = Provider.of<StreakProvider>(context);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -46,93 +55,120 @@ class _SixScreenState extends State<SixScreen> {
         centerTitle: true,
       ),
       drawer: const MainDrawer(),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [hardgreen, medgreen],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+
+      // --- STACK YAPISI GÜNCELLENDİ ---
+      body: Stack(
+        children: [
+          // 1. MEVCUT ARKA PLAN VE LİSTE
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [hardgreen, medgreen],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: SafeArea(
+              child: ListView(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                children: [
+                  _buildStatsPanel(
+                      scoreProvider, streakProvider), // Parametre Eklendi
+                  SizedBox(height: 30.h),
+                  Text(
+                    "Seviyeler",
+                    style: GoogleFonts.poppins(
+                      color: whites,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 15.h),
+
+                  // Seviye Kartları
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildModernLevelCard(
+                        context: context,
+                        level: 'A1',
+                        imagePath: 'assets/a1.webp',
+                        isEmpty: wordListProvider.getWords('A1').isEmpty,
+                        nextPage: const FlashCardScreen(level: 'A1'),
+                        progressValue: progressProvider.getLinearProgress('A1'),
+                      ),
+                      _buildModernLevelCard(
+                        context: context,
+                        level: 'A2',
+                        imagePath: 'assets/a2.webp',
+                        isEmpty: wordListProvider.getWords('A2').isEmpty,
+                        nextPage: const FlashCardScreen(level: 'A2'),
+                        progressValue: progressProvider.getLinearProgress('A2'),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildModernLevelCard(
+                        context: context,
+                        level: 'B1',
+                        imagePath: 'assets/a3.webp',
+                        isEmpty: wordListProvider.getWords('B1').isEmpty,
+                        nextPage: const FlashCardScreen(level: 'B1'),
+                        progressValue: progressProvider.getLinearProgress('B1'),
+                      ),
+                      _buildModernLevelCard(
+                        context: context,
+                        level: 'B2',
+                        imagePath: 'assets/a4.webp',
+                        isEmpty: wordListProvider.getWords('B2').isEmpty,
+                        nextPage: const FlashCardScreen(level: 'B2'),
+                        progressValue: progressProvider.getLinearProgress('B2'),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20.h),
+                  _buildModernLevelCard(
+                    context: context,
+                    level: 'C1',
+                    imagePath: 'assets/a5.webp',
+                    isEmpty: wordListProvider.getWords('C1').isEmpty,
+                    nextPage: const FlashCardScreen(level: 'C1'),
+                    progressValue: progressProvider.getLinearProgress('C1'),
+                    isFullWidth: true,
+                  ),
+                  SizedBox(height: 40.h),
+                ],
+              ),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: ListView(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-            children: [
-              _buildStatsPanel(scoreProvider),
-              SizedBox(height: 30.h),
-              Text(
-                "Seviyeler",
-                style: GoogleFonts.poppins(
-                  color: whites,
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
+
+          // 2. KUTLAMA KATMANI (EN ÜSTTE)
+          if (_showCelebration)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black54, // Arkayı hafif karart
+                child: StreakCelebrationOverlay(
+                  onAnimationComplete: () {
+                    setState(() {
+                      _showCelebration = false; // Animasyon bitince kapat
+                    });
+                  },
                 ),
               ),
-              SizedBox(height: 15.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildModernLevelCard(
-                    context: context,
-                    level: 'A1',
-                    imagePath: 'assets/a1.webp',
-                    isEmpty: wordListProvider.getWords('A1').isEmpty,
-                    nextPage: const FlashCardScreen(level: 'A1'),
-                    progressValue: progressProvider.getLinearProgress('A1'),
-                  ),
-                  _buildModernLevelCard(
-                    context: context,
-                    level: 'A2',
-                    imagePath: 'assets/a2.webp',
-                    isEmpty: wordListProvider.getWords('A2').isEmpty,
-                    nextPage: const FlashCardScreen(level: 'A2'),
-                    progressValue: progressProvider.getLinearProgress('A2'),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildModernLevelCard(
-                    context: context,
-                    level: 'B1',
-                    imagePath: 'assets/a3.webp',
-                    isEmpty: wordListProvider.getWords('B1').isEmpty,
-                    nextPage: const FlashCardScreen(level: 'B1'),
-                    progressValue: progressProvider.getLinearProgress('B1'),
-                  ),
-                  _buildModernLevelCard(
-                    context: context,
-                    level: 'B2',
-                    imagePath: 'assets/a4.webp',
-                    isEmpty: wordListProvider.getWords('B2').isEmpty,
-                    nextPage: const FlashCardScreen(level: 'B2'),
-                    progressValue: progressProvider.getLinearProgress('B2'),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20.h),
-              _buildModernLevelCard(
-                context: context,
-                level: 'C1',
-                imagePath: 'assets/a5.webp',
-                isEmpty: wordListProvider.getWords('C1').isEmpty,
-                nextPage: const FlashCardScreen(level: 'C1'),
-                progressValue: progressProvider.getLinearProgress('C1'),
-                isFullWidth: true,
-              ),
-              SizedBox(height: 40.h),
-            ],
-          ),
-        ),
+            ),
+        ],
       ),
     );
   }
 
-  Widget _buildStatsPanel(ScoreProvider scoreProvider) {
+  // --- İSTATİSTİK PANELİ (GÜNCELLENDİ) ---
+  Widget _buildStatsPanel(
+      ScoreProvider scoreProvider, StreakProvider streakProvider) {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -147,21 +183,29 @@ class _SixScreenState extends State<SixScreen> {
               Icons.emoji_events),
           Container(
               width: 1, height: 40.h, color: whites.withValues(alpha: 0.2)),
-          _buildStatItem("Günlük", scoreProvider.dailyScore.toString(),
+          _buildStatItem("Günlük Puan", scoreProvider.dailyScore.toString(),
               Icons.calendar_today),
           Container(
               width: 1, height: 40.h, color: whites.withValues(alpha: 0.2)),
           _buildStatItem(
-              "Öğrenilen", scoreProvider.knownScore.toString(), Icons.school),
+              'Günlük Seri',
+              streakProvider.isTargetReached
+                  ? "${streakProvider.streakCount} Gün 🔥"
+                  : "${streakProvider.dailyCount} / 10",
+              Icons.local_fire_department_rounded,
+              color: streakProvider.isTargetReached
+                  ? Colors.deepOrangeAccent
+                  : Colors.grey),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon) {
+  Widget _buildStatItem(String label, String value, IconData icon,
+      {Color? color}) {
     return Column(
       children: [
-        Icon(icon, color: orange, size: 24.sp),
+        Icon(icon, color: color ?? orange, size: 24.sp),
         SizedBox(height: 5.h),
         Text(
           value,
@@ -196,7 +240,8 @@ class _SixScreenState extends State<SixScreen> {
         : (ScreenUtil().screenWidth - 55.w) / 2;
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        // async Eklendi
         if (isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -209,9 +254,18 @@ class _SixScreenState extends State<SixScreen> {
               duration: const Duration(seconds: 2),
             ),
           );
-        } else {
+          // İsterseniz burada da resetleme sayfasına yönlendirebilirsiniz
           Navigator.of(context)
               .push(MaterialPageRoute(builder: (context) => nextPage));
+        } else {
+          final bool? result = await Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => nextPage));
+
+          if (result == true) {
+            setState(() {
+              _showCelebration = true;
+            });
+          }
         }
       },
       child: Container(
@@ -267,7 +321,7 @@ class _SixScreenState extends State<SixScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Level $level",
+                          "Seviye $level",
                           style: GoogleFonts.poppins(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
@@ -292,7 +346,7 @@ class _SixScreenState extends State<SixScreen> {
                           borderRadius: BorderRadius.circular(5),
                           child: LinearProgressIndicator(
                             value: progressValue,
-                            minHeight: 6,
+                            minHeight: 6, // .h kaldırıldı (Hata önlemi)
                             backgroundColor: Colors.grey.shade200,
                             valueColor: AlwaysStoppedAnimation<Color>(
                               isEmpty ? easgreen : orange,

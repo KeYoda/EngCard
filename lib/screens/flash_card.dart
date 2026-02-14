@@ -5,6 +5,8 @@ import 'package:eng_card/data/favorite_list.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
+import 'package:eng_card/provider/streak_prov.dart'; // EKLENDİ
+import 'package:eng_card/widgets/floating_score.dart'; // EKLENDİ
 import 'package:flip_card/flip_card.dart';
 import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +29,10 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
   List<Words> shuffledWords = [];
   FlutterTts flutterTts = FlutterTts();
   final CardSwiperController controller = CardSwiperController();
+  final GlobalKey<FloatingScoreOverlayState> _scoreKey =
+      GlobalKey<FloatingScoreOverlayState>();
 
+  // --- RENK PALETİ ---
   final Color bgGradientStart = const Color(0xFF0F2027);
   final Color bgGradientEnd = const Color(0xFF203A43);
   final Color cardBg = Colors.white;
@@ -36,9 +41,12 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
   final Color textColorMain = const Color(0xFF2EC4B6);
   final Color textColorSub = const Color(0xFF2C3E50);
 
-  bool isIconVisible = true;
+  bool isIconVisible = false;
   static const String isIconVisibleKey = 'isIconVisible';
   bool isInitialized = false;
+
+  // --- SERİ KONTROL DEĞİŞKENİ ---
+  bool _hasStreakIncreasedSession = false;
 
   @override
   void initState() {
@@ -68,7 +76,7 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
-        isIconVisible = prefs.getBool(isIconVisibleKey) ?? true;
+        isIconVisible = prefs.getBool(isIconVisibleKey) ?? false;
       });
     }
   }
@@ -93,6 +101,7 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
     return wordsListOne.where((element) => element.list == level).length;
   }
 
+  // --- SWIPE MANTIĞI ---
   bool _onSwipe(
     int previousIndex,
     int? currentIndex,
@@ -100,37 +109,43 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
     WordProvider wordProvider,
     ProgressProvider progressProvider,
     ScoreProvider scoreProvider,
+    StreakProvider streakProvider,
     List<Words> localList,
   ) {
     if (direction == CardSwiperDirection.right) {
       scoreProvider.incrementScore(10);
       progressProvider.increaseLinearProgress(widget.level);
 
+      // --- SAYAÇ VE HEDEF KONTROLÜ (DÜZELTİLDİ) ---
+      // Şu anki sayaç 9 ise ve hedef 10 ise, bu işlemle 10 olacak demektir.
+      // Bu yüzden arttırmadan ÖNCE kontrol ediyoruz.
+      if (streakProvider.dailyCount == 9) {
+        _hasStreakIncreasedSession = true;
+      }
+
+      streakProvider.incrementDailyProgress();
+      // -------------------------------------------
+
+      // Animasyonu Tetikle
+      _scoreKey.currentState?.showScore(
+        position: Offset(MediaQuery.of(context).size.width / 2 - 30,
+            MediaQuery.of(context).size.height / 2 - 100),
+        points: 10,
+      );
+
+      // Listeden silme işlemi
       Future.delayed(Duration.zero, () {
         if (mounted && localList.isNotEmpty) {
           wordProvider.deleteWord(widget.level, 0, context);
-
           setState(() {
             shuffledWords.removeAt(0);
-            (Text('${shuffledWords.length}'));
           });
         }
       });
-
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Öğrenildi! +10 Puan",
-              style: GoogleFonts.poppins(color: Colors.black)),
-          backgroundColor: Colors.white,
-          duration: const Duration(milliseconds: 300),
-        ),
-      );
     } else if (direction == CardSwiperDirection.left) {
       Future.delayed(Duration.zero, () {
         if (mounted && localList.isNotEmpty) {
           wordProvider.sendToBack(widget.level, 0);
-
           setState(() {
             Words movedWord = shuffledWords.removeAt(0);
             shuffledWords.add(movedWord);
@@ -138,7 +153,6 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
         }
       });
     }
-
     return true;
   }
 
@@ -163,169 +177,208 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     var wordProvider = Provider.of<WordProvider>(context);
     var progressProvider = Provider.of<ProgressProvider>(context);
     var scoreProvider = Provider.of<ScoreProvider>(context);
+    var streakProvider = Provider.of<StreakProvider>(context);
     var favoriteList = Provider.of<FavoriteList>(context);
+
+    if (!isInitialized) {
+      return const Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      );
+    }
 
     if (shuffledWords.isEmpty) {
       return _buildEmptyState();
     }
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [bgGradientStart, bgGradientEnd],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-                child: Row(
+    // --- POPSCOPE İLE GERİ TUŞUNU YAKALAMA ---
+    return PopScope(
+      canPop: false, // Otomatik çıkışı engelle, biz yöneteceğiz
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        // Seri arttı mı bilgisini ana ekrana gönder
+        Navigator.pop(context, _hasStreakIncreasedSession);
+      },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [bgGradientStart, bgGradientEnd],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+              child: SafeArea(
+                child: Column(
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: EdgeInsets.all(8.w),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.arrow_back_ios_new,
-                            color: Colors.white, size: 18.sp),
-                      ),
-                    ),
-                    SizedBox(width: 15.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    // ÜST BAR
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 20.w, vertical: 10.h),
+                      child: Row(
                         children: [
-                          Text(
-                            "Level ${widget.level}",
-                            style: GoogleFonts.poppins(
-                                color: Colors.white70, fontSize: 12.sp),
+                          GestureDetector(
+                            onTap: () {
+                              // OK TUŞU İLE ÇIKIŞ
+                              Navigator.pop(
+                                  context, _hasStreakIncreasedSession);
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(8.w),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.arrow_back_ios_new,
+                                  color: Colors.white, size: 18.sp),
+                            ),
                           ),
-                          SizedBox(height: 5.h),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: LinearProgressIndicator(
-                              value: _getFixedTotalCount(widget.level) > 0
-                                  ? (_getFixedTotalCount(widget.level) -
-                                          shuffledWords.length) /
-                                      _getFixedTotalCount(widget.level)
-                                  : 0,
-                              minHeight: 8.h,
-                              backgroundColor: Colors.white12,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(accentColor),
+                          SizedBox(width: 15.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Level ${widget.level}",
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.white70, fontSize: 12.sp),
+                                ),
+                                SizedBox(height: 5.h),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: LinearProgressIndicator(
+                                    value: _getFixedTotalCount(widget.level) > 0
+                                        ? (_getFixedTotalCount(widget.level) -
+                                                shuffledWords.length) /
+                                            _getFixedTotalCount(widget.level)
+                                        : 0,
+                                    minHeight: 8,
+                                    backgroundColor: Colors.white12,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        accentColor),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 15.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12.w, vertical: 6.h),
+                            decoration: BoxDecoration(
+                              color: accentColor.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                  color: accentColor.withValues(alpha: 0.5)),
+                            ),
+                            child: Text(
+                              '${shuffledWords.length}',
+                              style: GoogleFonts.poppins(
+                                  color: accentColor,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(width: 15.w),
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: accentColor.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: accentColor.withOpacity(0.5)),
+
+                    // KART ALANI
+                    Expanded(
+                      flex: 10,
+                      child: CardSwiper(
+                        controller: controller,
+                        cardsCount: shuffledWords.length,
+                        key: ValueKey(
+                            "${shuffledWords.length}_${shuffledWords.isNotEmpty ? shuffledWords.first.quest : 'empty'}"),
+                        numberOfCardsDisplayed:
+                            shuffledWords.length < 3 ? shuffledWords.length : 3,
+                        backCardOffset: const Offset(0, 35),
+                        padding: EdgeInsets.fromLTRB(24.w, 10.h, 24.w, 40.h),
+                        cardBuilder:
+                            (context, index, horizontalOffset, verticalOffset) {
+                          if (index >= shuffledWords.length) return Container();
+                          return _buildFlipCard(shuffledWords[index]);
+                        },
+                        onSwipe: (previousIndex, currentIndex, direction) {
+                          return _onSwipe(
+                              previousIndex,
+                              currentIndex,
+                              direction,
+                              wordProvider,
+                              progressProvider,
+                              scoreProvider,
+                              streakProvider,
+                              shuffledWords);
+                        },
+                        allowedSwipeDirection: const AllowedSwipeDirection.only(
+                            right: true, left: true),
                       ),
-                      child: Text(
-                        '${shuffledWords.length}',
-                        style: GoogleFonts.poppins(
-                            color: accentColor, fontWeight: FontWeight.bold),
+                    ),
+
+                    // ALT BUTONLAR
+                    Padding(
+                      padding: EdgeInsets.only(
+                          bottom: 30.h, left: 30.w, right: 30.w),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildCircleButton(
+                            icon: Icons.favorite,
+                            isActive: shuffledWords.isNotEmpty &&
+                                favoriteList.favorites.any((item) =>
+                                    item.question == shuffledWords[0].quest),
+                            activeColor: Colors.redAccent,
+                            onTap: () =>
+                                _toggleFavorite(wordProvider, shuffledWords),
+                          ),
+                          _buildCircleButton(
+                            icon: Icons.volume_up_rounded,
+                            size: 70.w,
+                            isActive: true,
+                            activeColor: textColorMain,
+                            iconSize: 35.sp,
+                            onTap: () {
+                              if (shuffledWords.isNotEmpty)
+                                _speak(shuffledWords[0].quest);
+                            },
+                          ),
+                          _buildCircleButton(
+                            icon: isIconVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            isActive: isIconVisible,
+                            activeColor: accentColor,
+                            onTap: () {
+                              setState(() {
+                                isIconVisible = !isIconVisible;
+                                _saveIsIconVisible(isIconVisible);
+                              });
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-              Expanded(
-                flex: 10,
-                child: CardSwiper(
-                  controller: controller,
-                  cardsCount: shuffledWords.length,
-                  key: ValueKey(
-                      "${shuffledWords.length}_${shuffledWords.isNotEmpty ? shuffledWords.first.quest : 'empty'}"),
-                  numberOfCardsDisplayed:
-                      shuffledWords.length < 3 ? shuffledWords.length : 3,
-                  backCardOffset: const Offset(0, 35),
-                  padding: EdgeInsets.fromLTRB(24.w, 10.h, 24.w, 40.h),
-                  cardBuilder:
-                      (context, index, horizontalOffset, verticalOffset) {
-                    if (index >= shuffledWords.length) return Container();
-                    return _buildFlipCard(shuffledWords[index]);
-                  },
-                  onSwipe: (previousIndex, currentIndex, direction) {
-                    return _onSwipe(
-                        previousIndex,
-                        currentIndex,
-                        direction,
-                        wordProvider,
-                        progressProvider,
-                        scoreProvider,
-                        shuffledWords);
-                  },
-                  allowedSwipeDirection:
-                      const AllowedSwipeDirection.only(right: true, left: true),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(bottom: 30.h, left: 30.w, right: 30.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildCircleButton(
-                      icon: Icons.favorite,
-                      isActive: shuffledWords.isNotEmpty &&
-                          favoriteList.favorites.any((item) =>
-                              item.question == shuffledWords[0].quest),
-                      activeColor: Colors.redAccent,
-                      onTap: () => _toggleFavorite(wordProvider, shuffledWords),
-                    ),
-                    _buildCircleButton(
-                      icon: Icons.volume_up_rounded,
-                      size: 70.w,
-                      isActive: true,
-                      activeColor: textColorMain,
-                      iconSize: 35.sp,
-                      onTap: () {
-                        if (shuffledWords.isNotEmpty)
-                          _speak(shuffledWords[0].quest);
-                      },
-                    ),
-                    _buildCircleButton(
-                      icon: isIconVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      isActive: isIconVisible,
-                      activeColor: accentColor,
-                      onTap: () {
-                        setState(() {
-                          isIconVisible = !isIconVisible;
-                          _saveIsIconVisible(isIconVisible);
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+
+            // ANIMASYON KATMANI
+            FloatingScoreOverlay(key: _scoreKey),
+          ],
         ),
       ),
     );
   }
 
+  // --- BOŞ DURUM (BİTİNCE) ---
   Widget _buildEmptyState() {
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -343,7 +396,7 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
             Container(
               padding: EdgeInsets.all(30.w),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.celebration, color: accentColor, size: 80.sp),
@@ -369,11 +422,8 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
               onPressed: () async {
                 var wordProvider =
                     Provider.of<WordProvider>(context, listen: false);
-
-                wordProvider.resetList(widget.level);
-
+                await wordProvider.resetList(widget.level); // await eklendi
                 var originalWords = wordProvider.getWords(widget.level);
-
                 setState(() {
                   shuffledWords = List.from(originalWords);
                   shuffledWords.shuffle();
@@ -386,7 +436,8 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
             ),
             SizedBox(height: 20.h),
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () =>
+                  Navigator.pop(context, _hasStreakIncreasedSession),
               child: Text("Listeye Dön",
                   style: GoogleFonts.poppins(
                       color: Colors.white54, fontWeight: FontWeight.w600)),
@@ -411,12 +462,12 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
         width: size ?? 55.w,
         height: size ?? 55.w,
         decoration: BoxDecoration(
-          color: isActive ? Colors.white : Colors.white.withOpacity(0.1),
+          color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.1),
           shape: BoxShape.circle,
           boxShadow: isActive
               ? [
                   BoxShadow(
-                      color: activeColor.withOpacity(0.4),
+                      color: activeColor.withValues(alpha: 0.4),
                       blurRadius: 15,
                       offset: Offset(0, 5))
                 ]
@@ -504,7 +555,7 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 10),
           )
@@ -520,7 +571,7 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
               width: 150.w,
               height: 150.w,
               decoration: BoxDecoration(
-                color: textColorMain.withOpacity(0.05),
+                color: textColorMain.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
             ),
@@ -538,8 +589,8 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
                         EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                     decoration: BoxDecoration(
                       color: isFront
-                          ? textColorMain.withOpacity(0.1)
-                          : Colors.grey.withOpacity(0.1),
+                          ? textColorMain.withValues(alpha: 0.1)
+                          : Colors.grey.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -617,7 +668,7 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 10.sp,
-                color: Colors.grey.withOpacity(0.6),
+                color: Colors.grey.withValues(alpha: 0.6),
               ),
             ),
           ),

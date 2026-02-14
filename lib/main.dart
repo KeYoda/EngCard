@@ -1,6 +1,7 @@
 import 'package:eng_card/data/favorite_list.dart';
 import 'package:eng_card/provider/progres_prov.dart';
 import 'package:eng_card/provider/scor_prov.dart';
+import 'package:eng_card/provider/streak_prov.dart';
 import 'package:eng_card/provider/wordshare_prov.dart';
 import 'package:eng_card/screens/six_screen.dart';
 import 'package:eng_card/screens/start_screen.dart';
@@ -60,6 +61,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => ProgressProvider()),
         ChangeNotifierProvider(create: (_) => FavoriteList()),
         ChangeNotifierProvider(create: (_) => WordProvider()),
+        ChangeNotifierProvider(create: (_) => StreakProvider()),
       ],
       child: const MyApp(),
     ),
